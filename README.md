@@ -50,6 +50,7 @@ Implemented foundation:
 - browser prototype at `web/index.html`
 - formula input, presets, 12-fold visual wheel, sonification, Atlas capture, and JSON ledger export
 - basic tests and GitHub Actions workflow
+- Akashic Coherence Ledger v0.2 stewardship schema for trace/source/status/mandate records
 
 Next capabilities:
 
@@ -101,6 +102,7 @@ Every result should be treated as an **HTE overlay candidate** until tested by c
 ├── LICENSE
 ├── pyproject.toml
 ├── docs/
+│   ├── AKASHIC_COHERENCE_LEDGER_V0.2.md
 │   ├── architecture.md
 │   ├── CLAIM_BOUNDARIES.md
 │   ├── MVP_BUILD_PLAN.md
@@ -138,6 +140,7 @@ Every result should be treated as an **HTE overlay candidate** until tested by c
 4. Make every mapping calibratable and versioned.
 5. Preserve every meaningful run as a Materials Atlas entry.
 6. Let the lattice be visual, audible, and auditable.
+7. Preserve traces without pretending partial records are total knowledge.
 
 ## License
 
