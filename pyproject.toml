@@ -1,0 +1,31 @@
+[project]
+name = "hte-resonance-observatory"
+version = "0.1.0"
+description = "Open-source exploratory platform for HTE harmonic material mapping, sonification, visualization, and experiment ledgers."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "The Fource Principles" }
+]
+dependencies = [
+  "pydantic>=2.0",
+  "fastapi>=0.110",
+  "uvicorn>=0.27"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.5"
+]
+materials = [
+  "pymatgen>=2024.0",
+  "mp-api>=0.41"
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
