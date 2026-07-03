@@ -1,0 +1,46 @@
+{
+  "run_id": "HTE-RUN-EXAMPLE-QUARTZ",
+  "created_at": "2026-07-03T00:00:00Z",
+  "observatory_version": "0.1.0",
+  "source": "curated_example",
+  "formula": "SiO2",
+  "signature": {
+    "formula": "SiO2",
+    "composition": {
+      "Si": 1,
+      "O": 2
+    },
+    "mapping_rule": "pitch_class = atomic_number mod 12",
+    "nodes": [
+      {
+        "element": "O",
+        "atomic_number": 8,
+        "count": 2,
+        "pitch_class": 8,
+        "pitch_name": "Ab",
+        "octave_band": 1
+      },
+      {
+        "element": "Si",
+        "atomic_number": 14,
+        "count": 1,
+        "pitch_class": 2,
+        "pitch_name": "D",
+        "octave_band": 2
+      }
+    ],
+    "weighted_chord": [8, 8, 2],
+    "pitch_class_histogram": {
+      "2": 1,
+      "8": 2
+    },
+    "interval_walk": [6, 6],
+    "dominant_pitch_class": 8,
+    "overlay_state": "PIEZO_OVERLAY_CANDIDATE",
+    "claim_boundary": "derived_hte_mapping_only"
+  },
+  "claim_level": "L2",
+  "claim_level_label": "derived_hte_mapping",
+  "evidence_boundary": "This example records an HTE-derived exploratory mapping only. It does not establish a conventional material property without external data or experiment.",
+  "notes": "Quartz starter example for validating parser, harmonic mapping, sonification, and ledger export."
+}
