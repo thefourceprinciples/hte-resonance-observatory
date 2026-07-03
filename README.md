@@ -12,13 +12,15 @@ It combines:
 
 - **Materials Atlas entries** for conventional material identity and evidence
 - **HTE harmonic mapping** using `atomic_number mod 12`
+- **Formula parsing** for simple and grouped formulas such as `SiO2`, `Fe2O3`, and `Ca10(PO4)6(OH)2`
 - **Lost-mode / modal coherence fields** inspired by Pythagorean and Greek modal systems
-- **Matter-state detection** for Gold, Armor, Piezo, Shadow, Plasma, and transition states
+- **Matter-state overlay detection** for Gold, Armor, Piezo, Shadow, Plasma, and transition candidates
 - **Darkness Functional residual auditing** using `Observed - Explained`
-- **Chronogradient topography modules** as optional hypothesis layers
-- **Visual and sonic rendering** so material fields can be seen, heard, perturbed, and logged
+- **Browser-native sonification** using HTE-rendered pitch-class mappings
+- **Experiment ledgers** that preserve source, formula, mapping, claim level, and evidence boundary
+- **Extensible analysis tools** for future calibration against material datasets
 
-This repository is a software and research-platform project. It does **not** claim that HTE replaces chemistry, proves new physics, proves dark matter, or validates literal transmutation. HTE is used here as an exploratory coordinate transform and coherence-overlay system.
+This repository is a software and research-platform project. It does **not** claim that HTE replaces chemistry, proves new physics, proves dark matter, proves superconductivity, or validates literal transmutation. HTE is used here as an exploratory coordinate transform and coherence-overlay system.
 
 ## Core stack
 
@@ -26,7 +28,7 @@ This repository is a software and research-platform project. It does **not** cla
 Materials data
   -> HTE harmonic coordinate layer
   -> Modal topology layer
-  -> Matter-state engine
+  -> Matter-state overlay engine
   -> Darkness residual layer
   -> Visualization + sonification
   -> Materials Atlas log
@@ -35,21 +37,49 @@ Materials data
 
 ## Current milestone
 
-**MVP v0.1:** standalone browser observatory.
+**MVP v0.1:** local observatory scaffold.
 
-Planned first capabilities:
+Implemented foundation:
 
-- Element selector for Z=1..88
-- HTE pitch-class projection
-- interval walk display
-- modal field detection
-- matter-state scoring
-- pyknon density
-- enharmonic near-lock score
-- Darkness Functional residual simulator
-- Chronogradient terrain simulator
-- Materials Atlas log capture
-- local HTML prototype
+- Python package scaffold under `src/hte_observatory/`
+- canonical element table through Ra / Z=88
+- lightweight formula parser
+- HTE harmonic signature builder
+- experiment ledger generator
+- FastAPI endpoints for signatures and ledgers
+- browser prototype at `web/index.html`
+- formula input, presets, 12-fold visual wheel, sonification, Atlas capture, and JSON ledger export
+- basic tests and GitHub Actions workflow
+
+Next capabilities:
+
+- Materials Atlas source/provenance cards
+- calibration profiles
+- Materials Project connector
+- Markdown / Google Docs report export
+- richer modal field detection
+- plugin API for hypothesis layers
+
+## Quick start
+
+Install locally:
+
+```bash
+python -m pip install -e '.[dev]'
+pytest
+```
+
+Run the API:
+
+```bash
+uvicorn hte_observatory.api:app --reload
+```
+
+Open the browser prototype:
+
+```text
+web/index.html
+```
 
 ## Claim boundary
 
@@ -69,8 +99,12 @@ Every result should be treated as an **HTE overlay candidate** until tested by c
 .
 ├── README.md
 ├── LICENSE
+├── pyproject.toml
 ├── docs/
 │   ├── architecture.md
+│   ├── CLAIM_BOUNDARIES.md
+│   ├── MVP_BUILD_PLAN.md
+│   ├── SONIFICATION_SPEC.md
 │   ├── calibration-layer.md
 │   ├── materials-atlas-entry.md
 │   └── roadmap.md
@@ -78,10 +112,22 @@ Every result should be treated as an **HTE overlay candidate** until tested by c
 │   └── index.html
 ├── examples/
 │   └── materials/
+│       └── quartz-ledger.json
 ├── experiments/
 ├── src/
+│   └── hte_observatory/
+│       ├── __init__.py
+│       ├── api.py
+│       ├── elements.py
+│       ├── formula.py
+│       ├── harmonic.py
+│       └── ledger.py
+├── tests/
+│   └── test_hte_core.py
 └── .github/
-    └── ISSUE_TEMPLATE/
+    ├── ISSUE_TEMPLATE/
+    └── workflows/
+        └── python-tests.yml
 ```
 
 ## Development philosophy
