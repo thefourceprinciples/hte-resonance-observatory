@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HTE Resonance Observatory</title>
+  <style>
+    :root { color-scheme: dark; --bg:#030303; --panel:#090909; --ink:#e7e7e7; --muted:#8a8a8a; --line:#222; --gold:#ffd700; --piezo:#7cff00; --shadow:#a020f0; --armor:#ff3b3b; --blue:#00bfff; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; display:grid; grid-template-columns: 1.25fr .9fr; background:radial-gradient(circle at 30% 45%, #101018, #030303 60%, #000); color:var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    main { display:grid; place-items:center; border-right:1px solid var(--line); min-height:100vh; }
+    aside { background:var(--panel); min-height:100vh; display:flex; flex-direction:column; }
+    canvas { width:min(86vmin,760px); height:min(86vmin,760px); border:1px solid #171717; background:#000; box-shadow:0 0 80px rgba(255,255,255,.05); }
+    header, section, footer { padding:14px; border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:1rem; letter-spacing:2px; text-transform:uppercase; }
+    .sub { margin-top:6px; color:var(--muted); font-size:.78rem; }
+    .grid { display:grid; grid-template-columns: repeat(8,1fr); gap:4px; padding:14px; overflow:auto; }
+    button { background:#111; color:#ddd; border:1px solid #2a2a2a; padding:9px; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:900; }
+    button:hover { background:#1b1b1b; color:#fff; }
+    button.active { background:#f0f0f0; color:#000; }
+    .row { display:flex; justify-content:space-between; gap:10px; font-size:.82rem; margin:7px 0; }
+    .label { color:var(--muted); }
+    .tags { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+    .tag { border:1px solid #333; border-radius:999px; padding:3px 8px; font-size:.68rem; text-transform:uppercase; }
+    .gold { color:var(--gold); border-color:rgba(255,215,0,.5); } .piezo { color:var(--piezo); border-color:rgba(124,255,0,.5); } .shadow { color:var(--shadow); border-color:rgba(160,32,240,.5); } .armor { color:var(--armor); border-color:rgba(255,59,59,.5); }
+    pre { margin:0; padding:14px; border-top:1px solid var(--line); background:#050505; color:#d0d0d0; white-space:pre-wrap; overflow:auto; font-size:.75rem; line-height:1.45; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap; }
+    @media (max-width:900px){ body{grid-template-columns:1fr;} main, aside{min-height:auto;} }
+  </style>
+</head>
+<body>
+  <main><canvas id="scope"></canvas></main>
+  <aside>
+    <header>
+      <h1>HTE Resonance Observatory</h1>
+      <div class="sub">MVP scaffold — listen to the lattice.</div>
+    </header>
+    <section>
+      <div class="row"><span class="label">Selected</span><span id="selected">—</span></div>
+      <div class="row"><span class="label">HTE Classes</span><span id="classes">—</span></div>
+      <div class="row"><span class="label">Interval Walk</span><span id="walk">—</span></div>
+      <div class="row"><span class="label">State</span><span id="state">VOID</span></div>
+      <div class="row"><span class="label">Tags</span><span class="tags" id="tags"></span></div>
+    </section>
+    <div class="grid" id="grid"></div>
+    <footer class="controls">
+      <button onclick="resetAll()">Purge</button>
+      <button onclick="load([10,26,20])">Load Piezo Case</button>
+      <button onclick="load([33,36,41])">Load Golden</button>
+      <button onclick="captureAtlas()">Capture Atlas Entry</button>
+    </footer>
+    <pre id="log">MATERIALS ATLAS LOG:\n- No entries yet.</pre>
+  </aside>
+<script>
+const DB=['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn','Sb','Te','I','Xe','Cs','Ba','La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','At','Rn','Fr','Ra'].map((s,i)=>({s,z:i+1,pc:(i+1)%12}));
+const P=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+let active=[]; const $=id=>document.getElementById(id);
+function mod12(x){return ((x%12)+12)%12} function dist(a,b){let d=Math.abs(a-b)%12; return d>6?12-d:d}
+function toggle(z){const i=active.indexOf(z); i>=0?active.splice(i,1):active.push(z); render();}
+function resetAll(){active=[]; render();} function load(zs){active=[...zs]; render();}
+function uniqPcs(){return [...new Set(active.map(z=>z%12))].sort((a,b)=>a-b)}
+function walk(pcs){return pcs.map((p,i)=>mod12(pcs[(i+1)%pcs.length]-p))}
+function hasTritone(pcs){for(let i=0;i<pcs.length;i++)for(let j=i+1;j<pcs.length;j++)if(dist(pcs[i],pcs[j])===6)return true;return false}
+function stateOf(pcs){ if(!pcs.length)return 'VOID'; if(hasTritone(pcs)) return 'PIEZO'; if(pcs.includes(7)) return 'GOLD'; if(pcs.some(p=>[0,5,8,10].includes(p))&&pcs.length>=3) return 'ARMOR'; return 'MIXED'; }
+function tagsFor(st){ if(st==='GOLD')return '<span class="tag gold">Gold</span>'; if(st==='PIEZO')return '<span class="tag piezo">Piezo</span>'; if(st==='ARMOR')return '<span class="tag armor">Armor</span>'; if(st==='SHADOW')return '<span class="tag shadow">Shadow</span>'; return '<span class="tag">Mixed</span>';}
+function render(){
+ const pcs=uniqPcs(), st=stateOf(pcs); [...document.querySelectorAll('.grid button')].forEach((b,i)=>b.classList.toggle('active',active.includes(i+1)));
+ $('selected').textContent=active.map(z=>DB[z-1].s+z).join(' ')||'—'; $('classes').textContent=pcs.map(p=>p+'('+P[p]+')').join(' ')||'—'; $('walk').textContent=pcs.length?walk(pcs).join('-'):'—'; $('state').textContent=st; $('tags').innerHTML=tagsFor(st); draw(pcs,st);
+}
+function captureAtlas(){ const pcs=uniqPcs(), st=stateOf(pcs); if(!active.length)return; $('log').textContent += `\n\n[${new Date().toISOString()}] ATLAS ENTRY\nCOMPOSITION: ${$('selected').textContent}\nHTE_CLASSES: ${$('classes').textContent}\nINTERVAL_WALK: ${$('walk').textContent}\nPRIMARY_STATE: ${st}\nEVIDENCE_BOUNDARY: HTE overlay only; requires conventional testing.`; }
+const grid=$('grid'); DB.forEach(e=>{const b=document.createElement('button'); b.textContent=e.s+'\n'+e.z; b.onclick=()=>toggle(e.z); grid.appendChild(b)});
+const c=$('scope'), ctx=c.getContext('2d'); function size(){c.width=c.clientWidth*devicePixelRatio;c.height=c.clientHeight*devicePixelRatio} addEventListener('resize',size); size(); let t=0;
+function draw(pcs,st){ ctx.fillStyle='rgba(0,0,0,.18)'; ctx.fillRect(0,0,c.width,c.height); const cx=c.width/2,cy=c.height/2,R=Math.min(c.width,c.height)*.32; const color=st==='PIEZO'?'#7cff00':st==='GOLD'?'#ffd700':st==='ARMOR'?'#ff3b3b':'#00bfff'; ctx.strokeStyle='#151515'; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke(); t+=.02; ctx.strokeStyle=color; ctx.shadowColor=color; ctx.shadowBlur=18*devicePixelRatio; ctx.lineWidth=2*devicePixelRatio; ctx.beginPath(); for(let a=0;a<Math.PI*2+.01;a+=.012){let r=R*.62; pcs.forEach(p=>r+=(10+p)*Math.sin((p+2)*a+t+p*.4)); const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a); if(a===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);} ctx.closePath(); ctx.stroke(); pcs.forEach(p=>{const a=(p/12)*Math.PI*2-Math.PI/2; const x=cx+R*Math.cos(a), y=cy+R*Math.sin(a); ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y,7*devicePixelRatio,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#777'; ctx.fillText(P[p],x+10,y+4);}); }
+function loop(){draw(uniqPcs(),stateOf(uniqPcs())); requestAnimationFrame(loop)} render(); loop();
+</script>
+</body>
+</html>
