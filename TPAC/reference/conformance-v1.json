@@ -1,0 +1,30 @@
+{
+  "schema": "tpac-conformance-v1",
+  "invariants": [
+    {
+      "id": "SCHED-001",
+      "name": "deterministic_selection",
+      "requirement": "identical eligible resource sets and policy inputs select the same resource"
+    },
+    {
+      "id": "SCHED-002",
+      "name": "capability_boundary",
+      "requirement": "a resource lacking a required capability cannot be allocated"
+    },
+    {
+      "id": "PROV-001",
+      "name": "predecessor_integrity",
+      "requirement": "an event cannot reference an unknown predecessor"
+    },
+    {
+      "id": "PROV-002",
+      "name": "lineage_reconstruction",
+      "requirement": "a result lineage can be reconstructed from predecessor edges"
+    },
+    {
+      "id": "CAL-001",
+      "name": "calibration_validity",
+      "requirement": "invalid calibration state cannot satisfy a valid-calibration dependency"
+    }
+  ]
+}
