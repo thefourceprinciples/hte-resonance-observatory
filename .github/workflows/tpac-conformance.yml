@@ -29,19 +29,23 @@ jobs:
         run: python -m pip install --upgrade pip && pip install -e .
 
       - name: Run TPAC integration and replay tests
-        run: python -m pytest -q tests/test_tpac_integration.py tests/test_tpac_replay.py
+        run: python -m pytest -q tests/test_tpac_integration.py tests/test_tpac_replay.py tests/test_tpac_manifest.py
 
-      - name: Generate conformance evidence
+      - name: Generate conformance and reproducibility evidence
         run: python -m TPAC.reference.conformance_report
 
-      - name: Validate evidence artifact
-        run: python -m json.tool tpac-conformance-report.json >/dev/null
+      - name: Validate evidence artifacts
+        run: |
+          python -m json.tool tpac-conformance-report.json >/dev/null
+          python -m json.tool tpac-experiment-manifest.json >/dev/null
 
-      - name: Upload TPAC conformance evidence
+      - name: Upload TPAC evidence artifacts
         uses: actions/upload-artifact@v4
         with:
           name: tpac-conformance-evidence
-          path: tpac-conformance-report.json
+          path: |
+            tpac-conformance-report.json
+            tpac-experiment-manifest.json
           if-no-files-found: error
 
       - name: Run full test suite
