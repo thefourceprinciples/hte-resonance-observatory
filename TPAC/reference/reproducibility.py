@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from .experiment import run_experiment
 from .experiment_manifest import stable_hash
-from .experiment import run_reference_experiment
 
 
 @dataclass(frozen=True)
@@ -17,19 +17,26 @@ class ReproducibilityResult:
     differences: tuple[str, ...] = ()
 
 
-def _fingerprint(result: Any) -> str:
-    """Hash the deterministic experiment outputs that should remain stable."""
+def _fingerprint(result: dict[str, Any]) -> str:
+    """Hash deterministic outputs, excluding environment- and time-dependent metadata."""
     payload = {
-        "events": [event.to_dict() for event in result.events],
-        "claims": [claim.to_dict() for claim in result.claims],
-        "verification": result.verification,
+        "events": result["events"],
+        "claims": result["run"].claims,
+        "native_verification": result["native_verification"],
+        "replay": {
+            "valid": result["replay"].valid,
+            "event_count": result["replay"].event_count,
+            "state": result["replay"].state,
+            "errors": result["replay"].errors,
+        },
+        "event_log_hash": result["event_log_hash"],
     }
     return stable_hash(payload)
 
 
 def run_reproducibility_check() -> ReproducibilityResult:
-    first = run_reference_experiment()
-    second = run_reference_experiment()
+    first = run_experiment()
+    second = run_experiment()
     first_hash = _fingerprint(first)
     second_hash = _fingerprint(second)
     differences: list[str] = []
