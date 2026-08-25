@@ -29,11 +29,12 @@ materials = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = [".", "src"]
+include = ["TPAC*", "hte_resonance_observatory*"]
 
 [tool.ruff]
 line-length = 100
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = [".", "src"]
