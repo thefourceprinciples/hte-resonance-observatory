@@ -1,4 +1,4 @@
-"""Generate a deterministic TPAC conformance evidence report."""
+"""Generate deterministic TPAC conformance and reproducibility evidence."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 
+from TPAC.reference.experiment_manifest import build_manifest, write_manifest
 from TPAC.reference.replay import (
     event_hash,
     inject_delete,
@@ -51,6 +52,22 @@ def main() -> int:
         "mutate_payload": replay(inject_payload_mutation(events, 2, "value", 99)),
     }
 
+    fault_results = {
+        name: {
+            "detected": not result.valid,
+            "event_count": result.event_count,
+            "errors": list(result.errors),
+        }
+        for name, result in attacks.items()
+    }
+
+    conformance_verdict = (
+        "PASS"
+        if baseline.valid and all(item["detected"] for item in fault_results.values())
+        else "FAIL"
+    )
+
+    event_log_hash = hashlib.sha256(canonical(events).encode()).hexdigest()
     report = {
         "schema": "tpac-conformance-evidence-v1",
         "tpac_version": "reference-v1",
@@ -61,23 +78,42 @@ def main() -> int:
             "state_hash": hashlib.sha256(canonical(baseline.state).encode()).hexdigest(),
             "errors": list(baseline.errors),
         },
-        "fault_injection": {
-            name: {
-                "detected": not result.valid,
-                "event_count": result.event_count,
-                "errors": list(result.errors),
-            }
-            for name, result in attacks.items()
-        },
-        "event_log_hash": hashlib.sha256(canonical(events).encode()).hexdigest(),
+        "fault_injection": fault_results,
+        "event_log_hash": event_log_hash,
     }
 
-    if not baseline.valid or not all(item["detected"] for item in report["fault_injection"].values()):
+    if conformance_verdict != "PASS":
         raise SystemExit("TPAC conformance evidence generation failed")
 
     output = Path("tpac-conformance-report.json")
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    manifest = build_manifest(
+        experiment_id="tpac-conformance-smoke-001",
+        tpac_version="reference-v1",
+        commit_sha=os.environ.get("GITHUB_SHA", "local"),
+        configuration={"history": "canonical-smoke", "fault_suite": sorted(attacks)},
+        inputs=events,
+        event_log_hash=event_log_hash,
+        expected_invariants=[
+            "baseline replay is valid",
+            "event deletion is detected",
+            "event duplication is detected",
+            "event reordering is detected",
+            "payload mutation is detected",
+        ],
+        observed_results=report["baseline"],
+        fault_injections=fault_results,
+        replay_result={
+            "status": "PASS" if baseline.valid else "FAIL",
+            "errors": list(baseline.errors),
+        },
+        conformance_verdict=conformance_verdict,
+    )
+    write_manifest(manifest, "tpac-experiment-manifest.json")
+
     print(output)
+    print("tpac-experiment-manifest.json")
     return 0
 
 
