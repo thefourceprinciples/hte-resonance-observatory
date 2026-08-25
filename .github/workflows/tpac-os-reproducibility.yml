@@ -1,0 +1,92 @@
+name: TPAC Operating-System Reproducibility
+
+on:
+  push:
+    paths:
+      - 'TPAC/**'
+      - 'tests/**'
+      - '.github/workflows/tpac-os-reproducibility.yml'
+  pull_request:
+    paths:
+      - 'TPAC/**'
+      - 'tests/**'
+      - '.github/workflows/tpac-os-reproducibility.yml'
+  workflow_dispatch:
+
+jobs:
+  experiment:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: '3.12'
+          - os: macos-latest
+            python-version: '3.12'
+          - os: windows-latest
+            python-version: '3.12'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install project
+        run: python -m pip install --upgrade pip && pip install -e .
+
+      - name: Run TPAC reproducibility tests
+        run: python -m pytest -q tests/test_tpac_reproducibility.py tests/test_tpac_experiment.py
+
+      - name: Generate TPAC evidence manifest
+        run: python -m TPAC.reference.conformance_report
+
+      - name: Upload environment manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: tpac-os-manifest-${{ matrix.os }}
+          path: tpac-experiment-manifest.json
+          if-no-files-found: error
+
+  compare:
+    name: Compare operating-system manifests
+    needs: experiment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download manifests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: tpac-os-manifest-*
+          path: manifests
+          merge-multiple: false
+
+      - name: Compare deterministic outputs
+        shell: python
+        run: |
+          import glob
+          import json
+          import sys
+
+          paths = sorted(glob.glob("manifests/**/tpac-experiment-manifest.json", recursive=True))
+          if len(paths) != 3:
+              raise SystemExit(f"expected 3 OS manifests, found {len(paths)}")
+
+          manifests = [json.load(open(path, encoding="utf-8")) for path in paths]
+          fields = ["configuration_hash", "input_hash", "event_log_hash", "conformance_verdict"]
+          baseline = {field: manifests[0][field] for field in fields}
+
+          for path, manifest in zip(paths, manifests):
+              current = {field: manifest[field] for field in fields}
+              if current != baseline:
+                  print("DIVERGENCE:", path)
+                  print("baseline:", baseline)
+                  print("current:", current)
+                  print("runtime:", manifest.get("runtime"))
+                  sys.exit(1)
+
+          print("TPAC operating-system reproducibility PASS across Linux, macOS, and Windows")
+          print(baseline)
