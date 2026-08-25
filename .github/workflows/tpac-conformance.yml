@@ -31,5 +31,18 @@ jobs:
       - name: Run TPAC integration and replay tests
         run: python -m pytest -q tests/test_tpac_integration.py tests/test_tpac_replay.py
 
+      - name: Generate conformance evidence
+        run: python -m TPAC.reference.conformance_report
+
+      - name: Validate evidence artifact
+        run: python -m json.tool tpac-conformance-report.json >/dev/null
+
+      - name: Upload TPAC conformance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: tpac-conformance-evidence
+          path: tpac-conformance-report.json
+          if-no-files-found: error
+
       - name: Run full test suite
         run: python -m pytest -q
