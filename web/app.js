@@ -14,6 +14,7 @@ const MODES = Array.of(
 );
 
 let current = null;
+let startedStack = false;
 const $ = id => document.getElementById(id);
 const mod12 = x => ((x % 12) + 12) % 12;
 const dist = (a,b) => { const d = Math.abs(a-b)%12; return d>6 ? 12-d : d; };
@@ -127,9 +128,20 @@ function mapFormula(){
   try { renderSignature(buildSignature($('formula').value, $('modeSelect').value)); $('log').classList.remove('error'); }
   catch(err){ $('log').classList.add('error'); $('log').textContent = 'ERROR:\n- ' + err.message; }
 }
-function loadFormula(f){ $('formula').value = f; mapFormula(); }
-function resetAll(){ current=null; $('formula').value=''; $('selected').textContent='—'; $('composition').textContent='—'; $('modalField').textContent='—'; $('fourceScore').textContent='—'; $('classes').textContent='—'; $('chord').textContent='—'; $('walk').textContent='—'; $('state').textContent='VOID'; $('tags').innerHTML=''; $('log').classList.remove('error'); $('log').textContent='MATERIALS ATLAS LOG:\n- No entries yet.'; [...document.querySelectorAll('.grid button')].forEach(b=>b.classList.remove('active')); }
-function captureAtlas(){ if(!current) return; const mf=current.modal_field; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}) → ${mf.optimal_tonic_name} ${mf.optimal_mode} | F=${mf.fource_lock} | ${current.overlay_state}`; }
+function loadFormula(f){ $('formula').value = f; startedStack = false; mapFormula(); }
+function resetAll(){
+  current=null; startedStack=false; $('formula').value=''; $('selected').textContent='—'; $('composition').textContent='—';
+  $('modalField').textContent='—'; $('fourceScore').textContent='—'; $('classes').textContent='—'; $('chord').textContent='—';
+  $('walk').textContent='—'; $('state').textContent='VOID'; $('tags').innerHTML=''; $('log').classList.remove('error');
+  $('log').textContent='MATERIALS ATLAS LOG:\n- No entries yet.';
+  [...document.querySelectorAll('.grid button')].forEach(b=>b.classList.remove('active'));
+}
+function stackElement(sym){
+  let cur = startedStack ? $('formula').value.trim() : '';
+  startedStack = true;
+  const rx = new RegExp(`(${sym})(\\d*)$`);
+  const m = cur.match(rx);
+  if(m){function captureAtlas(){ if(!current) return; const mf=current.modal_field; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}) → ${mf.optimal_tonic_name} ${mf.optimal_mode} | F=${mf.fource_lock} | ${current.overlay_state}`; }
 function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify(current,null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`hte-ledger-${current.formula}.json`; a.click(); }
 function sonify(){
   if(!current) mapFormula();
@@ -148,7 +160,7 @@ function sonify(){
 }
 
 const grid=$('grid');
-ELEMENTS.forEach(e=>{ const s=e.at(0), z=e.at(1), b=document.createElement('button'); b.textContent=s+'\n'+z; b.onclick=()=>loadFormula(s); grid.appendChild(b); });
+ELEMENTS.forEach(e=>{ const s=e.at(0), z=e.at(1), b=document.createElement('button'); b.textContent=s+'\n'+z; b.onclick=()=>stackElement(s); grid.appendChild(b); });
 const c=$('scope'), ctx=c.getContext('2d');
 function size(){ c.width=c.clientWidth*devicePixelRatio; c.height=c.clientHeight*devicePixelRatio; }
 addEventListener('resize',size); size(); let t=0;
@@ -171,3 +183,4 @@ function draw(pcs, st){
 }
 function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):Array.of(); draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
 mapFormula(); loop();
+  
