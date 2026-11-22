@@ -1,6 +1,7 @@
 # HTE Resonance Observatory (`v0.4 MAE`)
 
-**Live Interactive Workbench:** [https://github.io](https://github.io)
+- **Live Interactive Workbench:** [https://github.io](https://github.io)
+- **Documentation & Walkthrough:** [User Guide (`USER_GUIDE.md`)](./USER_GUIDE.md)
 
 An interactive computational physics, harmonic periodic mapping, and **Materials Atlas Engine (MAE)** workbench built on **Harmonic Table of Elements (HTE)** coordinates, **CUC relational constraints**, and **Fource Lock** modal field analysis across all **119 elements (`E0` and `Z = 1..118`)**.
 
@@ -31,15 +32,17 @@ An interactive computational physics, harmonic periodic mapping, and **Materials
 ```text
 hte-resonance-observatory/
 ├── web/
-│   ├── index.html          # 3-column interactive Observatory & MAE Dossier UI
-│   └── app.js              # 119-element isotope table, harmonic engine & WebAudio synth
+│   ├── index.html           # 3-column interactive Observatory & MAE Dossier UI
+│   └── app.js               # 119-element isotope table, harmonic engine & WebAudio synth
 ├── src/hte_observatory/
-│   ├── elements.py         # Deterministic 119-element HTE coordinate mapping
-│   ├── harmonic.py         # Formula parser, modal field solver & Fource Lock metrics
-│   ├── atlas.py            # Materials Atlas Engine (MAE) 17-section dossier generator
-│   └── ...                 # TPAC manifest, calibration, replay & reproducibility modules
-└── tests/
-    └── test_atlas_engine.py # Automated verification across E0, Hydrogen & all 119 elements
+│   ├── elements.py          # Deterministic 119-element HTE coordinate mapping
+│   ├── harmonic.py          # Formula parser, modal field solver & Fource Lock metrics
+│   ├── atlas.py             # Materials Atlas Engine (MAE) 17-section dossier generator
+│   └── ...                  # TPAC manifest, calibration, replay & reproducibility modules
+├── tests/
+│   └── test_atlas_engine.py # Automated verification across E0, Hydrogen & all 119 elements
+├── USER_GUIDE.md            # Step-by-step walkthrough of the workbench & Python MAE API
+└── README.md                # Project overview & quickstart
 ```
 
 ---
@@ -50,5 +53,7 @@ hte-resonance-observatory/
 pip install -e ".[dev]"
 pytest
 ```
+
+For full instructions on using the 3-column workbench, Doping Phase Sweep, Boundary Contexts, and Materials Atlas Dossier exports, see the **[User Guide](./USER_GUIDE.md)**.
 
 *Claim Boundary: All HTE coordinates, Fifth Ladder sequences, and Materials Atlas classifications represent derived structural mappings and exploratory engineering hypotheses.*
