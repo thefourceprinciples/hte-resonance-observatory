@@ -208,7 +208,6 @@ function undoLast(){
   $('formula').value = formulaFromHistory(atomHistory);
   mapFormula(`Removed <strong>${removed}</strong>`);
 }
-
 function captureAtlas(){ if(!current) return; const mf=current.modal_field, ph=current.physical; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}/${current.weight_mode}) → ${current.overlay_state} | Δχ=${ph.delta_chi}, Val=${ph.val_per_atom} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}, C=${mf.c_modal}]`; }
 function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify(current,null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`hte-ledger-${current.formula}.json`; a.click(); }
 function sonify(){
@@ -245,14 +244,67 @@ ELEMENTS.forEach(e=>{
   grid.appendChild(b);
 });
 
+function buildDopedFormula(base, el, xVal){
+  const x = Number(xVal);
+  if(x <= 0.001) return base;
+  const rx = new RegExp(`(${el})(\\d*\\.?\\d*)$`);
+  const m = base.match(rx);
+  if(m){
+    const prev = m.at(2) ? Number(m.at(2)) : 1;
+    return base.replace(rx, `${el}${Number((prev + x).toFixed(2))}`);
+  }
+  return `${base}${el}${Number(x.toFixed(2))}`;
+}
+
+function drawDopingCurve(activeX = Number($('dopeSlider')?.value || 0.9)){
+  const dc = $('dopingChart');
+  if(!dc) return;
+  dc.width = dc.clientWidth * devicePixelRatio;
+  dc.height = dc.clientHeight * devicePixelRatio;
+  const dctx = dc.getContext('2d'), w = dc.width, h = dc.height;
+  dctx.clearRect(0, 0, w, h);
+
+  const base = ($('dopeBase')?.value || 'YBa2Cu3O6').trim(), el = ($('dopeEl')?.value || 'O').trim();
+  const mode = $('modeSelect').value, weight = $('weightSelect').value, pts = Array.of();
+  for(let i = 0; i <= 40; i++){
+    const x = i * 0.05;
+    try { const sig = buildSignature(buildDopedFormula(base, el, x), mode, weight); pts.push({ x, f: sig.modal_field.fource_lock }); }
+    catch(e) { return; }
+  }
+  const maxF = Math.max(0.5, ...pts.map(p => p.f));
+  dctx.strokeStyle = '#00bfff'; dctx.lineWidth = 2 * devicePixelRatio; dctx.beginPath();
+  pts.forEach((p, idx) => {
+    const px = (p.x / 2.0) * (w - 20) + 10, py = h - 10 - (p.f / maxF) * (h - 22);
+    if(idx === 0) dctx.moveTo(px, py); else dctx.lineTo(px, py);
+  });
+  dctx.stroke();
+
+  const curPt = pts.reduce((a, b) => Math.abs(b.x - activeX) < Math.abs(a.x - activeX) ? b : a);
+  dctx.fillStyle = '#ffd700'; dctx.beginPath();
+  dctx.arc((curPt.x / 2.0) * (w - 20) + 10, h - 10 - (curPt.f / maxF) * (h - 22), 4.5 * devicePixelRatio, 0, Math.PI * 2);
+  dctx.fill();
+
+  dctx.fillStyle = '#8a8a8a'; dctx.font = `${10 * devicePixelRatio}px monospace`;
+  dctx.fillText(`Fource Lock Curve (${base} + x·${el}) | Peak F=${maxF.toFixed(2)}`, 10, 12 * devicePixelRatio);
+}
+
+function applyDoping(val){
+  const x = Number(val);
+  $('dopeVal').textContent = x.toFixed(2);
+  const base = ($('dopeBase')?.value || 'YBa2Cu3O6').trim(), el = ($('dopeEl')?.value || 'O').trim();
+  atomHistory = Array.of();
+  $('formula').value = buildDopedFormula(base, el, x);
+  mapFormula(`Doped <strong>${base} + ${x.toFixed(2)} ${el}</strong>`);
+  drawDopingCurve(x);
+}
+
 const c=$('scope'), ctx=c.getContext('2d');
 function size(){ c.width=c.clientWidth*devicePixelRatio; c.height=c.clientHeight*devicePixelRatio; }
 addEventListener('resize',size); size(); let t=0;
 function draw(pcs, st){
   ctx.fillStyle='rgba(0,0,0,.2)'; ctx.fillRect(0,0,c.width,c.height);
   const cx=c.width/2, cy=c.height/2, R=Math.min(c.width,c.height)*.33, tonic=current?current.modal_field.optimal_tonic:-1;
-  const cat = STATE_CATALOG.find(s => s.id === st);
-  const color = cat ? cat.color : '#00bfff';
+  const cat = STATE_CATALOG.find(s => s.id === st), color = cat ? cat.color : '#00bfff';
   ctx.shadowBlur=0; ctx.strokeStyle='#151515'; ctx.lineWidth=1*devicePixelRatio;
   for(let i=0;i<12;i++){ const a=(i/12)*Math.PI*2-Math.PI/2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a)); ctx.stroke(); }
   ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
@@ -268,4 +320,4 @@ function draw(pcs, st){
   }
 }
 function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):Array.of(); draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
-updateDiscoveryUI(); mapFormula(); loop();
+updateDiscoveryUI(); mapFormula(); drawDopingCurve(); loop();
