@@ -1,11 +1,11 @@
-"""HTE harmonic mapping & CLV-HTE-001 modal coherence engine (v0.2).
+"""HTE harmonic mapping & CLV-HTE-001 physical calibration engine (v0.3).
 
-Combines v0.1 raw Z mod 12 interval-walk & Matter-State overlay classification
-with CLV-HTE-001 unit-norm 12x7 modal inference, C_modal = O * E * H * X,
-Fource functional F, and periodic group-phase coordinates.
+Combines v0.1 raw Z mod 12 interval-walk & overlay classification with
+CLV-HTE-001 12x7 modal inference, Pauling electronegativity (chi) & valence
+weighting, bond polarity delta_chi, and continuous 7-state phase probabilities.
 
-This module produces exploratory signatures only. It does not infer material
-properties without calibration data.
+This module produces exploratory signatures only (Claim Level L2). It does not
+infer conventional material properties without external calibration data.
 """
 
 from __future__ import annotations
@@ -29,6 +29,8 @@ class HTENode:
     group: int = 0
     period: int = 0
     block: str = ""
+    valence: int = 0
+    electronegativity: float = 0.0
     group_pitch_class: int = 0
     group_pitch_name: str = "C"
 
@@ -73,10 +75,7 @@ def _has_tritone(pitch_classes: list[int]) -> bool:
 
 
 def classify_overlay_state(pitch_classes: list[int]) -> str:
-    """Return a conservative exploratory state tag.
-
-    These are HTE overlay states, not conventional material classes.
-    """
+    """Return the v0.1 backward-compatible exploratory state tag."""
     unique = sorted(set(pitch_classes))
     if not unique:
         return "VOID"
@@ -87,6 +86,66 @@ def classify_overlay_state(pitch_classes: list[int]) -> str:
     if len(unique) >= 3 and any(pc in {0, 5, 8, 10} for pc in unique):
         return "ARMOR_OVERLAY_CANDIDATE"
     return "MIXED_OVERLAY"
+
+
+def compute_soft_states(norm_h: list[float], nodes: list[HTENode], delta_chi: float = 0.0) -> dict:
+    """Compute continuous 7-state phase probabilities and dominant discovery state."""
+    active_pcs = [i for i, w in enumerate(norm_h) if w > 1e-9]
+    if not active_pcs:
+        probs = {
+            "SUBSTRATE_ZERO": 0.0, "SINGLET_SEED": 0.0, "GOLD_ANCHOR": 0.0,
+            "PIEZO_TENSION": 0.0, "ARMOR_SHIELD": 0.0, "SHADOW_PHASE": 0.0, "PLASMA_FLUX": 0.0,
+        }
+        return {"dominant_state": "VOID", "state_probabilities": probs}
+
+    if len(nodes) == 1 and nodes[0].element == "E0":
+        probs = {
+            "SUBSTRATE_ZERO": 1.0, "SINGLET_SEED": 0.0, "GOLD_ANCHOR": 0.0,
+            "PIEZO_TENSION": 0.0, "ARMOR_SHIELD": 0.0, "SHADOW_PHASE": 0.0, "PLASMA_FLUX": 0.0,
+        }
+        return {"dominant_state": "SUBSTRATE_ZERO", "state_probabilities": probs}
+
+    # Pairwise interval coupling energies
+    tritone_energy = 0.0
+    semitone_energy = 0.0
+    fifth_energy = 0.0
+    for i in range(12):
+        for j in range(i + 1, 12):
+            iv = _circular_distance(i, j)
+            pair = norm_h[i] * norm_h[j]
+            if iv == 6:
+                tritone_energy += pair
+            elif iv == 1:
+                semitone_energy += pair
+            elif iv == 5:
+                fifth_energy += pair
+
+    # Shannon diversity of active pitch classes (0 when single pitch class)
+    entropy = -sum(w * math.log(w) for w in norm_h if w > 1e-12)
+    singlet_raw = math.exp(-3.0 * entropy)
+
+    # Polarity boost scales piezo tension gently when real electronegativity delta_chi is high
+    polarity_factor = 1.0 + 0.25 * min(delta_chi, 3.5)
+    piezo_raw = 4.0 * tritone_energy * polarity_factor
+    gold_raw = 1.8 * norm_h[7] + 1.5 * fifth_energy
+    armor_mass = sum(norm_h[p] for p in (0, 5, 8, 10))
+    armor_raw = 1.4 * armor_mass * min(1.0, len(active_pcs) / 3.0)
+    plasma_raw = 5.0 * semitone_energy * max(0.0, (len(active_pcs) - 2) / 2.0)
+    shadow_raw = 0.45 * (1.0 - singlet_raw) * max(0.0, 1.0 - 2.0 * tritone_energy - norm_h[7])
+
+    raw_scores = {
+        "SUBSTRATE_ZERO": 0.0,
+        "SINGLET_SEED": singlet_raw,
+        "GOLD_ANCHOR": gold_raw,
+        "PIEZO_TENSION": piezo_raw,
+        "ARMOR_SHIELD": armor_raw,
+        "SHADOW_PHASE": shadow_raw,
+        "PLASMA_FLUX": plasma_raw,
+    }
+    total = sum(raw_scores.values())
+    probs = {k: round(v / total, 6) if total > 0 else 0.0 for k, v in raw_scores.items()}
+    dominant = max(probs.items(), key=lambda kv: kv[1])[0]
+    return {"dominant_state": dominant, "state_probabilities": probs}
 
 
 def _unit_template_vector(tonic: int, mode: ModeSpec) -> list[float]:
@@ -184,74 +243,23 @@ def evaluate_modal_field(h: list[float], epsilon: float = 0.05) -> dict:
     }
 
 
-def build_hte_signature(formula: str, mapping_mode: str = "raw") -> dict:
-    """Build an HTE signature from a formula string.
+def _normalize(vec: list[float]) -> list[float]:
+    total = sum(vec)
+    return [x / total for x in vec] if total > 0 else vec
 
-    Supports mapping_mode='raw' (Z mod 12, default for v0.1 compatibility)
-    or mapping_mode='group' (periodic group-phase projection onto Z_12).
+
+def build_hte_signature(
+    formula: str,
+    mapping_mode: str = "raw",
+    weight_mode: str = "stoich",
+) -> dict:
+    """Build a physically calibrated HTE signature from a formula string.
+
+    Args:
+        formula: Chemical formula (e.g. 'SiO2', 'BaTiO3', 'YBa2Cu3O6.9', 'E0').
+        mapping_mode: 'raw' (Z mod 12) or 'group' (periodic group-phase).
+        weight_mode: 'stoich' (atom count), 'electronegativity' (count * chi),
+                     or 'valence' (count * valence electrons).
     """
     composition = parse_formula(formula)
     nodes: list[HTENode] = []
-    weighted_pitch_classes: list[int] = []
-    raw_hist = [0.0] * 12
-    group_hist = [0.0] * 12
-
-    for symbol, count in sorted(composition.items(), key=lambda item: atomic_number(item[0])):
-        coords = element_coordinates(symbol)
-        z = coords.Z
-        pitch_class = coords.pi_group if mapping_mode == "group" else coords.pi_raw
-        int_count = max(1, int(round(count))) if count > 0 else 0
-        weighted_pitch_classes.extend([pitch_class] * int_count)
-
-        raw_hist[coords.pi_raw] += float(count)
-        group_hist[coords.pi_group] += float(count)
-
-        octave_band = 0 if z == 0 else ((z - 1) // 12) + 1
-        nodes.append(
-            HTENode(
-                element=symbol,
-                atomic_number=z,
-                count=count,
-                pitch_class=pitch_class,
-                pitch_name=PITCH_NAMES[pitch_class],
-                octave_band=octave_band,
-                group=coords.group,
-                period=coords.period,
-                block=coords.block,
-                group_pitch_class=coords.pi_group,
-                group_pitch_name=PITCH_NAMES[coords.pi_group],
-            )
-        )
-
-    histogram = Counter(weighted_pitch_classes)
-    unique = sorted(histogram)
-
-    active_hist = group_hist if mapping_mode == "group" else raw_hist
-    total_w = sum(active_hist)
-    norm_h = [x / total_w for x in active_hist] if total_w > 0 else active_hist
-
-    total_raw = sum(raw_hist)
-    norm_raw = [x / total_raw for x in raw_hist] if total_raw > 0 else raw_hist
-    total_grp = sum(group_hist)
-    norm_grp = [x / total_grp for x in group_hist] if total_grp > 0 else group_hist
-
-    return {
-        "formula": formula,
-        "composition": composition,
-        "mapping_mode": mapping_mode,
-        "mapping_rule": (
-            "pitch_class = periodic_group_phase(Z) mod 12"
-            if mapping_mode == "group"
-            else "pitch_class = atomic_number mod 12"
-        ),
-        "nodes": [asdict(node) for node in nodes],
-        "weighted_chord": weighted_pitch_classes,
-        "pitch_class_histogram": {str(k): histogram[k] for k in unique},
-        "interval_walk": _interval_walk(unique),
-        "dominant_pitch_class": histogram.most_common(1)[0][0] if histogram else None,
-        "overlay_state": classify_overlay_state(unique),
-        "modal_field": evaluate_modal_field(norm_h),
-        "modal_field_raw": evaluate_modal_field(norm_raw),
-        "modal_field_group": evaluate_modal_field(norm_grp),
-        "claim_boundary": "derived_hte_mapping_only",
-    }
