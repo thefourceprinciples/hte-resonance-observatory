@@ -320,4 +320,10 @@ function draw(pcs, st){
   }
 }
 function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):Array.of(); draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
+function loadDopingPreset(base, el, x){
+  $('dopeBase').value = base;
+  $('dopeEl').value = el;
+  $('dopeSlider').value = x;
+  applyDoping(x);
+}
 updateDiscoveryUI(); mapFormula(); drawDopingCurve(); loop();
