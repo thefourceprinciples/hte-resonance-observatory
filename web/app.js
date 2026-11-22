@@ -26,7 +26,6 @@ const STATE_CATALOG = Array.of(
   { id:'SHADOW_PHASE', label:'Shadow Phase', color:'#a020f0', example:'GaAs', kid:'The Hidden Twin — dark minor/phrygian phase shifter.', eng:'Tritone-free dark cluster without dominant fifth; candidate for metastable switching or band-gap hysteresis.' },
   { id:'PLASMA_FLUX', label:'Plasma Flux', color:'#ff8c00', example:'YBa2Cu3O7', kid:'The Lightning Cloud — super-excited multi-note energy.', eng:'4+ pitch classes with adjacent semitone (m2) friction; candidate for high-entropy transport or catalytic flux.' }
 );
-
 let current = null;
 let prevSnapshot = null;
 let atomHistory = Array.of();
@@ -141,7 +140,6 @@ function buildSignature(formula, mappingMode='group', weightMode='stoich'){
     modal_field:{ optimal_tonic:modal.tonic, optimal_tonic_name:PITCH.at(modal.tonic), optimal_mode:modal.mode.name, field_type:modal.mode.field, fource_lock:Number(modal.fource.toFixed(4)), c_modal:Number(modal.cModal.toFixed(4)) }
   };
 }
-
 function updateDiscoveryUI(){
   const box = $('discoveryBadges');
   box.innerHTML = `<span class="badge unlocked">Discovered: ${discovered.size} / ${STATE_CATALOG.length}</span>` +
@@ -177,62 +175,6 @@ function renderSignature(sig, actionNote=''){
   [...document.querySelectorAll('.grid button')].forEach((b,i)=>b.classList.toggle('active', sig.nodes.some(n=>n.atomic_number===i)));
 }
 
-function mapFormula(actionNote=''){
-  try { renderSignature(buildSignature($('formula').value, $('modeSelect').value, $('weightSelect').value), actionNote); $('log').classList.remove('error'); }
-  catch(err){ $('log').classList.add('error'); $('log').textContent = 'ERROR:\n- ' + err.message; }
-}
-function loadFormula(f){ atomHistory = Array.of(); $('formula').value = f; mapFormula(`Loaded preset <strong>${f}</strong>`); }
-function resetAll(){
-  current=null; prevSnapshot=null; atomHistory=Array.of(); $('formula').value=''; $('selected').textContent='—';
-  $('composition').textContent='—'; $('polarityMetrics').textContent='—'; $('modalField').textContent='—';
-  $('fourceScore').textContent='—'; $('classes').textContent='—'; $('state').textContent='VOID'; $('state').style.color='#8a8a8a';
-  $('stateExplain').textContent='Stack purged — click any element tile below to start a fresh experiment!';
-  $('deltaBanner').textContent='Stack purged. Ready for new atoms.';
-  [...document.querySelectorAll('.grid button')].forEach(b=>b.classList.remove('active'));
-}
-
-function formulaFromHistory(hist){
-  const counts = new Map();
-  hist.forEach(sym => counts.set(sym, (counts.get(sym)||0) + 1));
-  return Array.from(counts.entries()).map(([s,c]) => c > 1 ? `${s}${c}` : s).join('');
-}
-function stackElement(sym){
-  if(atomHistory.length === 0 && $('formula').value === 'SiO2') $('formula').value = '';
-  atomHistory.push(sym);
-  $('formula').value = formulaFromHistory(atomHistory);
-  mapFormula(`Added <strong>${sym}</strong>`);
-  if($('autoChime') && $('autoChime').checked) sonify();
-}
-function undoLast(){
-  if(!atomHistory.length){ resetAll(); return; }
-  const removed = atomHistory.pop();
-  if(!atomHistory.length){ resetAll(); return; }
-  $('formula').value = formulaFromHistory(atomHistory);
-  mapFormula(`Removed <strong>${removed}</strong>`);
-}
-
-function captureAtlas(){ if(!current) return; const mf=current.modal_field, ph=current.physical; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}/${current.weight_mode}) → ${current.overlay_state} | Δχ=${ph.delta_chi}, Val=${ph.val_per_atom} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}, C=${mf.c_modal}]`; }
-function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify(current,null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`hte-ledger-${current.formula}.json`; a.click(); }
-function sonify(){
-  if(!current) mapFormula();
-  if(!current) return;
-  const ctx = new (window.AudioContext || window.webkitAudioContext)(), now = ctx.currentTime + 0.05;
-  current.nodes.forEach((node, i) => {
-    const osc = ctx.createOscillator(), gain = ctx.createGain();
-    osc.type = current.overlay_state.includes('PIEZO') ? 'triangle' : current.overlay_state.includes('ARMOR') ? 'square' : 'sine';
-    osc.frequency.value = 440 * Math.pow(2, ((60 + node.pitch_class + Math.max(0, node.octave_band-1)*3) - 69) / 12);
-    const start = now + i * 0.16, dur = Math.min(0.7, 0.22 + node.count * 0.07);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(Math.min(0.22, 0.07 + node.count * 0.025), start + 0.03);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-    osc.connect(gain).connect(ctx.destination); osc.start(start); osc.stop(start + dur + 0.05);
-  });
-}
-
-const gList = $('glossaryList');
-STATE_CATALOG.forEach(s => {
-  const div = document.createElement('div');
-  div.className = 'g-card';
 function mapFormula(actionNote=''){
   try { renderSignature(buildSignature($('formula').value, $('modeSelect').value, $('weightSelect').value), actionNote); $('log').classList.remove('error'); }
   catch(err){ $('log').classList.add('error'); $('log').textContent = 'ERROR:\n- ' + err.message; }
