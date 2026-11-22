@@ -2,8 +2,8 @@
 
 Combines deterministic HTE lattice coordinates, C_HTE unison coherence, and
 6-step Fifth Ladder sequences with curated canonical dossiers (such as
-MATLAS-E001-HYDROGEN) and periodic-family engineering intelligence across
-all 119 elements (E0 and Z = 1..118).
+MATLAS-E000-SUBSTRATE and MATLAS-E001-HYDROGEN) and periodic-family engineering
+intelligence across all 119 elements (E0 and Z = 1..118).
 """
 
 from __future__ import annotations
@@ -14,13 +14,39 @@ from .harmonic import build_hte_signature
 
 # Curated canonical overrides (Tier 2 dossiers)
 CANONICAL_DOSSIERS: dict[str, dict] = {
+    "E0": {
+        "entry_id": "MATLAS-E000-SUBSTRATE",
+        "status": "canonical_draft",
+        "name": "Element-0 (Substrate Zero)",
+        "material_class": "sub-nucleonic reference substrate / vacuum carrier floor",
+        "hte_role": "Substrate Zero / zero-octave calibration origin",
+        "isotopes": ["None (zero-nucleon reference substrate; Z=0, A=0)"],
+        "canonical_phrase": "Element-0 is the unperturbed carrier floor from which discrete baryonic matter emerges.",
+        "fource_phrase": "Element-0 is the silence that makes the first note audible.",
+        "one_line_lock": "Element-0 = Substrate Zero: the unperturbed carrier medium before discrete atomic boundary conditions.",
+        "state_activation": {
+            "Origin": "baseline — pre-nucleonic zero point prior to Z=1.",
+            "Gold": "null — unexcited reference medium.",
+            "Shadow": "null — no lattice structure.",
+            "Plasma": "null — un-ionized reference floor.",
+            "Armor": "null — zero boundary mass.",
+            "Piezo": "null — zero stress gradient.",
+            "Fifth Ladder": "E0 Substrate calibration origin.",
+        },
+        "interface_behavior": ["Provides unperturbed continuous reference medium (pi=0, omega=0)"],
+        "failure_modes": ["Zero-matter baseline — no physical containment failure modes"],
+        "darkness_remainder": {
+            "visible_accounting": "Zero nucleonic mass (Z=0, valence=0, chi=0.00).",
+            "hidden_remainder": "Ambient carrier medium enabling gradient and wave propagation.",
+        },
+    },
     "H": {
         "entry_id": "MATLAS-E001-HYDROGEN",
         "status": "canonical_draft",
         "name": "Hydrogen",
         "material_class": "element / gas / plasma-forming carrier / hydride former / isotope platform",
         "hte_role": "Origin Node / carrier seed / Fifth-Ladder root",
-        "isotopes": ["1H (protium)", "2H (deuterium)", "3H (tritium)"],
+        "isotopes": ["1H (protium, stable)", "2H (deuterium, stable)", "3H (tritium, radio)"],
         "canonical_phrase": "Hydrogen is the first carrier: the smallest material unit of elemental identity, the seed point from which the HTE lattice begins.",
         "fource_phrase": "Hydrogen is the first note of matter, but it only becomes a song under constraint.",
         "one_line_lock": "Hydrogen = Origin Carrier: the first HTE note, the smallest material actor, and the most boundary-sensitive seed of energy, storage, plasma, and lattice interaction.",
@@ -55,8 +81,9 @@ CANONICAL_DOSSIERS: dict[str, dict] = {
             "material_compatibility": ["embrittlement response", "crack growth rate", "tensile strength change", "ductility change"],
             "energy_and_interface": ["reaction enthalpy", "proton conductivity", "plasma threshold", "surface dissociation", "diffusion coefficient"],
         },
-    }
+    },
 }
+
 _Z_TO_SYMBOL: dict[int, str] = {meta: sym for sym, meta in ELEMENT_TABLE.items()}
 
 
@@ -77,22 +104,8 @@ def fifth_ladder_from_z(root_z: int, steps: int = 6) -> list[dict]:
             "pitch_name": PITCH_NAMES[p_raw],
         })
     return ladder
-
-
 def _auto_family_profile(symbol: str, z: int, group: int, block: str, chi: float) -> dict:
     """Synthesize Tier-1 engineering & interface rules for any element Z = 0..118."""
-    if z == 0:
-        return {
-            "material_class": "sub-nucleonic reference substrate / vacuum carrier floor",
-            "hte_role": "Substrate Zero / zero-octave calibration origin",
-            "interface_behavior": ["Provides unperturbed continuous reference medium (pi=0, omega=0)"],
-            "failure_modes": ["Zero-matter baseline — no physical containment failure modes"],
-            "darkness_remainder": {
-                "visible_accounting": "Zero nucleonic mass (Z=0, valence=0, chi=0.00).",
-                "hidden_remainder": "Ambient carrier medium enabling gradient and wave propagation.",
-            },
-            "one_line_lock": "Element-0 = Substrate Zero: the unperturbed carrier medium before discrete atomic boundary conditions.",
-        }
     if group == 1:
         role = "Alkali electron donor / high-mobility ionic carrier"
         iface = ["Rapid surface oxidation & moisture reaction", "Intercalates into layered host cathodes (e.g. Li/Na batteries)"]
