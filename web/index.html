@@ -91,41 +91,41 @@
     <pre id="log">MATERIALS ATLAS LOG:\n- No entries yet.</pre>
   </aside>
 <script>
-const ELEMENTS = [
- ['E0',0,0],
- ['H',1,1],['He',2,18],['Li',3,1],['Be',4,2],['B',5,13],['C',6,14],['N',7,15],['O',8,16],['F',9,17],['Ne',10,18],
- ['Na',11,1],['Mg',12,2],['Al',13,13],['Si',14,14],['P',15,15],['S',16,16],['Cl',17,17],['Ar',18,18],
- ['K',19,1],['Ca',20,2],['Sc',21,3],['Ti',22,4],['V',23,5],['Cr',24,6],['Mn',25,7],['Fe',26,8],['Co',27,9],['Ni',28,10],
- ['Cu',29,11],['Zn',30,12],['Ga',31,13],['Ge',32,14],['As',33,15],['Se',34,16],['Br',35,17],['Kr',36,18],
- ['Rb',37,1],['Sr',38,2],['Y',39,3],['Zr',40,4],['Nb',41,5],['Mo',42,6],['Tc',43,7],['Ru',44,8],['Rh',45,9],['Pd',46,10],
- ['Ag',47,11],['Cd',48,12],['In',49,13],['Sn',50,14],['Sb',51,15],['Te',52,16],['I',53,17],['Xe',54,18],
- ['Cs',55,1],['Ba',56,2],['La',57,3],['Ce',58,3],['Pr',59,3],['Nd',60,3],['Pm',61,3],['Sm',62,3],['Eu',63,3],['Gd',64,3],
- ['Tb',65,3],['Dy',66,3],['Ho',67,3],['Er',68,3],['Tm',69,3],['Yb',70,3],['Lu',71,3],['Hf',72,4],['Ta',73,5],['W',74,6],
- ['Re',75,7],['Os',76,8],['Ir',77,9],['Pt',78,10],['Au',79,11],['Hg',80,12],['Tl',81,13],['Pb',82,14],['Bi',83,15],
- ['Po',84,16],['At',85,17],['Rn',86,18],['Fr',87,1],['Ra',88,2],['Ac',89,3],['Th',90,3],['Pa',91,3],['U',92,3],
- ['Np',93,3],['Pu',94,3],['Am',95,3],['Cm',96,3],['Bk',97,3],['Cf',98,3],['Es',99,3],['Fm',100,3],['Md',101,3],
- ['No',102,3],['Lr',103,3],['Rf',104,4],['Db',105,5],['Sg',106,6],['Bh',107,7],['Hs',108,8],['Mt',109,9],['Ds',110,10],
- ['Rg',111,11],['Cn',112,12],['Nh',113,13],['Fl',114,14],['Mc',115,15],['Lv',116,16],['Ts',117,17],['Og',118,18]
-];
-const Z = Object.fromEntries(ELEMENTS.map(([s,z])=>[s,z]));
-const GRP = Object.fromEntries(ELEMENTS.map(([s,,g])=>[s,g]));
-const PITCH = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
-const MODES = [
-  { name:'Ionian',     intervals:[0,2,4,5,7,9,11], char:11, third:4, fifth:7, field:'Structural Clarity Field' },
-  { name:'Dorian',     intervals:[0,2,3,5,7,9,10], char:9,  third:3, fifth:7, field:'Restoration Field' },
-  { name:'Phrygian',   intervals:[0,1,3,5,7,8,10], char:1,  third:3, fifth:7, field:'Boundary / Threshold Field' },
-  { name:'Lydian',     intervals:[0,2,4,6,7,9,11], char:6,  third:4, fifth:7, field:'Expansion / Levitation Field' },
-  { name:'Mixolydian', intervals:[0,2,4,5,7,9,10], char:10, third:4, fifth:7, field:'Continuity Field' },
-  { name:'Aeolian',    intervals:[0,2,3,5,7,8,10], char:8,  third:3, fifth:7, field:'Memory / Gravitational Field' },
-  { name:'Locrian',    intervals:[0,1,3,5,6,8,10], char:6,  third:3, fifth:6, field:'Fracture / Collapse Field' }
-];
+const ELEMENTS = Array.of(
+ Array.of('E0',0,0),
+ Array.of('H',1,1),Array.of('He',2,18),Array.of('Li',3,1),Array.of('Be',4,2),Array.of('B',5,13),Array.of('C',6,14),Array.of('N',7,15),Array.of('O',8,16),Array.of('F',9,17),Array.of('Ne',10,18),
+ Array.of('Na',11,1),Array.of('Mg',12,2),Array.of('Al',13,13),Array.of('Si',14,14),Array.of('P',15,15),Array.of('S',16,16),Array.of('Cl',17,17),Array.of('Ar',18,18),
+ Array.of('K',19,1),Array.of('Ca',20,2),Array.of('Sc',21,3),Array.of('Ti',22,4),Array.of('V',23,5),Array.of('Cr',24,6),Array.of('Mn',25,7),Array.of('Fe',26,8),Array.of('Co',27,9),Array.of('Ni',28,10),
+ Array.of('Cu',29,11),Array.of('Zn',30,12),Array.of('Ga',31,13),Array.of('Ge',32,14),Array.of('As',33,15),Array.of('Se',34,16),Array.of('Br',35,17),Array.of('Kr',36,18),
+ Array.of('Rb',37,1),Array.of('Sr',38,2),Array.of('Y',39,3),Array.of('Zr',40,4),Array.of('Nb',41,5),Array.of('Mo',42,6),Array.of('Tc',43,7),Array.of('Ru',44,8),Array.of('Rh',45,9),Array.of('Pd',46,10),
+ Array.of('Ag',47,11),Array.of('Cd',48,12),Array.of('In',49,13),Array.of('Sn',50,14),Array.of('Sb',51,15),Array.of('Te',52,16),Array.of('I',53,17),Array.of('Xe',54,18),
+ Array.of('Cs',55,1),Array.of('Ba',56,2),Array.of('La',57,3),Array.of('Ce',58,3),Array.of('Pr',59,3),Array.of('Nd',60,3),Array.of('Pm',61,3),Array.of('Sm',62,3),Array.of('Eu',63,3),Array.of('Gd',64,3),
+ Array.of('Tb',65,3),Array.of('Dy',66,3),Array.of('Ho',67,3),Array.of('Er',68,3),Array.of('Tm',69,3),Array.of('Yb',70,3),Array.of('Lu',71,3),Array.of('Hf',72,4),Array.of('Ta',73,5),Array.of('W',74,6),
+ Array.of('Re',75,7),Array.of('Os',76,8),Array.of('Ir',77,9),Array.of('Pt',78,10),Array.of('Au',79,11),Array.of('Hg',80,12),Array.of('Tl',81,13),Array.of('Pb',82,14),Array.of('Bi',83,15),
+ Array.of('Po',84,16),Array.of('At',85,17),Array.of('Rn',86,18),Array.of('Fr',87,1),Array.of('Ra',88,2),Array.of('Ac',89,3),Array.of('Th',90,3),Array.of('Pa',91,3),Array.of('U',92,3),
+ Array.of('Np',93,3),Array.of('Pu',94,3),Array.of('Am',95,3),Array.of('Cm',96,3),Array.of('Bk',97,3),Array.of('Cf',98,3),Array.of('Es',99,3),Array.of('Fm',100,3),Array.of('Md',101,3),
+ Array.of('No',102,3),Array.of('Lr',103,3),Array.of('Rf',104,4),Array.of('Db',105,5),Array.of('Sg',106,6),Array.of('Bh',107,7),Array.of('Hs',108,8),Array.of('Mt',109,9),Array.of('Ds',110,10),
+ Array.of('Rg',111,11),Array.of('Cn',112,12),Array.of('Nh',113,13),Array.of('Fl',114,14),Array.of('Mc',115,15),Array.of('Lv',116,16),Array.of('Ts',117,17),Array.of('Og',118,18)
+);
+const Z = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(1))));
+const GRP = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(2))));
+const PITCH = Array.of('C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B');
+const MODES = Array.of(
+  { name:'Ionian',     intervals:Array.of(0,2,4,5,7,9,11), char:11, third:4, fifth:7, field:'Structural Clarity Field' },
+  { name:'Dorian',     intervals:Array.of(0,2,3,5,7,9,10), char:9,  third:3, fifth:7, field:'Restoration Field' },
+  { name:'Phrygian',   intervals:Array.of(0,1,3,5,7,8,10), char:1,  third:3, fifth:7, field:'Boundary / Threshold Field' },
+  { name:'Lydian',     intervals:Array.of(0,2,4,6,7,9,11), char:6,  third:4, fifth:7, field:'Expansion / Levitation Field' },
+  { name:'Mixolydian', intervals:Array.of(0,2,4,5,7,9,10), char:10, third:4, fifth:7, field:'Continuity Field' },
+  { name:'Aeolian',    intervals:Array.of(0,2,3,5,7,8,10), char:8,  third:3, fifth:7, field:'Memory / Gravitational Field' },
+  { name:'Locrian',    intervals:Array.of(0,1,3,5,6,8,10), char:6,  third:3, fifth:6, field:'Fracture / Collapse Field' }
+);
 
 let current = null;
 const $ = id => document.getElementById(id);
 function mod12(x){ return ((x % 12) + 12) % 12; }
 function dist(a,b){ const d = Math.abs(a-b)%12; return d>6 ? 12-d : d; }
 function groupPi(g){ return g === 0 ? 0 : mod12(Math.round(((g - 1) * 12) / 18)); }
-function tokenize(formula){ return formula.match(/(E0|[A-Z][a-z]?|\(|\)|\d+\.\d+|\d+)/g) || []; }
+function tokenize(formula){ return formula.match(/(E0|[A-Z][a-z]?|\(|\)|\d+\.\d+|\d+)/g) || Array.of(); }
 function isNum(tok){ return /^(\d+\.\d+|\d+)$/.test(tok); }
 
 function parseFormula(formula){
@@ -133,36 +133,36 @@ function parseFormula(formula){
   if(!clean) throw new Error('Formula cannot be empty.');
   const tokens = tokenize(clean);
   if(tokens.join('') !== clean) throw new Error('Unsupported formula syntax.');
-  const stack = [new Map()];
+  const stack = Array.of(new Map());
   const add = (map, key, n) => map.set(key, (map.get(key)||0)+n);
   for(let i=0; i<tokens.length; i++){
-    const token = tokens[i];
+    const token = tokens.at(i);
     if(token === '('){ stack.push(new Map()); continue; }
     if(token === ')'){
       if(stack.length === 1) throw new Error('Unmatched closing parenthesis.');
       const group = stack.pop();
       let mult = 1;
-      if(tokens[i+1] && isNum(tokens[i+1])) mult = Number(tokens[++i]);
-      group.forEach((count, symbol) => add(stack[stack.length-1], symbol, count*mult));
+      if(tokens.at(i+1) && isNum(tokens.at(i+1))) mult = Number(tokens.at(++i));
+      group.forEach((count, symbol) => add(stack.at(-1), symbol, count*mult));
       continue;
     }
     if(isNum(token)) throw new Error('Dangling multiplier: '+token);
     if(Z[token] === undefined) throw new Error('Unknown element: '+token);
     let count = 1;
-    if(tokens[i+1] && isNum(tokens[i+1])) count = Number(tokens[++i]);
-    add(stack[stack.length-1], token, count);
+    if(tokens.at(i+1) && isNum(tokens.at(i+1))) count = Number(tokens.at(++i));
+    add(stack.at(-1), token, count);
   }
   if(stack.length !== 1) throw new Error('Unmatched opening parenthesis.');
-  return Object.fromEntries(stack[0]);
+  return Object.fromEntries(stack.at(0));
 }
 
-function intervalWalk(unique){ if(unique.length<2) return []; return unique.map((p,i)=>mod12(unique[(i+1)%unique.length]-p)); }
-function hasTritone(unique){ for(let i=0;i<unique.length;i++) for(let j=i+1;j<unique.length;j++) if(dist(unique[i], unique[j])===6) return true; return false; }
+function intervalWalk(unique){ if(unique.length<2) return Array.of(); return unique.map((p,i)=>mod12(unique.at((i+1)%unique.length)-p)); }
+function hasTritone(unique){ for(let i=0;i<unique.length;i++) for(let j=i+1;j<unique.length;j++) if(dist(unique.at(i), unique.at(j))===6) return true; return false; }
 function stateOf(unique){
   if(!unique.length) return 'VOID';
   if(hasTritone(unique)) return 'PIEZO_OVERLAY_CANDIDATE';
   if(unique.includes(7)) return 'GOLD_OVERLAY_CANDIDATE';
-  if(unique.length>=3 && unique.some(p=>[0,5,8,10].includes(p))) return 'ARMOR_OVERLAY_CANDIDATE';
+  if(unique.length>=3 && unique.some(p=>Array.of(0,5,8,10).includes(p))) return 'ARMOR_OVERLAY_CANDIDATE';
   return 'MIXED_OVERLAY';
 }
 function tagsFor(st, modeName){
@@ -178,7 +178,7 @@ function tagsFor(st, modeName){
 
 function evaluateModalField(normH){
   const normVal = Math.hypot(...normH);
-  let best = { score:-1, tonic:0, mode:MODES[0], match:0, cModal:0, fource:0 };
+  let best = { score:-1, tonic:0, mode:MODES.at(0), match:0, cModal:0, fource:0 };
   for(let t=0; t<12; t++){
     for(const m of MODES){
       const tplSet = new Set(m.intervals.map(d => mod12(t + d)));
@@ -190,15 +190,15 @@ function evaluateModalField(normH){
       tVec[mod12(t + m.third)] += 0.3;
       const normT = Math.hypot(...tVec);
 
-      const dot = normH.reduce((acc, v, idx) => acc + v * tVec[idx], 0);
+      const dot = normH.reduce((acc, v, idx) => acc + v * tVec.at(idx), 0);
       const cosSim = (normVal > 0 && normT > 0) ? dot / (normVal * normT) : 0;
       const offMass = normH.reduce((acc, v, idx) => acc + (tplSet.has(idx) ? 0 : v), 0);
       const match = Math.max(0, cosSim - 0.5 * offMass);
 
-      const hRoot = normH[t];
-      const hFifth = normH[mod12(t + m.fifth)];
-      const hThird = normH[mod12(t + m.third)];
-      const hChar = normH[mod12(t + m.char)];
+      const hRoot = normH.at(t);
+      const hFifth = normH.at(mod12(t + m.fifth));
+      const hThird = normH.at(mod12(t + m.third));
+      const hChar = normH.at(mod12(t + m.char));
 
       const O = Math.min(1.0, (0.5*hRoot + 0.3*hFifth + 0.2*hThird) * 2.0);
       const E = 1.0 - offMass;
@@ -209,8 +209,8 @@ function evaluateModalField(normH){
       for(let i=0; i<12; i++){
         for(let j=i+1; j<12; j++){
           const iv = mod12(j - i);
-          if(iv === 1 || iv === 11) m2 += normH[i]*normH[j];
-          else if(iv === 6) tri += normH[i]*normH[j];
+          if(iv === 1 || iv === 11) m2 += normH.at(i)*normH.at(j);
+          else if(iv === 6) tri += normH.at(i)*normH.at(j);
         }
       }
       const fource = (hRoot * (hChar + 0.15*hFifth)) / (0.05 + offMass + m2 + tri);
@@ -223,11 +223,11 @@ function evaluateModalField(normH){
 
 function buildSignature(formula, mappingMode='group'){
   const composition = parseFormula(formula);
-  const nodes = Object.entries(composition).sort((a,b)=>Z[a[0]]-Z[b[0]]).map(([symbol,count]) => {
+  const nodes = Object.entries(composition).sort((a,b)=>Z[a.at(0)]-Z[b.at(0)]).map(([symbol,count]) => {
     const atomicNumber = Z[symbol], grp = GRP[symbol];
     const pc = mappingMode === 'group' ? groupPi(grp) : mod12(atomicNumber);
     const band = atomicNumber === 0 ? 0 : Math.floor((atomicNumber-1)/12)+1;
-    return { element:symbol, atomic_number:atomicNumber, group:grp, count, pitch_class:pc, pitch_name:PITCH[pc], octave_band:band };
+    return { element:symbol, atomic_number:atomicNumber, group:grp, count, pitch_class:pc, pitch_name:PITCH.at(pc), octave_band:band };
   });
   const weightedChord = nodes.flatMap(n => Array(Math.max(1, Math.round(n.count))).fill(n.pitch_class));
   const rawHist = Array(12).fill(0);
@@ -238,48 +238,18 @@ function buildSignature(formula, mappingMode='group'){
   nodes.forEach(n => histogram[n.pitch_class] = (histogram[n.pitch_class]||0) + n.count);
   const unique = Object.keys(histogram).map(Number).sort((a,b)=>a-b);
   const modal = evaluateModalField(normH);
+  const sortedEntries = Object.entries(histogram).sort((a,b)=>b.at(1)-a.at(1));
 
   return {
     formula: formula.trim(), composition, mapping_mode: mappingMode,
     mapping_rule: mappingMode === 'group' ? 'pitch_class = periodic_group_phase(Z) mod 12' : 'pitch_class = atomic_number mod 12',
     nodes, weighted_chord: weightedChord, pitch_class_histogram: histogram,
     interval_walk: intervalWalk(unique),
-    dominant_pitch_class: weightedChord.length ? Number(Object.entries(histogram).sort((a,b)=>b[1]-a[1])[0][0]) : null,
+    dominant_pitch_class: weightedChord.length ? Number(sortedEntries.at(0).at(0)) : null,
     overlay_state: stateOf(unique),
     modal_field: {
       optimal_tonic: modal.tonic,
-      optimal_tonic_name: PITCH[modal.tonic],
+      optimal_tonic_name: PITCH.at(modal.tonic),
       optimal_mode: modal.mode.name,
       field_type: modal.mode.field,
-      char_pc: mod12(modal.tonic + modal.mode.char),
-      fource_lock: Number(modal.fource.toFixed(4)),
-      c_modal: Number(modal.cModal.toFixed(4)),
-      match_score: Number(modal.match.toFixed(4))
-    },
-    claim_boundary: 'derived_hte_mapping_only'
-  };
-}
 
-function buildLedger(){
-  return {
-    run_id: 'HTE-RUN-' + Math.random().toString(16).slice(2,12).toUpperCase(),
-    created_at: new Date().toISOString(),
-    observatory_version: '0.2.0-browser',
-    source: 'browser_manual_input',
-    formula: current?.formula || '',
-    signature: current,
-    claim_level: 'L2',
-    claim_level_label: 'derived_hte_mapping',
-    evidence_boundary: 'HTE-derived exploratory mapping only; no conventional material property claim is established by this run.'
-  };
-}
-
-function renderSignature(sig){
-  current = sig;
-  const pcs = Object.keys(sig.pitch_class_histogram).map(Number).sort((a,b)=>a-b);
-  const mf = sig.modal_field;
-  $('selected').textContent = sig.formula;
-  $('composition').textContent = Object.entries(sig.composition).map(([s,c])=>s+':'+c).join(' ');
-  $('modalField').textContent = `${mf.optimal_tonic_name} ${mf.optimal_mode} (${mf.field_type})`;
-
-  
