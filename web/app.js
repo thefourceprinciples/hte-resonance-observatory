@@ -1,7 +1,9 @@
-const RAW_EL = "E0:0:0,H:1:1,He:2:18,Li:3:1,Be:4:2,B:5:13,C:6:14,N:7:15,O:8:16,F:9:17,Ne:10:18,Na:11:1,Mg:12:2,Al:13:13,Si:14:14,P:15:15,S:16:16,Cl:17:17,Ar:18:18,K:19:1,Ca:20:2,Sc:21:3,Ti:22:4,V:23:5,Cr:24:6,Mn:25:7,Fe:26:8,Co:27:9,Ni:28:10,Cu:29:11,Zn:30:12,Ga:31:13,Ge:32:14,As:33:15,Se:34:16,Br:35:17,Kr:36:18,Rb:37:1,Sr:38:2,Y:39:3,Zr:40:4,Nb:41:5,Mo:42:6,Tc:43:7,Ru:44:8,Rh:45:9,Pd:46:10,Ag:47:11,Cd:48:12,In:49:13,Sn:50:14,Sb:51:15,Te:52:16,I:53:17,Xe:54:18,Cs:55:1,Ba:56:2,La:57:3,Ce:58:3,Pr:59:3,Nd:60:3,Pm:61:3,Sm:62:3,Eu:63:3,Gd:64:3,Tb:65:3,Dy:66:3,Ho:67:3,Er:68:3,Tm:69:3,Yb:70:3,Lu:71:3,Hf:72:4,Ta:73:5,W:74:6,Re:75:7,Os:76:8,Ir:77:9,Pt:78:10,Au:79:11,Hg:80:12,Tl:81:13,Pb:82:14,Bi:83:15,Po:84:16,At:85:17,Rn:86:18,Fr:87:1,Ra:88:2,Ac:89:3,Th:90:3,Pa:91:3,U:92:3,Np:93:3,Pu:94:3,Am:95:3,Cm:96:3,Bk:97:3,Cf:98:3,Es:99:3,Fm:100:3,Md:101:3,No:102:3,Lr:103:3,Rf:104:4,Db:105:5,Sg:106:6,Bh:107:7,Hs:108:8,Mt:109:9,Ds:110:10,Rg:111:11,Cn:112:12,Nh:113:13,Fl:114:14,Mc:115:15,Lv:116:16,Ts:117:17,Og:118:18";
-const ELEMENTS = RAW_EL.split(",").map(s => { const p = s.split(":"); return Array.of(p.at(0), Number(p.at(1)), Number(p.at(2))); });
+const RAW_EL = "E0:0:0:0:0,H:1:1:1:2.2,He:2:18:2:0,Li:3:1:1:0.98,Be:4:2:2:1.57,B:5:13:3:2.04,C:6:14:4:2.55,N:7:15:5:3.04,O:8:16:6:3.44,F:9:17:7:3.98,Ne:10:18:8:0,Na:11:1:1:0.93,Mg:12:2:2:1.31,Al:13:13:3:1.61,Si:14:14:4:1.9,P:15:15:5:2.19,S:16:16:6:2.58,Cl:17:17:7:3.16,Ar:18:18:8:0,K:19:1:1:0.82,Ca:20:2:2:1,Sc:21:3:3:1.36,Ti:22:4:4:1.54,V:23:5:5:1.63,Cr:24:6:6:1.66,Mn:25:7:7:1.55,Fe:26:8:8:1.83,Co:27:9:9:1.88,Ni:28:10:10:1.91,Cu:29:11:11:1.9,Zn:30:12:2:1.65,Ga:31:13:3:1.81,Ge:32:14:4:2.01,As:33:15:5:2.18,Se:34:16:6:2.55,Br:35:17:7:2.96,Kr:36:18:8:3,Rb:37:1:1:0.82,Sr:38:2:2:0.95,Y:39:3:3:1.22,Zr:40:4:4:1.33,Nb:41:5:5:1.6,Mo:42:6:6:2.16,Tc:43:7:7:1.9,Ru:44:8:8:2.2,Rh:45:9:9:2.28,Pd:46:10:10:2.2,Ag:47:11:11:1.93,Cd:48:12:2:1.69,In:49:13:3:1.78,Sn:50:14:4:1.96,Sb:51:15:5:2.05,Te:52:16:6:2.1,I:53:17:7:2.66,Xe:54:18:8:2.6,Cs:55:1:1:0.79,Ba:56:2:2:0.89,La:57:3:3:1.1,Ce:58:3:4:1.12,Pr:59:3:3:1.13,Nd:60:3:3:1.14,Pm:61:3:3:1.13,Sm:62:3:3:1.17,Eu:63:3:2:1.2,Gd:64:3:3:1.2,Tb:65:3:3:1.1,Dy:66:3:3:1.22,Ho:67:3:3:1.23,Er:68:3:3:1.24,Tm:69:3:3:1.25,Yb:70:3:2:1.1,Lu:71:3:3:1.27,Hf:72:4:4:1.3,Ta:73:5:5:1.5,W:74:6:6:2.36,Re:75:7:7:1.9,Os:76:8:8:2.2,Ir:77:9:9:2.2,Pt:78:10:10:2.28,Au:79:11:11:2.54,Hg:80:12:2:2,Tl:81:13:3:1.62,Pb:82:14:4:2.33,Bi:83:15:5:2.02,Po:84:16:6:2,At:85:17:7:2.2,Rn:86:18:8:2.2,Fr:87:1:1:0.7,Ra:88:2:2:0.9,Ac:89:3:3:1.1,Th:90:3:4:1.3,Pa:91:3:5:1.5,U:92:3:6:1.38,Np:93:3:5:1.36,Pu:94:3:4:1.28,Am:95:3:3:1.13,Cm:96:3:3:1.28,Bk:97:3:3:1.3,Cf:98:3:3:1.3,Es:99:3:3:1.3,Fm:100:3:3:1.3,Md:101:3:3:1.3,No:102:3:2:1.3,Lr:103:3:3:1.3,Rf:104:4:4:1.3,Db:105:5:5:1.5,Sg:106:6:6:1.9,Bh:107:7:7:1.9,Hs:108:8:8:2,Mt:109:9:9:2,Ds:110:10:10:2,Rg:111:11:11:2.2,Cn:112:12:2:2,Nh:113:13:3:1.8,Fl:114:14:4:2,Mc:115:15:5:1.9,Lv:116:16:6:2,Ts:117:17:7:2.2,Og:118:18:8:2.2";
+const ELEMENTS = RAW_EL.split(",").map(s => { const p = s.split(":"); return Array.of(p.at(0), Number(p.at(1)), Number(p.at(2)), Number(p.at(3)), Number(p.at(4))); });
 const Z = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(1))));
 const GRP = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(2))));
+const VAL = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(3))));
+const CHI = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(4))));
 const PITCH = Array.of('C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B');
 const PC_COLORS = Array.of('#00bfff','#ff55aa','#7cff00','#a020f0','#ffd700','#ff6b6b','#00ffcc','#ffaa00','#b388ff','#69f0ae','#ff80ab','#40c4ff');
 
@@ -24,6 +26,7 @@ const STATE_CATALOG = Array.of(
   { id:'SHADOW_PHASE', label:'Shadow Phase', color:'#a020f0', example:'GaAs', kid:'The Hidden Twin — dark minor/phrygian phase shifter.', eng:'Tritone-free dark cluster without dominant fifth; candidate for metastable switching or band-gap hysteresis.' },
   { id:'PLASMA_FLUX', label:'Plasma Flux', color:'#ff8c00', example:'YBa2Cu3O7', kid:'The Lightning Cloud — super-excited multi-note energy.', eng:'4+ pitch classes with adjacent semitone (m2) friction; candidate for high-entropy transport or catalytic flux.' }
 );
+
 let current = null;
 let prevSnapshot = null;
 let atomHistory = Array.of();
@@ -76,7 +79,6 @@ function classifyState(unique, nodes){
   if(unique.length >= 3 && unique.some(p => Array.of(0,5,8,10).includes(p))) return 'ARMOR_SHIELD';
   return 'SHADOW_PHASE';
 }
-
 function evaluateModalField(normH){
   const normVal = Math.hypot(...normH);
   let best = { score:-1, tonic:0, mode:MODES.at(0), match:0, cModal:0, fource:0 };
@@ -102,20 +104,40 @@ function evaluateModalField(normH){
   }
   return best;
 }
-function buildSignature(formula, mappingMode='group'){
+
+function buildSignature(formula, mappingMode='group', weightMode='stoich'){
   const composition = parseFormula(formula);
+  const chis = Array.of();
+  let totalAtoms = 0, totalVal = 0, chiSum = 0;
+
   const nodes = Object.entries(composition).sort((a,b)=>Z[a.at(0)]-Z[b.at(0)]).map(([symbol,count]) => {
-    const atomicNumber = Z[symbol], grp = GRP[symbol], pc = mappingMode === 'group' ? groupPi(grp) : mod12(atomicNumber);
-    return { element:symbol, atomic_number:atomicNumber, group:grp, count, pitch_class:pc, pitch_name:PITCH.at(pc), octave_band:atomicNumber===0?0:Math.floor((atomicNumber-1)/12)+1 };
+    const atomicNumber = Z[symbol], grp = GRP[symbol], val = VAL[symbol], chi = CHI[symbol];
+    const pc = mappingMode === 'group' ? groupPi(grp) : mod12(atomicNumber);
+    if(chi > 0){ chis.push(chi); chiSum += count * chi; }
+    totalAtoms += count; totalVal += count * val;
+    return { element:symbol, atomic_number:atomicNumber, group:grp, valence:val, chi, count, pitch_class:pc, pitch_name:PITCH.at(pc), octave_band:atomicNumber===0?0:Math.floor((atomicNumber-1)/12)+1 };
   });
-  const rawHist = Array(12).fill(0); nodes.forEach(n => rawHist[n.pitch_class] += n.count);
+
+  const rawHist = Array(12).fill(0);
+  nodes.forEach(n => {
+    const w = weightMode === 'electronegativity' ? n.count * (n.chi > 0 ? n.chi : 0.1)
+            : weightMode === 'valence' ? n.count * (n.valence > 0 ? n.valence : 0.1)
+            : n.count;
+    rawHist[n.pitch_class] += w;
+  });
   const totalW = rawHist.reduce((a,b)=>a+b, 0), normH = totalW > 0 ? rawHist.map(x=>x/totalW) : rawHist;
   const histogram = {}; nodes.forEach(n => histogram[n.pitch_class] = (histogram[n.pitch_class]||0) + n.count);
   const unique = Object.keys(histogram).map(Number).sort((a,b)=>a-b);
   const modal = evaluateModalField(normH);
   const st = classifyState(unique, nodes);
+
+  const deltaChi = chis.length >= 2 ? Number((Math.max(...chis) - Math.min(...chis)).toFixed(2)) : 0;
+  const meanChi = totalAtoms > 0 ? Number((chiSum / totalAtoms).toFixed(2)) : 0;
+  const valPerAtom = totalAtoms > 0 ? Number((totalVal / totalAtoms).toFixed(2)) : 0;
+
   return {
-    formula:formula.trim(), composition, mapping_mode:mappingMode, nodes, pitch_class_histogram:histogram, overlay_state:st,
+    formula:formula.trim(), composition, mapping_mode:mappingMode, weight_mode:weightMode, nodes, pitch_class_histogram:histogram, overlay_state:st,
+    physical:{ delta_chi:deltaChi, mean_chi:meanChi, val_per_atom:valPerAtom },
     modal_field:{ optimal_tonic:modal.tonic, optimal_tonic_name:PITCH.at(modal.tonic), optimal_mode:modal.mode.name, field_type:modal.mode.field, fource_lock:Number(modal.fource.toFixed(4)), c_modal:Number(modal.cModal.toFixed(4)) }
   };
 }
@@ -127,15 +149,17 @@ function updateDiscoveryUI(){
 }
 
 function renderSignature(sig, actionNote=''){
-  if(current) prevSnapshot = { state: current.overlay_state, fource: current.modal_field.fource_lock };
+  if(current) prevSnapshot = { state: current.overlay_state, fource: current.modal_field.fource_lock, dchi: current.physical.delta_chi };
   current = sig;
-  const pcs = Object.keys(sig.pitch_class_histogram).map(Number).sort((a,b)=>a-b), mf = sig.modal_field;
+  const pcs = Object.keys(sig.pitch_class_histogram).map(Number).sort((a,b)=>a-b), mf = sig.modal_field, ph = sig.physical;
   const cat = STATE_CATALOG.find(s => s.id === sig.overlay_state);
   if(cat) discovered.add(cat.id);
   updateDiscoveryUI();
 
+  const bondType = ph.delta_chi >= 1.7 ? 'Ionic' : ph.delta_chi >= 0.4 ? 'Polar Covalent' : 'Covalent / Metallic';
   $('selected').textContent = sig.formula;
-  $('composition').textContent = sig.nodes.map(n => `${n.element}×${n.count} (Z=${n.atomic_number}, Grp ${n.group} → ${n.pitch_name})`).join(' | ');
+  $('composition').textContent = sig.nodes.map(n => `${n.element}×${n.count} (Grp ${n.group}, χ=${n.chi} → ${n.pitch_name})`).join(' | ');
+  $('polarityMetrics').textContent = `Δχ = ${ph.delta_chi.toFixed(2)} (${bondType}) | Mean χ = ${ph.mean_chi.toFixed(2)} | Val/atom = ${ph.val_per_atom.toFixed(2)}`;
   $('modalField').textContent = `${mf.optimal_tonic_name} ${mf.optimal_mode} (${mf.field_type})`;
   $('fourceScore').textContent = `F = ${mf.fource_lock.toFixed(3)} | C = ${mf.c_modal.toFixed(3)}`;
   $('classes').textContent = pcs.map(p=>p+'('+PITCH.at(p)+')').join(', ') || '—';
@@ -148,20 +172,20 @@ function renderSignature(sig, actionNote=''){
   if(actionNote && prevSnapshot){
     const df = mf.fource_lock - prevSnapshot.fource;
     const arrow = df > 0.001 ? '↑' : df < -0.001 ? '↓' : '→';
-    $('deltaBanner').innerHTML = `${actionNote} &nbsp;|&nbsp; State: <strong>${prevSnapshot.state}</strong> → <strong>${sig.overlay_state}</strong> &nbsp;|&nbsp; Fource: ${prevSnapshot.fource.toFixed(3)} → <strong>${mf.fource_lock.toFixed(3)} (${arrow})</strong>`;
+    $('deltaBanner').innerHTML = `${actionNote} &nbsp;|&nbsp; State: <strong>${prevSnapshot.state}</strong> → <strong>${sig.overlay_state}</strong> &nbsp;|&nbsp; Δχ: ${prevSnapshot.dchi.toFixed(2)} → <strong>${ph.delta_chi.toFixed(2)}</strong> &nbsp;|&nbsp; Fource: <strong>${mf.fource_lock.toFixed(3)} (${arrow})</strong>`;
   }
   [...document.querySelectorAll('.grid button')].forEach((b,i)=>b.classList.toggle('active', sig.nodes.some(n=>n.atomic_number===i)));
 }
 
 function mapFormula(actionNote=''){
-  try { renderSignature(buildSignature($('formula').value, $('modeSelect').value), actionNote); $('log').classList.remove('error'); }
+  try { renderSignature(buildSignature($('formula').value, $('modeSelect').value, $('weightSelect').value), actionNote); $('log').classList.remove('error'); }
   catch(err){ $('log').classList.add('error'); $('log').textContent = 'ERROR:\n- ' + err.message; }
 }
 function loadFormula(f){ atomHistory = Array.of(); $('formula').value = f; mapFormula(`Loaded preset <strong>${f}</strong>`); }
 function resetAll(){
   current=null; prevSnapshot=null; atomHistory=Array.of(); $('formula').value=''; $('selected').textContent='—';
-  $('composition').textContent='—'; $('modalField').textContent='—'; $('fourceScore').textContent='—';
-  $('classes').textContent='—'; $('state').textContent='VOID'; $('state').style.color='#8a8a8a';
+  $('composition').textContent='—'; $('polarityMetrics').textContent='—'; $('modalField').textContent='—';
+  $('fourceScore').textContent='—'; $('classes').textContent='—'; $('state').textContent='VOID'; $('state').style.color='#8a8a8a';
   $('stateExplain').textContent='Stack purged — click any element tile below to start a fresh experiment!';
   $('deltaBanner').textContent='Stack purged. Ready for new atoms.';
   [...document.querySelectorAll('.grid button')].forEach(b=>b.classList.remove('active'));
@@ -187,7 +211,63 @@ function undoLast(){
   mapFormula(`Removed <strong>${removed}</strong>`);
 }
 
-function captureAtlas(){ if(!current) return; const mf=current.modal_field; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}) → ${current.overlay_state} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}, C=${mf.c_modal}]`; }
+function captureAtlas(){ if(!current) return; const mf=current.modal_field, ph=current.physical; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}/${current.weight_mode}) → ${current.overlay_state} | Δχ=${ph.delta_chi}, Val=${ph.val_per_atom} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}, C=${mf.c_modal}]`; }
+function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify(current,null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`hte-ledger-${current.formula}.json`; a.click(); }
+function sonify(){
+  if(!current) mapFormula();
+  if(!current) return;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)(), now = ctx.currentTime + 0.05;
+  current.nodes.forEach((node, i) => {
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = current.overlay_state.includes('PIEZO') ? 'triangle' : current.overlay_state.includes('ARMOR') ? 'square' : 'sine';
+    osc.frequency.value = 440 * Math.pow(2, ((60 + node.pitch_class + Math.max(0, node.octave_band-1)*3) - 69) / 12);
+    const start = now + i * 0.16, dur = Math.min(0.7, 0.22 + node.count * 0.07);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.min(0.22, 0.07 + node.count * 0.025), start + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    osc.connect(gain).connect(ctx.destination); osc.start(start); osc.stop(start + dur + 0.05);
+  });
+}
+
+const gList = $('glossaryList');
+STATE_CATALOG.forEach(s => {
+  const div = document.createElement('div');
+  div.className = 'g-card';
+function mapFormula(actionNote=''){
+  try { renderSignature(buildSignature($('formula').value, $('modeSelect').value, $('weightSelect').value), actionNote); $('log').classList.remove('error'); }
+  catch(err){ $('log').classList.add('error'); $('log').textContent = 'ERROR:\n- ' + err.message; }
+}
+function loadFormula(f){ atomHistory = Array.of(); $('formula').value = f; mapFormula(`Loaded preset <strong>${f}</strong>`); }
+function resetAll(){
+  current=null; prevSnapshot=null; atomHistory=Array.of(); $('formula').value=''; $('selected').textContent='—';
+  $('composition').textContent='—'; $('polarityMetrics').textContent='—'; $('modalField').textContent='—';
+  $('fourceScore').textContent='—'; $('classes').textContent='—'; $('state').textContent='VOID'; $('state').style.color='#8a8a8a';
+  $('stateExplain').textContent='Stack purged — click any element tile below to start a fresh experiment!';
+  $('deltaBanner').textContent='Stack purged. Ready for new atoms.';
+  [...document.querySelectorAll('.grid button')].forEach(b=>b.classList.remove('active'));
+}
+
+function formulaFromHistory(hist){
+  const counts = new Map();
+  hist.forEach(sym => counts.set(sym, (counts.get(sym)||0) + 1));
+  return Array.from(counts.entries()).map(([s,c]) => c > 1 ? `${s}${c}` : s).join('');
+}
+function stackElement(sym){
+  if(atomHistory.length === 0 && $('formula').value === 'SiO2') $('formula').value = '';
+  atomHistory.push(sym);
+  $('formula').value = formulaFromHistory(atomHistory);
+  mapFormula(`Added <strong>${sym}</strong>`);
+  if($('autoChime') && $('autoChime').checked) sonify();
+}
+function undoLast(){
+  if(!atomHistory.length){ resetAll(); return; }
+  const removed = atomHistory.pop();
+  if(!atomHistory.length){ resetAll(); return; }
+  $('formula').value = formulaFromHistory(atomHistory);
+  mapFormula(`Removed <strong>${removed}</strong>`);
+}
+
+function captureAtlas(){ if(!current) return; const mf=current.modal_field, ph=current.physical; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}/${current.weight_mode}) → ${current.overlay_state} | Δχ=${ph.delta_chi}, Val=${ph.val_per_atom} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}, C=${mf.c_modal}]`; }
 function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify(current,null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`hte-ledger-${current.formula}.json`; a.click(); }
 function sonify(){
   if(!current) mapFormula();
@@ -215,10 +295,10 @@ STATE_CATALOG.forEach(s => {
 
 const grid=$('grid');
 ELEMENTS.forEach(e=>{
-  const s=e.at(0), z=e.at(1), grp=e.at(2), b=document.createElement('button');
+  const s=e.at(0), z=e.at(1), grp=e.at(2), val=e.at(3), chi=e.at(4), b=document.createElement('button');
   b.textContent=s+'\n'+z;
   b.style.borderTopColor = PC_COLORS.at(groupPi(grp));
-  b.title = `${s} (Z=${z}, Group ${grp} → ${PITCH.at(groupPi(grp))})`;
+  b.title = `${s} (Z=${z}, Grp ${grp}, Val=${val}, χ=${chi} → ${PITCH.at(groupPi(grp))})`;
   b.onclick=()=>stackElement(s);
   grid.appendChild(b);
 });
