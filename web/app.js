@@ -62,7 +62,6 @@ function tagsFor(st, modeName){
   let h = st.includes('GOLD')?'<span class="tag gold">Gold overlay</span>':st.includes('PIEZO')?'<span class="tag piezo">Piezo overlay</span>':st.includes('ARMOR')?'<span class="tag armor">Armor overlay</span>':'<span class="tag">Mixed</span>';
   return modeName ? h + `<span class="tag shadow">${modeName}</span>` : h;
 }
-
 function evaluateModalField(normH){
   const normVal = Math.hypot(...normH);
   let best = { score:-1, tonic:0, mode:MODES.at(0), match:0, cModal:0, fource:0 };
@@ -141,7 +140,16 @@ function stackElement(sym){
   startedStack = true;
   const rx = new RegExp(`(${sym})(\\d*)$`);
   const m = cur.match(rx);
-  if(m){function captureAtlas(){ if(!current) return; const mf=current.modal_field; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}) → ${mf.optimal_tonic_name} ${mf.optimal_mode} | F=${mf.fource_lock} | ${current.overlay_state}`; }
+  if(m){
+    const nextCnt = m.at(2) ? Number(m.at(2)) + 1 : 2;
+    cur = cur.replace(rx, `${sym}${nextCnt}`);
+  } else {
+    cur += sym;
+  }
+  $('formula').value = cur;
+  mapFormula();
+}
+function captureAtlas(){ if(!current) return; const mf=current.modal_field; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}) → ${mf.optimal_tonic_name} ${mf.optimal_mode} | F=${mf.fource_lock} | ${current.overlay_state}`; }
 function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify(current,null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`hte-ledger-${current.formula}.json`; a.click(); }
 function sonify(){
   if(!current) mapFormula();
@@ -183,4 +191,3 @@ function draw(pcs, st){
 }
 function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):Array.of(); draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
 mapFormula(); loop();
-  
