@@ -175,7 +175,6 @@ function tagsFor(st, modeName){
   if(modeName) html += `<span class="tag shadow">${modeName}</span>`;
   return html;
 }
-
 function evaluateModalField(normH){
   const normVal = Math.hypot(...normH);
   let best = { score:-1, tonic:0, mode:MODES.at(0), match:0, cModal:0, fource:0 };
@@ -252,4 +251,155 @@ function buildSignature(formula, mappingMode='group'){
       optimal_tonic_name: PITCH.at(modal.tonic),
       optimal_mode: modal.mode.name,
       field_type: modal.mode.field,
+      char_pc: mod12(modal.tonic + modal.mode.char),
+      fource_lock: Number(modal.fource.toFixed(4)),
+      c_modal: Number(modal.cModal.toFixed(4)),
+      match_score: Number(modal.match.toFixed(4))
+    },
+    claim_boundary: 'derived_hte_mapping_only'
+  };
+}
 
+function buildLedger(){
+  return {
+    run_id: 'HTE-RUN-' + Math.random().toString(16).slice(2,12).toUpperCase(),
+    created_at: new Date().toISOString(),
+    observatory_version: '0.2.0-browser',
+    source: 'browser_manual_input',
+    formula: current?.formula || '',
+    signature: current,
+    claim_level: 'L2',
+    claim_level_label: 'derived_hte_mapping',
+    evidence_boundary: 'HTE-derived exploratory mapping only; no conventional material property claim is established by this run.'
+  };
+}
+
+function renderSignature(sig){
+  current = sig;
+  const pcs = Object.keys(sig.pitch_class_histogram).map(Number).sort((a,b)=>a-b);
+  const mf = sig.modal_field;
+  $('selected').textContent = sig.formula;
+  $('composition').textContent = Object.entries(sig.composition).map(([s,c])=>s+':'+c).join(' ');
+  $('modalField').textContent = `${mf.optimal_tonic_name} ${mf.optimal_mode} (${mf.field_type})`;
+  $('fourceScore').textContent = `F = ${mf.fource_lock.toFixed(3)} | C = ${mf.c_modal.toFixed(3)}`;
+  $('classes').textContent = pcs.map(p=>p+'('+PITCH.at(p)+')').join(' ') || '—';
+  $('chord').textContent = '[' + sig.weighted_chord.join(', ') + ']';
+  $('walk').textContent = sig.interval_walk.length ? sig.interval_walk.join('-') : '—';
+  $('state').textContent = sig.overlay_state;
+  $('tags').innerHTML = tagsFor(sig.overlay_state, mf.optimal_mode);
+  [...document.querySelectorAll('.grid button')].forEach((b,i)=>b.classList.toggle('active', sig.nodes.some(n=>n.atomic_number===i)));
+  draw(pcs, sig.overlay_state);
+}
+
+function mapFormula(){
+  try { renderSignature(buildSignature($('formula').value, $('modeSelect').value)); $('log').classList.remove('error'); }
+  catch(err){ $('log').classList.add('error'); $('log').textContent = 'ERROR:\n- ' + err.message; }
+}
+function loadFormula(formula){ $('formula').value = formula; mapFormula(); }
+function resetAll(){
+  current = null; $('formula').value=''; $('selected').textContent='—'; $('composition').textContent='—';
+  $('modalField').textContent='—'; $('fourceScore').textContent='—'; $('classes').textContent='—';
+  $('chord').textContent='—'; $('walk').textContent='—'; $('state').textContent='VOID'; $('tags').innerHTML='';
+  $('log').classList.remove('error'); $('log').textContent='MATERIALS ATLAS LOG:\n- No entries yet.';
+  [...document.querySelectorAll('.grid button')].forEach(b=>b.classList.remove('active'));
+  draw(Array.of(), 'VOID');
+}
+function captureAtlas(){
+  if(!current) return;
+  const ledger = buildLedger();
+  const mf = current.modal_field;
+  $('log').classList.remove('error');
+  $('log').textContent += `\n\n[${ledger.created_at}] ${ledger.run_id}\nFORMULA: ${ledger.formula} (${current.mapping_mode})\nMODAL_FIELD: ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}, C=${mf.c_modal}]\nCOMPOSITION: ${JSON.stringify(current.composition)}\nHTE_CLASSES: ${$('classes').textContent}\nWEIGHTED_CHORD: ${JSON.stringify(current.weighted_chord)}\nINTERVAL_WALK: ${JSON.stringify(current.interval_walk)}\nPRIMARY_STATE: ${current.overlay_state}\nEVIDENCE_BOUNDARY: ${ledger.evidence_boundary}`;
+}
+function downloadLedger(){
+  if(!current) return;
+  const blob = new Blob(Array.of(JSON.stringify(buildLedger(), null, 2)), {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `hte-ledger-${current.formula}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+function frequency(pc, octaveBand=4){
+  const midi = 60 + pc + Math.max(0, octaveBand-1)*3;
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+function sonify(){
+  if(!current) mapFormula();
+  if(!current) return;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = ctx.currentTime + 0.05;
+  current.nodes.forEach((node, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = current.overlay_state.includes('PIEZO') ? 'triangle' : current.overlay_state.includes('ARMOR') ? 'square' : 'sine';
+    osc.frequency.value = frequency(node.pitch_class, node.octave_band);
+    const start = now + i * 0.18;
+    const dur = Math.min(0.75, 0.22 + node.count * 0.08);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.min(0.22, 0.07 + node.count * 0.025), start + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(start); osc.stop(start + dur + 0.05);
+  });
+}
+
+const grid=$('grid');
+ELEMENTS.forEach(e=>{ const s=e.at(0), z=e.at(1); const b=document.createElement('button'); b.textContent=s+'\n'+z; b.onclick=()=>loadFormula(s); grid.appendChild(b); });
+const c=$('scope'), ctx=c.getContext('2d');
+function size(){ c.width=c.clientWidth*devicePixelRatio; c.height=c.clientHeight*devicePixelRatio; }
+addEventListener('resize',size); size(); let t=0;
+
+function draw(pcs, st){
+  ctx.fillStyle='rgba(0,0,0,.2)'; ctx.fillRect(0,0,c.width,c.height);
+  const cx=c.width/2, cy=c.height/2, R=Math.min(c.width,c.height)*.33;
+  const color=st.includes('PIEZO')?'#7cff00':st.includes('GOLD')?'#ffd700':st.includes('ARMOR')?'#ff3b3b':'#00bfff';
+  const tonic = current ? current.modal_field.optimal_tonic : -1;
+
+  ctx.shadowBlur=0; ctx.strokeStyle='#151515'; ctx.lineWidth=1*devicePixelRatio;
+  for(let i=0;i<12;i++){ const a=(i/12)*Math.PI*2-Math.PI/2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R*Math.cos(a), cy+R*Math.sin(a)); ctx.stroke(); }
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+
+  t+=.02; ctx.strokeStyle=color; ctx.shadowColor=color; ctx.shadowBlur=18*devicePixelRatio; ctx.lineWidth=2*devicePixelRatio;
+  ctx.beginPath();
+  for(let a=0;a<Math.PI*2+.01;a+=.012){ let r=R*.58; pcs.forEach(p=>r+=(10+p)*Math.sin((p+2)*a+t+p*.4)); const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a); if(a===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+  ctx.closePath(); ctx.stroke(); ctx.shadowBlur=0;
+
+  for(let p=0;p<12;p++){
+    const a=(p/12)*Math.PI*2-Math.PI/2;
+    const x=cx+R*Math.cos(a), y=cy+R*Math.sin(a);
+    const active = pcs.includes(p);
+    const isTonic = p === tonic && pcs.length > 0;
+function draw(pcs, st){
+  ctx.fillStyle='rgba(0,0,0,.2)'; ctx.fillRect(0,0,c.width,c.height);
+  const cx=c.width/2, cy=c.height/2, R=Math.min(c.width,c.height)*.33;
+  const color=st.includes('PIEZO')?'#7cff00':st.includes('GOLD')?'#ffd700':st.includes('ARMOR')?'#ff3b3b':'#00bfff';
+  const tonic = current ? current.modal_field.optimal_tonic : -1;
+
+  ctx.shadowBlur=0; ctx.strokeStyle='#151515'; ctx.lineWidth=1*devicePixelRatio;
+  for(let i=0;i<12;i++){ const a=(i/12)*Math.PI*2-Math.PI/2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R*Math.cos(a), cy+R*Math.sin(a)); ctx.stroke(); }
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+
+  t+=.02; ctx.strokeStyle=color; ctx.shadowColor=color; ctx.shadowBlur=18*devicePixelRatio; ctx.lineWidth=2*devicePixelRatio;
+  ctx.beginPath();
+  for(let a=0;a<Math.PI*2+.01;a+=.012){ let r=R*.58; pcs.forEach(p=>r+=(10+p)*Math.sin((p+2)*a+t+p*.4)); const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a); if(a===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+  ctx.closePath(); ctx.stroke(); ctx.shadowBlur=0;
+
+  for(let p=0;p<12;p++){
+    const a=(p/12)*Math.PI*2-Math.PI/2;
+    const x=cx+R*Math.cos(a), y=cy+R*Math.sin(a);
+    const active = pcs.includes(p);
+    const isTonic = p === tonic && pcs.length > 0;
+    ctx.fillStyle = isTonic ? '#ffd700' : (active ? color : '#333');
+    ctx.beginPath();
+    ctx.arc(x, y, (isTonic ? 9 : active ? 7 : 4)*devicePixelRatio, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = isTonic ? '#ffd700' : (active ? '#fff' : '#777');
+    ctx.font=`${12*devicePixelRatio}px monospace`;
+    ctx.fillText(PITCH.at(p), x+10*devicePixelRatio, y+4*devicePixelRatio);
+  }
+}
+function loop(){ const pcs = current ? Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b) : Array.of(); draw(pcs, current?.overlay_state || 'VOID'); requestAnimationFrame(loop); }
+mapFormula(); loop();
+</script>
+</body>
+</html>
