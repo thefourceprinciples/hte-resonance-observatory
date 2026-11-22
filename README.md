@@ -1,6 +1,6 @@
 # HTE Resonance Observatory (`v0.4 MAE`)
 
-- **Live Interactive Workbench:** [https://github.io](https://github.io)
+- **Live Interactive Workbench:** [https://thefourceprinciples.github.io/hte-resonance-observatory/web/]
 - **Documentation & Walkthrough:** [User Guide (`USER_GUIDE.md`)](./USER_GUIDE.md)
 
 An interactive computational physics, harmonic periodic mapping, and **Materials Atlas Engine (MAE)** workbench built on **Harmonic Table of Elements (HTE)** coordinates, **CUC relational constraints**, and **Fource Lock** modal field analysis across all **119 elements (`E0` and `Z = 1..118`)**.
