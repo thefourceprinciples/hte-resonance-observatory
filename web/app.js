@@ -27,6 +27,29 @@ const STATE_CATALOG = Array.of(
   { id:'SHADOW_PHASE', label:'Shadow Phase', color:'#a020f0', example:'GaAs', kid:'The Hidden Twin — stored, trapped, or interstitial phase.', eng:'Interstitial/hydride storage or metastable band-gap switching hidden inside a host lattice.' },
   { id:'PLASMA_FLUX', label:'Plasma Flux', color:'#ff8c00', example:'YBa2Cu3O7', kid:'The Lightning Cloud — super-excited ionized flux.', eng:'High-entropy multi-mode excitation; ionized plasma seed or superionic transport.' }
 );
+const CANONICAL_DOSSIERS = {
+  H: {
+    entry_id:'MATLAS-E001-HYDROGEN', status:'canonical draft', name:'Hydrogen',
+    cls:'element / gas / plasma-forming carrier / hydride former / isotope platform',
+    role:'Origin Node / carrier seed / Fifth-Ladder root',
+    isotopes:'1H (protium), 2H (deuterium), 3H (tritium) — all share Z=1 and p(H)=1.',
+    states:[
+      'Origin: very high — Z=1, first pitch-class root and lattice seed.',
+      'Gold: conditional — active in fuel cells, PEM proton transfer, and redox pathways.',
+      'Shadow: high — stored, trapped, or absorbed as interstitial hydrides.',
+      'Plasma: very high — simplest ionized plasma and fusion seed.',
+      'Armor: low / negative at interfaces — weakens metal grain boundaries via embrittlement.',
+      'Piezo: indirect — converts pressure/proton transport stress inside host lattices.',
+      'Fifth Ladder: canonical root — H → O → P → Ti → Cu → Kr.'
+    ],
+    iface:['Adsorbs onto surfaces & dissociates from H2 into atomic H','Diffuses rapidly into metals & occupies interstitial sites','Forms metal hydrides & weakens grain boundaries','Participates in proton conduction & alters local electronic structure'],
+    fails:['Hydrogen Embrittlement (reduces tensile strength, ductility & fracture toughness)','Leakage & Permeation through seals due to tiny molecular radius','Flammability / Ignition Risk in air (~500°C autoignition)','Cryogenic Risk (boil-off & thermal contraction near -252.9°C)'],
+    visible:'Smallest element, light diatomic gas (H2), simple 1s1 structure.',
+    hidden:'Embrittlement, seal permeation, storage difficulty, plasma potential, protonic transport, isotope divergence.',
+    lock:'Hydrogen = Origin Carrier: the first HTE note, the smallest material actor, and the most boundary-sensitive seed of energy, storage, plasma, and lattice interaction.'
+  }
+};
+
 const BOUNDARY_PROFILES = {
   free_bulk: { label:'Free Bulk', stateOverride:null, risk:'Low bulk interface stress; watch gas diffusivity / leakage on light carriers.', remainder:'Visible gas/bulk mass; minimal grain-boundary constraint.' },
   metal_host: { label:'Metal Host / Hydride', stateOverride:'SHADOW_PHASE', risk:'HIGH EMBRITTLEMENT RISK: Interstitial H weakens metal grain boundaries & ductility.', remainder:'Hidden interstitial lattice loading & crack-growth remainder.' },
@@ -34,9 +57,10 @@ const BOUNDARY_PROFILES = {
   cryo_pressure: { label:'Cryo / High-Pressure', stateOverride:'SHADOW_PHASE', risk:'Cryogenic contraction, boil-off pressure rise & seal permeation hazard.', remainder:'High-density confined phase under extreme thermal/pressure constraint.' },
   plasma_excited: { label:'Plasma Excitation', stateOverride:'PLASMA_FLUX', risk:'Thermal wall load, ionization instability & confinement boundary erosion.', remainder:'Ionized collective plasma state exceeding neutral molecular bounds.' }
 };
-
 let current = null, prevSnapshot = null, atomHistory = Array.of();
+let pinnedElement = null, activeDossierSym = 'H';
 const discovered = new Set();
+
 const $ = id => document.getElementById(id);
 const mod12 = x => ((x % 12) + 12) % 12;
 const dist = (a,b) => { const d = Math.abs(a-b)%12; return d>6 ? 12-d : d; };
@@ -73,6 +97,7 @@ function parseFormula(formula){
 
 function hasTritone(u){ for(let i=0;i<u.length;i++) for(let j=i+1;j<u.length;j++) if(dist(u.at(i),u.at(j))===6) return true; return false; }
 function hasSemitone(u){ for(let i=0;i<u.length;i++) for(let j=i+1;j<u.length;j++) if(dist(u.at(i),u.at(j))===1) return true; return false; }
+
 function classifyState(unique, nodes, boundary){
   if(!unique.length) return 'VOID';
   if(nodes.length === 1 && nodes.at(0).element === 'E0') return 'SUBSTRATE_ZERO';
@@ -85,7 +110,6 @@ function classifyState(unique, nodes, boundary){
   if(unique.length >= 3 && unique.some(p => Array.of(0,5,8,10).includes(p))) return 'ARMOR_SHIELD';
   return 'SHADOW_PHASE';
 }
-
 function computeCHTE(nodes){
   const pcs = nodes.flatMap(n => Array(Math.max(1, Math.round(n.count))).fill(n.pitch_class));
   if(pcs.length < 2) return 1.0;
@@ -102,6 +126,53 @@ function fifthLadder(rootZ){
   return chain.join(' → ');
 }
 
+function getElementDossier(sym){
+  const z = Z[sym] ?? 0, grp = GRP[sym] ?? 0, val = VAL[sym] ?? 0, chi = CHI[sym] ?? 0;
+  const pRaw = mod12(z), pGrp = groupPi(grp), oct = z === 0 ? 0 : Math.floor((z - 1) / 12) + 1;
+  const ladder = fifthLadder(z);
+  if(CANONICAL_DOSSIERS[sym]) return { ...CANONICAL_DOSSIERS[sym], sym, z, grp, val, chi, pRaw, pGrp, oct, ladder };
+  return {
+    entry_id:`MATLAS-E${String(z).padStart(3,'0')}-${sym.toUpperCase()}`, status:'auto_derived_v1', name:sym, sym, z, grp, val, chi, pRaw, pGrp, oct, ladder,
+    cls:`element / group-${grp} carrier (χ=${chi.toFixed(2)}, valence=${val})`,
+    role: z===0 ? 'Substrate Zero / calibration origin' : `Group-${grp} harmonic actor / Fifth-Ladder step-0 node`,
+    isotopes:`Natural & synthetic isotopes of ${sym} share Z=${z} and raw pitch class p(${sym})=${pRaw} (${PITCH.at(pRaw)}).`,
+    states:[
+      `Origin: ${z<=1?'very high':'low'} — Z=${z}, octave layer ${oct}.`,
+      `Gold: ${pGrp===7||pRaw===7?'high — fifth-anchored harmonic lock':'conditional — emerges in coherent transfer lattices'}.`,
+      `Shadow: ${grp>=3&&grp<=12?'high — d-block interstitial/hydride host candidate':'conditional — interface or defect trapped'}.`,
+      `Plasma: ${grp===1||grp===18?'high — low-ionization or discharge plasma actor':'conditional — high-energy excitation'}.`,
+      `Armor: ${grp>=6&&grp<=10?'high — structural transition-metal matrix':'conditional — depends on grain-boundary compatibility'}.`,
+      `Piezo: ${chi>=2.5||grp===4||grp===17?'high — polar electronegativity gradient':'indirect — stress coupling in asymmetric hosts'}.`,
+      `Fifth Ladder: ${ladder}`
+    ],
+    iface:[`Forms group-${grp} surface & lattice bonds (Pauling χ=${chi.toFixed(2)})`,`Modulates local electronic density & boundary charge transfer`],
+    fails:[`Interface reactivity, thermal mismatch, or defect trapping under extreme pressure/temperature`],
+    visible:`Z=${z}, Group ${grp}, Valence=${val}, Pauling χ=${chi.toFixed(2)}, HTE (${pRaw}, ${oct}).`,
+    hidden:`Boundary-induced phase shifts, grain-boundary compatibility & catalytic/transport remainder.`,
+    lock:`${sym} (Z=${z}) = Group-${grp} HTE node at (${pRaw}, ${oct}) whose full behavior emerges under relational boundary constraints.`
+  };
+}
+
+function renderElementDossier(sym, force = false){
+  if(pinnedElement && !force) return;
+  activeDossierSym = sym;
+  const d = getElementDossier(sym);
+  $('dossierTitle').textContent = d.entry_id;
+  $('dossierMeta').innerHTML = `STATUS: <strong style="color:${d.status==='canonical draft'?'#ffd700':'#00bfff'}">${d.status}</strong> | HTE Raw: (${d.pRaw}, ${d.oct}) ${PITCH.at(d.pRaw)} | Group: (${d.pGrp}, ${d.oct}) ${PITCH.at(d.pGrp)}`;
+  $('dossierBody').innerHTML = `
+    <div class="d-lock">${d.lock}</div>
+    <div class="d-card"><h2>1. Core &amp; HTE Role</h2><div><strong>Class:</strong> ${d.cls}<br><strong>HTE Role:</strong> ${d.role}<br><strong>Isotopes:</strong> ${d.isotopes}<br><strong>Diatomic Unison:</strong> C_HTE(${d.sym}${d.z>0?'2':''}) = +1.00 | <strong>Fifth Ladder:</strong> ${d.ladder}</div></div>
+    <div class="d-card"><h2>2. 7-State Activation Profile</h2><ul>${d.states.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+    <div class="d-card"><h2>3. Interface Behavior &amp; Failure Modes</h2><ul>${d.iface.map(i=>`<li>${i}</li>`).join('')}</ul><div style="margin-top:5px;color:#ff9a9a"><strong>Failure Modes:</strong></div><ul>${d.fails.map(f=>`<li>${f}</li>`).join('')}</ul></div>
+    <div class="d-card"><h2>4. Darkness Functional Reading</h2><div><strong>Visible:</strong> ${d.visible}<br><strong>Hidden Remainder:</strong> ${d.hidden}</div></div>
+  `;
+}
+
+function togglePinDossier(){
+  pinnedElement = pinnedElement ? null : activeDossierSym;
+  $('pinBtn').textContent = pinnedElement ? `📌 Pinned: ${pinnedElement} (Click to Unpin)` : '📌 Unpinned (Hover Live)';
+  $('pinBtn').style.borderColor = pinnedElement ? '#ffd700' : '#2a2a2a';
+}
 function evaluateModalField(normH){
   const normVal = Math.hypot(...normH);
   let best = { score:-1, tonic:0, mode:MODES.at(0), match:0, cModal:0, fource:0 };
@@ -127,6 +198,7 @@ function evaluateModalField(normH){
   }
   return best;
 }
+
 function buildSignature(formula, mappingMode='group', weightMode='stoich', boundary='free_bulk'){
   const composition = parseFormula(formula);
   const chis = Array.of();
@@ -170,7 +242,6 @@ function buildSignature(formula, mappingMode='group', weightMode='stoich', bound
     modal_field:{ optimal_tonic:modal.tonic, optimal_tonic_name:PITCH.at(modal.tonic), optimal_mode:modal.mode.name, field_type:modal.mode.field, fource_lock:Number(modal.fource.toFixed(4)), c_modal:Number(modal.cModal.toFixed(4)) }
   };
 }
-
 function updateDiscoveryUI(){
   const box = $('discoveryBadges');
   box.innerHTML = `<span class="badge unlocked">Discovered: ${discovered.size} / ${STATE_CATALOG.length}</span>` +
@@ -230,6 +301,7 @@ function stackElement(sym){
   const stacked = formulaFromHistory(atomHistory);
   $('formula').value = stacked;
   if($('dopeBase')){ $('dopeBase').value = stacked; $('dopeSlider').value = 0; $('dopeVal').textContent = '0.00'; drawDopingCurve(0); }
+  renderElementDossier(sym, true);
   mapFormula(`Added <strong>${sym}</strong>`);
   if($('autoChime') && $('autoChime').checked) sonify();
 }
@@ -242,7 +314,7 @@ function undoLast(){
 }
 
 function captureAtlas(){ if(!current) return; const mf=current.modal_field; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.entry_id} (${current.boundary_context}) → ${current.overlay_state} | C_HTE=${current.c_hte_unison} | Ladder: ${current.fifth_ladder} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}]`; }
-function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify(current,null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${current.entry_id.toLowerCase()}.json`; a.click(); }
+function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify({ ...current, active_element_dossier: getElementDossier(activeDossierSym) },null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${current.entry_id.toLowerCase()}.json`; a.click(); }
 function sonify(){
   if(!current) mapFormula();
   if(!current) return;
@@ -258,7 +330,6 @@ function sonify(){
     osc.connect(gain).connect(ctx.destination); osc.start(start); osc.stop(start + dur + 0.05);
   });
 }
-
 const gList = $('glossaryList');
 STATE_CATALOG.forEach(s => {
   const div = document.createElement('div');
@@ -269,10 +340,11 @@ STATE_CATALOG.forEach(s => {
 
 const grid=$('grid');
 ELEMENTS.forEach(e=>{
-  const s=e.at(0), z=e.at(1), grp=e.at(2), val=e.at(3), chi=e.at(4), b=document.createElement('button');
+  const s=e.at(0), z=e.at(1), grp=e.at(2), b=document.createElement('button');
   b.textContent=s+'\n'+z;
   b.style.borderTopColor = PC_COLORS.at(groupPi(grp));
-  b.title = `${s} (Z=${z}, Grp ${grp}, Val=${val}, χ=${chi} → ${PITCH.at(groupPi(grp))})`;
+  if(CANONICAL_DOSSIERS[s]) b.classList.add('has-canonical');
+  b.onmouseenter=()=>renderElementDossier(s, false);
   b.onclick=()=>stackElement(s);
   grid.appendChild(b);
 });
@@ -344,4 +416,4 @@ function draw(pcs, st){
   }
 }
 function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):Array.of(); draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
-updateDiscoveryUI(); mapFormula(); drawDopingCurve(); loop();
+renderElementDossier('H', true); updateDiscoveryUI(); mapFormula(); drawDopingCurve(); loop();
