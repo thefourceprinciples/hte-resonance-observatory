@@ -194,7 +194,7 @@ def build_element_atlas_entry(symbol: str, entry_date: str | None = None) -> dic
             "pitch_name_group": PITCH_NAMES[coords.pi_group],
             "atomic_chord": [coords.pi_raw],
             "diatomic_formula": diatomic_formula,
-            "diatomic_chord": [coords.pi_raw, coords.pi_raw] if z > 0 else,
+            "diatomic_chord": list((coords.pi_raw, coords.pi_raw)) if z > 0 else list(),
             "c_hte_unison": 1.0,
             "modal_field_group": sig_single["modal_field_group"],
             "modal_field_diatomic": sig_diatomic["modal_field_group"],
