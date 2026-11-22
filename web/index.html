@@ -18,12 +18,16 @@
     }
     main { display:flex; flex-direction:column; align-items:center; justify-content:center; border-right:1px solid var(--line); min-height:100vh; padding:16px; gap:10px; }
     aside { background:var(--panel); min-height:100vh; display:flex; flex-direction:column; }
-    canvas { width:min(78vmin,680px); height:min(78vmin,680px); border:1px solid #171717; border-radius:10px; background:#000; box-shadow:0 0 80px rgba(255,255,255,.05); }
+    canvas#scope { width:min(70vmin,600px); height:min(70vmin,600px); border:1px solid #171717; border-radius:10px; background:#000; box-shadow:0 0 80px rgba(255,255,255,.05); }
     .legend { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; font-size:.73rem; color:var(--muted); }
     .legend span { display:inline-flex; align-items:center; gap:6px; }
     .dot-el { width:10px; height:10px; border-radius:50%; background:var(--accent); display:inline-block; }
     .ring-tonic { width:12px; height:12px; border-radius:50%; border:2px solid var(--gold); display:inline-block; }
-    .delta-banner { width:min(78vmin,680px); background:#0c0c12; border:1px solid #232334; border-radius:8px; padding:8px 12px; font-size:.75rem; color:#cceeff; text-align:center; }
+    .delta-banner { width:min(70vmin,600px); background:#0c0c12; border:1px solid #232334; border-radius:8px; padding:7px 12px; font-size:.74rem; color:#cceeff; text-align:center; }
+    .doping-box { width:min(70vmin,600px); background:#08080c; border:1px solid #222230; border-radius:8px; padding:9px 12px; display:flex; flex-direction:column; gap:6px; }
+    .doping-row { display:flex; align-items:center; gap:8px; font-size:.74rem; color:#ccc; flex-wrap:wrap; }
+    .doping-row input[type=range] { flex:1; min-width:120px; accent-color:var(--accent); cursor:pointer; }
+    canvas#dopingChart { width:100%; height:64px; background:#030305; border:1px solid #1a1a24; border-radius:6px; display:block; }
     header, section, footer { padding:11px 14px; border-bottom:1px solid var(--line); }
     h1 { margin:0; font-size:.98rem; letter-spacing:2px; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; }
     .sub { margin-top:4px; color:var(--muted); font-size:.74rem; line-height:1.4; }
@@ -59,9 +63,19 @@
     <canvas id="scope" aria-label="HTE 12-fold resonance wheel"></canvas>
     <div class="legend">
       <span><i class="dot-el"></i> Solid Dot = Active Element Note</span>
-      <span><i class="ring-tonic"></i> Gold Halo = Inferred Modal Tonic (12×7 Scale Root)</span>
+      <span><i class="ring-tonic"></i> Gold Halo = Inferred Modal Tonic</span>
     </div>
-    <div class="delta-banner" id="deltaBanner">Stack atoms below to watch harmonic states, bond polarity (Δχ), and Fource Lock evolve.</div>
+    <div class="delta-banner" id="deltaBanner">Stack atoms or slide fractional doping below to watch Fource Lock evolve.</div>
+    <div class="doping-box">
+      <div class="doping-row">
+        <strong>Doping Sweep:</strong>
+        <span>Base:</span><input id="dopeBase" value="YBa2Cu3O6" style="max-width:115px;padding:4px 7px;" onchange="drawDopingCurve()" />
+        <span>+ Dopant:</span><input id="dopeEl" value="O" style="max-width:46px;padding:4px 7px;text-align:center;" onchange="drawDopingCurve()" />
+        <span>x = <strong id="dopeVal" style="color:var(--accent)">0.90</strong></span>
+        <input type="range" id="dopeSlider" min="0" max="2" step="0.05" value="0.90" oninput="applyDoping(this.value)" />
+      </div>
+      <canvas id="dopingChart" aria-label="Fource Lock doping phase curve"></canvas>
+    </div>
   </main>
   <aside>
     <header>
@@ -71,11 +85,11 @@
     <section>
       <div class="formula">
         <input id="formula" value="SiO2" aria-label="Chemical formula" onkeydown="if(event.key==='Enter') mapFormula()" />
-        <select id="modeSelect" onchange="mapFormula()" aria-label="Mapping mode">
+        <select id="modeSelect" onchange="mapFormula();drawDopingCurve()" aria-label="Mapping mode">
           <option value="group" selected>Group-Phase (v2)</option>
           <option value="raw">Raw Z mod 12 (v1)</option>
         </select>
-        <select id="weightSelect" onchange="mapFormula()" aria-label="Weight mode">
+        <select id="weightSelect" onchange="mapFormula();drawDopingCurve()" aria-label="Weight mode">
           <option value="stoich" selected>Stoich Count</option>
           <option value="electronegativity">Pauling χ Weight</option>
           <option value="valence">Valence e⁻ Weight</option>
