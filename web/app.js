@@ -1,16 +1,29 @@
-  t+=.02; ctx.strokeStyle=color; ctx.shadowColor=color; ctx.shadowBlur=18*devicePixelRatio; ctx.lineWidth=2*devicePixelRatio;
-  ctx.beginPath();
-  for(let a=0;a<Math.PI*2+.01;a+=.012){ let r=R*.58; pcs.forEach(p=>r+=(10+p)*Math.sin((p+2)*a+t+p*.4)); const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a); if(a===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }
-  ctx.closePath(); ctx.stroke(); ctx.shadowBlur=0;
-  for(let p=0;p<12;p++){
-    const a=(p/12)*Math.PI*2-Math.PI/2, x=cx+R*Math.cos(a), y=cy+R*Math.sin(a), active=pcs.includes(p), isTonic=p===tonic&&pcs.length>0;
-    if(isTonic){ ctx.strokeStyle='#ffd700'; ctx.lineWidth=2.5*devicePixelRatio; ctx.beginPath(); ctx.arc(x,y,12*devicePixelRatio,0,Math.PI*2); ctx.stroke(); }
-    ctx.fillStyle=active?color:'#333'; ctx.beginPath(); ctx.arc(x,y,(active?7:4)*devicePixelRatio,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle=active?'#fff':(isTonic?'#ffd700':'#777'); ctx.font=`${12*devicePixelRatio}px monospace`; ctx.fillText(PITCH.at(p),x+14*devicePixelRatio,y+4*devicePixelRatio);
-  }
-}
-function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):Array.of(); draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
-updateDiscoveryUI(); mapFormula(); loop();
+const RAW_EL = "E0:0:0,H:1:1,He:2:18,Li:3:1,Be:4:2,B:5:13,C:6:14,N:7:15,O:8:16,F:9:17,Ne:10:18,Na:11:1,Mg:12:2,Al:13:13,Si:14:14,P:15:15,S:16:16,Cl:17:17,Ar:18:18,K:19:1,Ca:20:2,Sc:21:3,Ti:22:4,V:23:5,Cr:24:6,Mn:25:7,Fe:26:8,Co:27:9,Ni:28:10,Cu:29:11,Zn:30:12,Ga:31:13,Ge:32:14,As:33:15,Se:34:16,Br:35:17,Kr:36:18,Rb:37:1,Sr:38:2,Y:39:3,Zr:40:4,Nb:41:5,Mo:42:6,Tc:43:7,Ru:44:8,Rh:45:9,Pd:46:10,Ag:47:11,Cd:48:12,In:49:13,Sn:50:14,Sb:51:15,Te:52:16,I:53:17,Xe:54:18,Cs:55:1,Ba:56:2,La:57:3,Ce:58:3,Pr:59:3,Nd:60:3,Pm:61:3,Sm:62:3,Eu:63:3,Gd:64:3,Tb:65:3,Dy:66:3,Ho:67:3,Er:68:3,Tm:69:3,Yb:70:3,Lu:71:3,Hf:72:4,Ta:73:5,W:74:6,Re:75:7,Os:76:8,Ir:77:9,Pt:78:10,Au:79:11,Hg:80:12,Tl:81:13,Pb:82:14,Bi:83:15,Po:84:16,At:85:17,Rn:86:18,Fr:87:1,Ra:88:2,Ac:89:3,Th:90:3,Pa:91:3,U:92:3,Np:93:3,Pu:94:3,Am:95:3,Cm:96:3,Bk:97:3,Cf:98:3,Es:99:3,Fm:100:3,Md:101:3,No:102:3,Lr:103:3,Rf:104:4,Db:105:5,Sg:106:6,Bh:107:7,Hs:108:8,Mt:109:9,Ds:110:10,Rg:111:11,Cn:112:12,Nh:113:13,Fl:114:14,Mc:115:15,Lv:116:16,Ts:117:17,Og:118:18";
+const ELEMENTS = RAW_EL.split(",").map(s => { const p = s.split(":"); return Array.of(p.at(0), Number(p.at(1)), Number(p.at(2))); });
+const Z = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(1))));
+const GRP = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(2))));
+const PITCH = Array.of('C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B');
+const PC_COLORS = Array.of('#00bfff','#ff55aa','#7cff00','#a020f0','#ffd700','#ff6b6b','#00ffcc','#ffaa00','#b388ff','#69f0ae','#ff80ab','#40c4ff');
+
+const MODES = Array.of(
+  { name:'Ionian', intervals:Array.of(0,2,4,5,7,9,11), char:11, third:4, fifth:7, field:'Structural Clarity Field' },
+  { name:'Dorian', intervals:Array.of(0,2,3,5,7,9,10), char:9, third:3, fifth:7, field:'Restoration Field' },
+  { name:'Phrygian', intervals:Array.of(0,1,3,5,7,8,10), char:1, third:3, fifth:7, field:'Boundary / Threshold Field' },
+  { name:'Lydian', intervals:Array.of(0,2,4,6,7,9,11), char:6, third:4, fifth:7, field:'Expansion / Levitation Field' },
+  { name:'Mixolydian', intervals:Array.of(0,2,4,5,7,9,10), char:10, third:4, fifth:7, field:'Continuity Field' },
+  { name:'Aeolian', intervals:Array.of(0,2,3,5,7,8,10), char:8, third:3, fifth:7, field:'Memory / Gravitational Field' },
+  { name:'Locrian', intervals:Array.of(0,1,3,5,6,8,10), char:6, third:3, fifth:6, field:'Fracture / Collapse Field' }
+);
+
+const STATE_CATALOG = Array.of(
+  { id:'SUBSTRATE_ZERO', label:'Substrate Zero', color:'#ffffff', example:'E0', kid:'The Quiet Blank Canvas — zero-atom background field.', eng:'Null-reference substrate (Z=0, π=0, ω=0) for baseline calibration.' },
+  { id:'SINGLET_SEED', label:'Singlet Seed', color:'#00bfff', example:'H', kid:'One Lone Atom Looking for a Friend — unbonded single note.', eng:'Single pitch-class occupancy; high Locrian tritone pull awaiting a bonding partner.' },
+  { id:'GOLD_ANCHOR', label:'Gold Anchor', color:'#ffd700', example:'SiO2', kid:'The Rock-Solid Bridge — locked by a strong musical fifth.', eng:'Anchored on pitch class 7 (G); candidate for high-symmetry bridging and low-friction stability.' },
+  { id:'PIEZO_TENSION', label:'Piezo Tension', color:'#7cff00', example:'BaTiO3', kid:'The Squeeze-and-Spark Spring — opposite poles pulling tight.', eng:'Contains a 6-semitone tritone axis; candidate for polar asymmetry and electromechanical stress coupling.' },
+  { id:'ARMOR_SHIELD', label:'Armor Shield', color:'#ff3b3b', example:'Fe2O3', kid:'The Heavy Fortress Wall — dense multi-atom shield.', eng:'3+ pitch classes anchored on {C, F, Ab, Bb}; candidate for mass damping and structural load absorption.' },
+  { id:'SHADOW_PHASE', label:'Shadow Phase', color:'#a020f0', example:'GaAs', kid:'The Hidden Twin — dark minor/phrygian phase shifter.', eng:'Tritone-free dark cluster without dominant fifth; candidate for metastable switching or band-gap hysteresis.' },
+  { id:'PLASMA_FLUX', label:'Plasma Flux', color:'#ff8c00', example:'YBa2Cu3O7', kid:'The Lightning Cloud — super-excited multi-note energy.', eng:'4+ pitch classes with adjacent semitone (m2) friction; candidate for high-entropy transport or catalytic flux.' }
+);
 let current = null;
 let prevSnapshot = null;
 let atomHistory = Array.of();
