@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HTE Resonance Observatory v0.3 — Physical Calibration</title>
+  <title>HTE Resonance Observatory v0.4 — Materials Atlas Engine (MAE)</title>
   <style>
     :root {
       color-scheme: dark;
@@ -12,48 +12,49 @@
     }
     * { box-sizing: border-box; }
     body {
-      margin:0; min-height:100vh; display:grid; grid-template-columns: 1.15fr 1fr;
+      margin:0; min-height:100vh; display:grid; grid-template-columns: 1.12fr 1.03fr;
       background:radial-gradient(circle at 30% 45%, #101018, #030303 60%, #000);
       color:var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
-    main { display:flex; flex-direction:column; align-items:center; justify-content:center; border-right:1px solid var(--line); min-height:100vh; padding:16px; gap:10px; }
+    main { display:flex; flex-direction:column; align-items:center; justify-content:center; border-right:1px solid var(--line); min-height:100vh; padding:14px; gap:9px; }
     aside { background:var(--panel); min-height:100vh; display:flex; flex-direction:column; }
-    canvas#scope { width:min(70vmin,600px); height:min(70vmin,600px); border:1px solid #171717; border-radius:10px; background:#000; box-shadow:0 0 80px rgba(255,255,255,.05); }
-    .legend { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; font-size:.73rem; color:var(--muted); }
+    canvas#scope { width:min(66vmin,560px); height:min(66vmin,560px); border:1px solid #171717; border-radius:10px; background:#000; box-shadow:0 0 80px rgba(255,255,255,.05); }
+    .legend { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; font-size:.72rem; color:var(--muted); }
     .legend span { display:inline-flex; align-items:center; gap:6px; }
     .dot-el { width:10px; height:10px; border-radius:50%; background:var(--accent); display:inline-block; }
     .ring-tonic { width:12px; height:12px; border-radius:50%; border:2px solid var(--gold); display:inline-block; }
-    .delta-banner { width:min(70vmin,600px); background:#0c0c12; border:1px solid #232334; border-radius:8px; padding:7px 12px; font-size:.74rem; color:#cceeff; text-align:center; }
-    .doping-box { width:min(70vmin,600px); background:#08080c; border:1px solid #222230; border-radius:8px; padding:9px 12px; display:flex; flex-direction:column; gap:6px; }
-    .doping-row { display:flex; align-items:center; gap:8px; font-size:.74rem; color:#ccc; flex-wrap:wrap; }
-    .doping-row input[type=range] { flex:1; min-width:120px; accent-color:var(--accent); cursor:pointer; }
-    canvas#dopingChart { width:100%; height:64px; background:#030305; border:1px solid #1a1a24; border-radius:6px; display:block; }
-    header, section, footer { padding:11px 14px; border-bottom:1px solid var(--line); }
-    h1 { margin:0; font-size:.98rem; letter-spacing:2px; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; }
-    .sub { margin-top:4px; color:var(--muted); font-size:.74rem; line-height:1.4; }
-    .formula { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-    input, select { background:#050505; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 9px; font-family:inherit; font-size:.78rem; }
-    input { flex:1; min-width:100px; }
-    button { background:#111; color:#ddd; border:1px solid #2a2a2a; padding:8px 9px; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:800; font-size:.74rem; }
+    .delta-banner { width:min(66vmin,560px); background:#0c0c12; border:1px solid #232334; border-radius:8px; padding:7px 12px; font-size:.73rem; color:#cceeff; text-align:center; }
+    .doping-box { width:min(66vmin,560px); background:#08080c; border:1px solid #222230; border-radius:8px; padding:8px 11px; display:flex; flex-direction:column; gap:6px; }
+    .doping-row { display:flex; align-items:center; gap:7px; font-size:.73rem; color:#ccc; flex-wrap:wrap; }
+    .doping-row input[type=range] { flex:1; min-width:110px; accent-color:var(--accent); cursor:pointer; }
+    canvas#dopingChart { width:100%; height:58px; background:#030305; border:1px solid #1a1a24; border-radius:6px; display:block; }
+    header, section, footer { padding:10px 14px; border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:.96rem; letter-spacing:2px; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; }
+    .sub { margin-top:4px; color:var(--muted); font-size:.72rem; line-height:1.38; }
+    .formula { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
+    input, select { background:#050505; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:7px 8px; font-family:inherit; font-size:.76rem; }
+    input { flex:1; min-width:95px; }
+    button { background:#111; color:#ddd; border:1px solid #2a2a2a; padding:7px 8px; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:800; font-size:.73rem; }
     button:hover { background:#1b1b1b; color:#fff; border-color:#444; }
     button.active { background:#f0f0f0 !important; color:#000 !important; }
-    .chk { display:inline-flex; align-items:center; gap:5px; font-size:.73rem; color:#ccc; cursor:pointer; user-select:none; }
-    .row { display:flex; justify-content:space-between; gap:10px; font-size:.77rem; margin:4px 0; }
+    .chk { display:inline-flex; align-items:center; gap:4px; font-size:.72rem; color:#ccc; cursor:pointer; user-select:none; }
+    .row { display:flex; justify-content:space-between; gap:10px; font-size:.76rem; margin:3.5px 0; }
     .label { color:var(--muted); }
     .value { text-align:right; max-width:72%; overflow-wrap:anywhere; }
     .highlight { color:var(--accent); font-weight:700; }
-    .explain { background:#06080c; border-left:3px solid var(--accent); padding:7px 10px; margin-top:6px; font-size:.72rem; line-height:1.45; color:#d8e6f0; }
-    .badges { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; }
-    .badge { border:1px solid #2a2a2a; border-radius:999px; padding:2px 8px; font-size:.65rem; color:#666; }
+    .warn { color:#ff8a8a; font-weight:700; }
+    .explain { background:#06080c; border-left:3px solid var(--accent); padding:6px 10px; margin-top:5px; font-size:.71rem; line-height:1.42; color:#d8e6f0; }
+    .badges { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
+    .badge { border:1px solid #2a2a2a; border-radius:999px; padding:2px 8px; font-size:.64rem; color:#666; }
     .badge.unlocked { color:#fff; border-color:var(--accent); background:rgba(0,191,255,.12); }
     details { border-bottom:1px solid var(--line); background:#070709; }
-    summary { padding:9px 14px; font-size:.75rem; font-weight:700; cursor:pointer; color:#ffd700; }
-    .glossary { padding:8px 14px 12px; display:grid; gap:6px; max-height:190px; overflow:auto; font-size:.72rem; }
+    summary { padding:8px 14px; font-size:.74rem; font-weight:700; cursor:pointer; color:#ffd700; }
+    .glossary { padding:8px 14px 12px; display:grid; gap:6px; max-height:180px; overflow:auto; font-size:.71rem; }
     .g-card { border:1px solid #1e1e26; border-radius:6px; padding:6px 8px; background:#0b0b0f; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .grid { display:grid; grid-template-columns: repeat(9,1fr); gap:4px; padding:10px 14px; max-height:180px; overflow:auto; border-bottom:1px solid var(--line); }
-    .grid button { white-space:pre-line; padding:5px 2px; font-size:.68rem; border-top-width:3px; }
-    .controls { display:flex; gap:6px; flex-wrap:wrap; }
-    pre { margin:0; padding:10px 14px; background:#050505; color:#d0d0d0; white-space:pre-wrap; overflow:auto; font-size:.71rem; line-height:1.4; min-height:110px; flex:1; }
+    .grid { display:grid; grid-template-columns: repeat(9,1fr); gap:4px; padding:9px 14px; max-height:165px; overflow:auto; border-bottom:1px solid var(--line); }
+    .grid button { white-space:pre-line; padding:5px 2px; font-size:.67rem; border-top-width:3px; }
+    .controls { display:flex; gap:5px; flex-wrap:wrap; }
+    pre { margin:0; padding:9px 14px; background:#050505; color:#d0d0d0; white-space:pre-wrap; overflow:auto; font-size:.7rem; line-height:1.38; min-height:105px; flex:1; }
     .error { color:#ff8a8a; }
     @media (max-width:920px){ body{grid-template-columns:1fr;} main, aside{min-height:auto;} }
   </style>
@@ -65,33 +66,33 @@
       <span><i class="dot-el"></i> Solid Dot = Active Element Note</span>
       <span><i class="ring-tonic"></i> Gold Halo = Inferred Modal Tonic</span>
     </div>
-    <div class="delta-banner" id="deltaBanner">Stack atoms or slide fractional doping below to watch Fource Lock evolve.</div>
-        <div class="doping-box">
+    <div class="delta-banner" id="deltaBanner">Stack atoms, switch Interface Context, or slide fractional doping below.</div>
+    <div class="doping-box">
       <div class="doping-row">
         <strong>Doping Sweep:</strong>
-        <span>Base:</span><input id="dopeBase" value="YBa2Cu3O6" style="max-width:110px;padding:4px 7px;" onchange="drawDopingCurve()" />
-        <span>+ Dopant:</span><input id="dopeEl" value="O" style="max-width:44px;padding:4px 7px;text-align:center;" onchange="drawDopingCurve()" />
+        <span>Base:</span><input id="dopeBase" value="YBa2Cu3O6" style="max-width:105px;padding:4px 6px;" onchange="drawDopingCurve()" />
+        <span>+ Dopant:</span><input id="dopeEl" value="O" style="max-width:42px;padding:4px 6px;text-align:center;" onchange="drawDopingCurve()" />
         <span>x = <strong id="dopeVal" style="color:var(--accent)">0.90</strong></span>
         <input type="range" id="dopeSlider" min="0" max="2" step="0.05" value="0.90" oninput="applyDoping(this.value)" />
       </div>
       <div class="doping-row" style="gap:5px;">
         <span style="color:var(--muted)">Presets:</span>
-        <button style="padding:3px 7px;font-size:.68rem;" onclick="loadDopingPreset('YBa2Cu3O6','O',0.90)">YBCO + x·O (Cuprate)</button>
-        <button style="padding:3px 7px;font-size:.68rem;" onclick="loadDopingPreset('BaTiO2','O',1.00)">BaTiO2 + x·O (Piezo)</button>
-        <button style="padding:3px 7px;font-size:.68rem;" onclick="loadDopingPreset('SiO1','O',1.00)">SiO + x·O (Oxide)</button>
-        <button style="padding:3px 7px;font-size:.68rem;" onclick="loadDopingPreset('GaAs','In',0.25)">GaAs + x·In (Semiconductor)</button>
+        <button style="padding:3px 6px;font-size:.67rem;" onclick="loadDopingPreset('YBa2Cu3O6','O',0.90)">YBCO + x·O</button>
+        <button style="padding:3px 6px;font-size:.67rem;" onclick="loadDopingPreset('BaTiO2','O',1.00)">BaTiO2 + x·O</button>
+        <button style="padding:3px 6px;font-size:.67rem;" onclick="loadDopingPreset('SiO1','O',1.00)">SiO + x·O</button>
+        <button style="padding:3px 6px;font-size:.67rem;" onclick="loadDopingPreset('GaAs','In',0.25)">GaAs + x·In</button>
       </div>
       <canvas id="dopingChart" aria-label="Fource Lock doping phase curve"></canvas>
     </div>
   </main>
   <aside>
     <header>
-      <h1>HTE Resonance Observatory <span style="color:var(--accent)">v0.3</span></h1>
-      <div class="sub">Physically Calibrated 7-State Discovery & Engineering Workbench (L2 Exploratory Overlay)</div>
+      <h1>HTE Resonance Observatory <span style="color:var(--accent)">v0.4 MAE</span></h1>
+      <div class="sub">Materials Atlas Engine — Interface-Aware 7-State Discovery &amp; Fifth-Ladder Workbench (L2 Overlay)</div>
     </header>
     <section>
       <div class="formula">
-        <input id="formula" value="SiO2" aria-label="Chemical formula" onkeydown="if(event.key==='Enter') mapFormula()" />
+        <input id="formula" value="H2" aria-label="Chemical formula" onkeydown="if(event.key==='Enter') mapFormula()" />
         <select id="modeSelect" onchange="mapFormula();drawDopingCurve()" aria-label="Mapping mode">
           <option value="group" selected>Group-Phase (v2)</option>
           <option value="raw">Raw Z mod 12 (v1)</option>
@@ -101,41 +102,48 @@
           <option value="electronegativity">Pauling χ Weight</option>
           <option value="valence">Valence e⁻ Weight</option>
         </select>
+        <select id="boundarySelect" onchange="mapFormula()" aria-label="Interface boundary context">
+          <option value="free_bulk" selected>Boundary: Free Bulk</option>
+          <option value="metal_host">Boundary: Metal Host / Hydride</option>
+          <option value="ceramic_matrix">Boundary: Ceramic / Proton Matrix</option>
+          <option value="cryo_pressure">Boundary: Cryo / High-Pressure</option>
+          <option value="plasma_excited">Boundary: Plasma Excitation</option>
+        </select>
         <button onclick="mapFormula()">Map</button>
-        <button onclick="undoLast()" title="Remove last stacked atom">Undo (-1)</button>
+        <button onclick="undoLast()">Undo (-1)</button>
         <button onclick="sonify()">Sonify</button>
-        <label class="chk"><input type="checkbox" id="autoChime" checked /> Auto-Chime</label>
+        <label class="chk"><input type="checkbox" id="autoChime" checked /> Chime</label>
       </div>
     </section>
     <section>
-      <div class="row"><span class="label">Formula</span><span class="value" id="selected">—</span></div>
-      <div class="row"><span class="label">Stack breakdown</span><span class="value" id="composition">—</span></div>
-      <div class="row"><span class="label">Bond polarity / Valence</span><span class="value highlight" id="polarityMetrics">—</span></div>
+      <div class="row"><span class="label">Formula / HTE (p, o)</span><span class="value" id="selected">—</span></div>
+      <div class="row"><span class="label">Stack &amp; Fifth Ladder</span><span class="value highlight" id="fifthLadder">—</span></div>
+      <div class="row"><span class="label">Bond polarity / Valence</span><span class="value" id="polarityMetrics">—</span></div>
       <div class="row"><span class="label">Modal field (Gold Halo)</span><span class="value highlight" id="modalField">—</span></div>
-      <div class="row"><span class="label">Fource / C_modal</span><span class="value" id="fourceScore">—</span></div>
-      <div class="row"><span class="label">Active notes</span><span class="value" id="classes">—</span></div>
+      <div class="row"><span class="label">C_HTE Unison / Fource</span><span class="value" id="fourceScore">—</span></div>
+      <div class="row"><span class="label">Interface &amp; Failure Risk</span><span class="value warn" id="interfaceRisk">—</span></div>
       <div class="row"><span class="label">Discovered state</span><span class="value highlight" id="state">VOID</span></div>
-      <div class="explain" id="stateExplain">Click any element tile below to stack atoms and discover states!</div>
+      <div class="explain" id="stateExplain">Click any element tile below to stack atoms and generate a Materials Atlas Entry!</div>
       <div class="badges" id="discoveryBadges"></div>
     </section>
     <details>
-      <summary>7-State Discovery & Engineering Glossary (Click to Expand)</summary>
+      <summary>7-State Discovery &amp; Engineering Glossary (Click to Expand)</summary>
       <div class="glossary" id="glossaryList"></div>
     </details>
     <div class="grid" id="grid"></div>
     <footer class="controls">
       <button onclick="loadFormula('E0')">E0</button>
+      <button onclick="loadFormula('H')">H</button>
+      <button onclick="loadFormula('H2')">H2</button>
       <button onclick="loadFormula('H2O')">H2O</button>
       <button onclick="loadFormula('SiO2')">SiO2</button>
       <button onclick="loadFormula('BaTiO3')">BaTiO3</button>
-      <button onclick="loadFormula('Fe2O3')">Fe2O3</button>
-      <button onclick="loadFormula('GaAs')">GaAs</button>
       <button onclick="loadFormula('YBa2Cu3O7')">YBCO</button>
       <button onclick="captureAtlas()">Log Entry</button>
-      <button onclick="downloadLedger()">Export JSON</button>
+      <button onclick="downloadLedger()">Export MATLAS JSON</button>
       <button onclick="resetAll()">Purge</button>
     </footer>
-    <pre id="log">MATERIALS ATLAS LOG (v0.3):\n- Ready. Click elements to stack or choose a preset.</pre>
+    <pre id="log">MATERIALS ATLAS LOG (v0.4 MAE):\n- Ready. Try H, H2, or switch Boundary Context to see interface behavior.</pre>
   </aside>
   <script src="./app.js"></script>
 </body>
