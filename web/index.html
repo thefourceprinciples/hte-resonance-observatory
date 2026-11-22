@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HTE Resonance Observatory v0.3 — Discovery & Engineering Workbench</title>
+  <title>HTE Resonance Observatory v0.3 — Physical Calibration</title>
   <style>
     :root {
       color-scheme: dark;
@@ -28,28 +28,28 @@
     h1 { margin:0; font-size:.98rem; letter-spacing:2px; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; }
     .sub { margin-top:4px; color:var(--muted); font-size:.74rem; line-height:1.4; }
     .formula { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-    input, select { background:#050505; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 9px; font-family:inherit; font-size:.8rem; }
-    input { flex:1; min-width:110px; }
-    button { background:#111; color:#ddd; border:1px solid #2a2a2a; padding:8px 9px; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:800; font-size:.75rem; }
+    input, select { background:#050505; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:8px 9px; font-family:inherit; font-size:.78rem; }
+    input { flex:1; min-width:100px; }
+    button { background:#111; color:#ddd; border:1px solid #2a2a2a; padding:8px 9px; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:800; font-size:.74rem; }
     button:hover { background:#1b1b1b; color:#fff; border-color:#444; }
     button.active { background:#f0f0f0 !important; color:#000 !important; }
-    .chk { display:inline-flex; align-items:center; gap:5px; font-size:.74rem; color:#ccc; cursor:pointer; user-select:none; }
-    .row { display:flex; justify-content:space-between; gap:10px; font-size:.78rem; margin:4px 0; }
+    .chk { display:inline-flex; align-items:center; gap:5px; font-size:.73rem; color:#ccc; cursor:pointer; user-select:none; }
+    .row { display:flex; justify-content:space-between; gap:10px; font-size:.77rem; margin:4px 0; }
     .label { color:var(--muted); }
     .value { text-align:right; max-width:72%; overflow-wrap:anywhere; }
     .highlight { color:var(--accent); font-weight:700; }
-    .explain { background:#06080c; border-left:3px solid var(--accent); padding:7px 10px; margin-top:6px; font-size:.73rem; line-height:1.45; color:#d8e6f0; }
+    .explain { background:#06080c; border-left:3px solid var(--accent); padding:7px 10px; margin-top:6px; font-size:.72rem; line-height:1.45; color:#d8e6f0; }
     .badges { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; }
-    .badge { border:1px solid #2a2a2a; border-radius:999px; padding:2px 8px; font-size:.66rem; color:#666; }
+    .badge { border:1px solid #2a2a2a; border-radius:999px; padding:2px 8px; font-size:.65rem; color:#666; }
     .badge.unlocked { color:#fff; border-color:var(--accent); background:rgba(0,191,255,.12); }
     details { border-bottom:1px solid var(--line); background:#070709; }
-    summary { padding:9px 14px; font-size:.76rem; font-weight:700; cursor:pointer; color:#ffd700; }
+    summary { padding:9px 14px; font-size:.75rem; font-weight:700; cursor:pointer; color:#ffd700; }
     .glossary { padding:8px 14px 12px; display:grid; gap:6px; max-height:190px; overflow:auto; font-size:.72rem; }
     .g-card { border:1px solid #1e1e26; border-radius:6px; padding:6px 8px; background:#0b0b0f; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .grid { display:grid; grid-template-columns: repeat(9,1fr); gap:4px; padding:10px 14px; max-height:185px; overflow:auto; border-bottom:1px solid var(--line); }
+    .grid { display:grid; grid-template-columns: repeat(9,1fr); gap:4px; padding:10px 14px; max-height:180px; overflow:auto; border-bottom:1px solid var(--line); }
     .grid button { white-space:pre-line; padding:5px 2px; font-size:.68rem; border-top-width:3px; }
     .controls { display:flex; gap:6px; flex-wrap:wrap; }
-    pre { margin:0; padding:10px 14px; background:#050505; color:#d0d0d0; white-space:pre-wrap; overflow:auto; font-size:.71rem; line-height:1.4; min-height:120px; flex:1; }
+    pre { margin:0; padding:10px 14px; background:#050505; color:#d0d0d0; white-space:pre-wrap; overflow:auto; font-size:.71rem; line-height:1.4; min-height:110px; flex:1; }
     .error { color:#ff8a8a; }
     @media (max-width:920px){ body{grid-template-columns:1fr;} main, aside{min-height:auto;} }
   </style>
@@ -61,12 +61,12 @@
       <span><i class="dot-el"></i> Solid Dot = Active Element Note</span>
       <span><i class="ring-tonic"></i> Gold Halo = Inferred Modal Tonic (12×7 Scale Root)</span>
     </div>
-    <div class="delta-banner" id="deltaBanner">Stack atoms below to watch harmonic states and Fource Lock evolve in real time.</div>
+    <div class="delta-banner" id="deltaBanner">Stack atoms below to watch harmonic states, bond polarity (Δχ), and Fource Lock evolve.</div>
   </main>
   <aside>
     <header>
       <h1>HTE Resonance Observatory <span style="color:var(--accent)">v0.3</span></h1>
-      <div class="sub">Interactive 7-State Discovery & Engineering Workbench (L2 Exploratory HTE Overlay)</div>
+      <div class="sub">Physically Calibrated 7-State Discovery & Engineering Workbench (L2 Exploratory Overlay)</div>
     </header>
     <section>
       <div class="formula">
@@ -74,6 +74,11 @@
         <select id="modeSelect" onchange="mapFormula()" aria-label="Mapping mode">
           <option value="group" selected>Group-Phase (v2)</option>
           <option value="raw">Raw Z mod 12 (v1)</option>
+        </select>
+        <select id="weightSelect" onchange="mapFormula()" aria-label="Weight mode">
+          <option value="stoich" selected>Stoich Count</option>
+          <option value="electronegativity">Pauling χ Weight</option>
+          <option value="valence">Valence e⁻ Weight</option>
         </select>
         <button onclick="mapFormula()">Map</button>
         <button onclick="undoLast()" title="Remove last stacked atom">Undo (-1)</button>
@@ -84,6 +89,7 @@
     <section>
       <div class="row"><span class="label">Formula</span><span class="value" id="selected">—</span></div>
       <div class="row"><span class="label">Stack breakdown</span><span class="value" id="composition">—</span></div>
+      <div class="row"><span class="label">Bond polarity / Valence</span><span class="value highlight" id="polarityMetrics">—</span></div>
       <div class="row"><span class="label">Modal field (Gold Halo)</span><span class="value highlight" id="modalField">—</span></div>
       <div class="row"><span class="label">Fource / C_modal</span><span class="value" id="fourceScore">—</span></div>
       <div class="row"><span class="label">Active notes</span><span class="value" id="classes">—</span></div>
