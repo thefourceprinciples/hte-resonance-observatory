@@ -1,149 +1,67 @@
-# HTE Resonance Observatory
+# HTE Resonance Observatory (`v0.3`)
 
-**A multimodal research platform for exploring material systems through harmonic topology, interactive visualization, sonification, experiment ledgers, and extensible analysis modules.**
+**An interactive harmonic materials discovery & engineering workbench** that maps chemical formulas (`Z = 0..118` + `Element-0`) onto a 12-fold chromatic resonance wheel, evaluates `12 × 7` modal coherence (`CLV-HTE-001`), classifies compounds across **7 HTE Discovery States**, synthesizes live WebAudio chords, and exports structured experiment ledgers.
 
-> Return phrase: **Listen to the lattice.**
+- **Launch Live Browser Workbench (No Install Required):** [https://github.io](https://github.io)
+- **Companion Core Engine (`CLV-HTE-001`):** [thefourceprinciples/clavis-harmonica](https://github.com)
 
-## What this is
+---
 
-HTE Resonance Observatory is an experimental, local-first research instrument for mapping materials into a layered coherence space.
+## What's New in `v0.3`
 
-It combines:
+- **Full Element Table (`Z = 0..118` + `E0`):** Supports Hydrogen (`H`) through Oganesson (`Og`), `Element-0` (`E0`) substrate baseline, grouped parentheses (`Ca10(PO4)6(OH)2`), and fractional stoichiometries (`YBa2Cu3O6.9`).
+- **Dual Mapping Modes (`Group-Phase v2` & `Raw Z mod 12 v1`):** Projects IUPAC periodic groups (`1–18`) onto `Z_12` (`+7.17σ` family clustering) alongside legacy `atomic_number mod 12` comparison.
+- **`CLV-HTE-001` Modal Field & Fource Lock (`F`):** Evaluates all `84` modal frames (`12 tonics × 7 modes`) to infer the **Gold Halo** scale root, modal coherence (`C_modal`), and harmonic lock (`F`).
+- **7-State Discovery Ladder & Interactive Glossary:** Classifies every atomic stack across *Substrate Zero, Singlet Seed, Gold Anchor, Piezo Tension, Armor Shield, Shadow Phase,* and *Plasma Flux* with kid-friendly metaphors and L2 engineering hypotheses.
+- **Tactile Atom Stacking & Audio:** Click elements to stack and auto-increment counts (`H` → `H2` → `H3`), step backward with **`Undo (-1)`**, and hear real-time chords via **`Auto-Chime`** and **`Sonify`**.
 
-- **Materials Atlas entries** for conventional material identity and evidence
-- **HTE harmonic mapping** using `atomic_number mod 12`
-- **Formula parsing** for simple and grouped formulas such as `SiO2`, `Fe2O3`, and `Ca10(PO4)6(OH)2`
-- **Lost-mode / modal coherence fields** inspired by Pythagorean and Greek modal systems
-- **Matter-state overlay detection** for Gold, Armor, Piezo, Shadow, Plasma, and transition candidates
-- **Darkness Functional residual auditing** using `Observed - Explained`
-- **Browser-native sonification** using HTE-rendered pitch-class mappings
-- **Experiment ledgers** that preserve source, formula, mapping, claim level, and evidence boundary
-- **Extensible analysis tools** for future calibration against material datasets
+---
 
-This repository is a software and research-platform project. It does **not** claim that HTE replaces chemistry, proves new physics, proves dark matter, proves superconductivity, or validates literal transmutation. HTE is used here as an exploratory coordinate transform and coherence-overlay system.
+## User Guide: How to Use the Observatory
 
-## Core stack
+### 1. The 12-Fold Standing-Wave Wheel & Delta Banner
+- **Animated Standing-Wave Curve:** Sums the sine harmonics of every active element in your formula. The waveform color shifts dynamically to match your compound's **Discovered State**.
+- **Solid Colored Dots (`●`):** Indicate the exact pitch classes (`0–11`, `C` through `B`) occupied by the elements currently in your stack.
+- **Gold Outer Halo (`◎`):** Marks the **Inferred Modal Tonic**—the root note of the `12 × 7` scale that best frames your compound. *(For example, a single Hydrogen atom `H` sits as a solid dot on `C`, while `F#` receives the gold halo because `F# Locrian` frames an unbonded single note.)*
+- **Delta Transition Banner:** Displays step-by-step sensitivity whenever you add or remove an atom, tracking state shifts and whether **Fource Lock** rose (`↑`), fell (`↓`), or held steady (`→`).
 
-```text
-Materials data
-  -> HTE harmonic coordinate layer
-  -> Modal topology layer
-  -> Matter-state overlay engine
-  -> Darkness residual layer
-  -> Visualization + sonification
-  -> Materials Atlas log
-  -> Exportable research artifacts
-```
+### 2. Controls & Formula Building
 
-## Current milestone
+| Control | Function |
+| :--- | :--- |
+| **Formula Box** | Type any formula (`H2O`, `SiO2`, `BaTiO3`, `YBa2Cu3O6.9`, `E0`) and press **Enter** or click **Map**. |
+| **Mapping Selector** | Toggle between **`Group-Phase (v2)`** (periodic family projection) and **`Raw Z mod 12 (v1)`**. |
+| **Periodic Grid (`E0`–`Og`)** | Click tiles to stack atoms (clicking repeatedly increments stoichiometry); top borders are color-coded by pitch class. |
+| **`Undo (-1)`** | Peels back the most recently added atom so you can step backward through phase transitions. |
+| **`Sonify` & `Auto-Chime`** | Synthesizes an arpeggiated WebAudio chord using state-adaptive timbres (*triangle* = Piezo, *square* = Armor, *sine* = Gold/Other). |
+| **`Log Entry` / `Export JSON`** | Appends timestamped runs to the **Materials Atlas Log** or downloads a structured `.json` experiment ledger. |
+| **`Purge`** | Clears the formula input, stack history, and wheel back to `VOID`. |
 
-**MVP v0.1:** local observatory scaffold.
+### 3. The 7 HTE Discovery States
 
-Implemented foundation:
+| State | Trigger Rule | Kid-Friendly Intuition | Engineering Hypothesis (Exploratory L2) |
+| :--- | :--- | :--- | :--- |
+| **`SUBSTRATE_ZERO`** | Only `E0` (`Z = 0`) present | *The Quiet Blank Canvas* | Null-reference background substrate (`Z=0, π=0, ω=0`) for baseline calibration. |
+| **`SINGLET_SEED`** | `1` active pitch class | *One Lone Atom Looking for a Friend* | Unbonded elemental seed; high boundary tension awaiting a bonding partner. |
+| **`GOLD_ANCHOR`** | Pitch class `7` (`G`) without tritone | *The Rock-Solid Bridge* | Fifth-anchored harmonic lock; candidate for high-symmetry bridging and low-friction stability. |
+| **`PIEZO_TENSION`** | Tritone (`6` semitones apart) | *The Squeeze-and-Spark Spring* | Polar asymmetry across opposite wheel poles; candidate for electromechanical stress coupling. |
+| **`ARMOR_SHIELD`** | `3+` classes on `{0, 5, 8, 10}` | *The Heavy Fortress Wall* | Subdominant mass clustering; candidate for mechanical damping and load absorption. |
+| **`SHADOW_PHASE`** | Tritone-free, fifth-free dark cluster | *The Hidden Twin* | Asymmetric threshold pocket; candidate for metastable switching or band-gap hysteresis. |
+| **`PLASMA_FLUX`** | `4+` classes with semitone (`m2`) | *The Lightning Cloud* | Multi-mode semitone excitation; candidate for superionic transport or catalytic flux. |
 
-- Python package scaffold under `src/hte_observatory/`
-- canonical element table through Ra / Z=88
-- lightweight formula parser
-- HTE harmonic signature builder
-- experiment ledger generator
-- FastAPI endpoints for signatures and ledgers
-- browser prototype at `web/index.html`
-- formula input, presets, 12-fold visual wheel, sonification, Atlas capture, and JSON ledger export
-- basic tests and GitHub Actions workflow
-- Akashic Coherence Ledger v0.2 stewardship schema for trace/source/status/mandate records
+---
 
-Next capabilities:
+## Python API & Local Development
 
-- Materials Atlas source/provenance cards
-- calibration profiles
-- Materials Project connector
-- Markdown / Google Docs report export
-- richer modal field detection
-- plugin API for hypothesis layers
-
-## Quick start
-
-Install locally:
+The Python backend (`src/hte_observatory/`) mirrors the browser engine and exposes FastAPI endpoints (`/health`, `/signature`, `/ledger`, `/compare`):
 
 ```bash
-python -m pip install -e '.[dev]'
-pytest
-```
-
-Run the API:
-
-```bash
+pip install -e .
 uvicorn hte_observatory.api:app --reload
 ```
 
-Open the browser prototype:
+---
 
-```text
-web/index.html
-```
+## Claim Boundaries (`L2 Exploratory Overlay`)
 
-## Claim boundary
-
-Allowed framing:
-
-> HTE Resonance Observatory is an exploratory interface for comparing materials through harmonic, modal, residual, and state-transition overlays.
-
-Forbidden framing:
-
-> This proves new physics, proves dark matter, proves superconductivity, or replaces conventional material science.
-
-Every result should be treated as an **HTE overlay candidate** until tested by conventional methods.
-
-## Repository layout
-
-```text
-.
-├── README.md
-├── LICENSE
-├── pyproject.toml
-├── docs/
-│   ├── AKASHIC_COHERENCE_LEDGER_V0.2.md
-│   ├── architecture.md
-│   ├── CLAIM_BOUNDARIES.md
-│   ├── MVP_BUILD_PLAN.md
-│   ├── SONIFICATION_SPEC.md
-│   ├── calibration-layer.md
-│   ├── materials-atlas-entry.md
-│   └── roadmap.md
-├── web/
-│   └── index.html
-├── examples/
-│   └── materials/
-│       └── quartz-ledger.json
-├── experiments/
-├── src/
-│   └── hte_observatory/
-│       ├── __init__.py
-│       ├── api.py
-│       ├── elements.py
-│       ├── formula.py
-│       ├── harmonic.py
-│       └── ledger.py
-├── tests/
-│   └── test_hte_core.py
-└── .github/
-    ├── ISSUE_TEMPLATE/
-    └── workflows/
-        └── python-tests.yml
-```
-
-## Development philosophy
-
-1. Build a useful local prototype first.
-2. Keep speculative modules clearly labeled.
-3. Separate raw measurements from HTE overlays.
-4. Make every mapping calibratable and versioned.
-5. Preserve every meaningful run as a Materials Atlas entry.
-6. Let the lattice be visual, audible, and auditable.
-7. Preserve traces without pretending partial records are total knowledge.
-
-## License
-
-Code is released under the MIT License unless otherwise noted.
-
-Documentation, theory notes, and datasets may receive separate licenses in later releases.
+All signatures, modal fields, Fource lock scores, and 7-state classifications produced by the **HTE Resonance Observatory** are **Claim Level L2 (`derived_hte_mapping_only`)** exploratory overlays. They do not establish conventional physical, electronic, or chemical properties without external experimental measurement or quantum-mechanical calibration.
