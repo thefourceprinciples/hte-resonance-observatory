@@ -150,3 +150,136 @@ function parseFormula(formula){
     if(Z[token] === undefined) throw new Error('Unknown element: '+token);
     let count = 1;
     if(tokens[i+1] && isNum(tokens[i+1])) count = Number(tokens[++i]);
+    add(stack[stack.length-1], token, count);
+  }
+  if(stack.length !== 1) throw new Error('Unmatched opening parenthesis.');
+  return Object.fromEntries(stack[0]);
+}
+
+function intervalWalk(unique){ if(unique.length<2) return []; return unique.map((p,i)=>mod12(unique[(i+1)%unique.length]-p)); }
+function hasTritone(unique){ for(let i=0;i<unique.length;i++) for(let j=i+1;j<unique.length;j++) if(dist(unique[i], unique[j])===6) return true; return false; }
+function stateOf(unique){
+  if(!unique.length) return 'VOID';
+  if(hasTritone(unique)) return 'PIEZO_OVERLAY_CANDIDATE';
+  if(unique.includes(7)) return 'GOLD_OVERLAY_CANDIDATE';
+  if(unique.length>=3 && unique.some(p=>[0,5,8,10].includes(p))) return 'ARMOR_OVERLAY_CANDIDATE';
+  return 'MIXED_OVERLAY';
+}
+function tagsFor(st, modeName){
+  let html = '';
+  if(st.includes('GOLD')) html += '<span class="tag gold">Gold overlay</span>';
+  else if(st.includes('PIEZO')) html += '<span class="tag piezo">Piezo overlay</span>';
+  else if(st.includes('ARMOR')) html += '<span class="tag armor">Armor overlay</span>';
+  else if(st.includes('SHADOW')) html += '<span class="tag shadow">Shadow overlay</span>';
+  else html += '<span class="tag">Mixed</span>';
+  if(modeName) html += `<span class="tag shadow">${modeName}</span>`;
+  return html;
+}
+
+function evaluateModalField(normH){
+  const normVal = Math.hypot(...normH);
+  let best = { score:-1, tonic:0, mode:MODES[0], match:0, cModal:0, fource:0 };
+  for(let t=0; t<12; t++){
+    for(const m of MODES){
+      const tplSet = new Set(m.intervals.map(d => mod12(t + d)));
+      const tVec = Array(12).fill(0);
+      m.intervals.forEach(d => tVec[mod12(t+d)] = 1.0);
+      tVec[t] = 2.0;
+      tVec[mod12(t + m.fifth)] += 0.5;
+      tVec[mod12(t + m.char)] += 0.6;
+      tVec[mod12(t + m.third)] += 0.3;
+      const normT = Math.hypot(...tVec);
+
+      const dot = normH.reduce((acc, v, idx) => acc + v * tVec[idx], 0);
+      const cosSim = (normVal > 0 && normT > 0) ? dot / (normVal * normT) : 0;
+      const offMass = normH.reduce((acc, v, idx) => acc + (tplSet.has(idx) ? 0 : v), 0);
+      const match = Math.max(0, cosSim - 0.5 * offMass);
+
+      const hRoot = normH[t];
+      const hFifth = normH[mod12(t + m.fifth)];
+      const hThird = normH[mod12(t + m.third)];
+      const hChar = normH[mod12(t + m.char)];
+
+      const O = Math.min(1.0, (0.5*hRoot + 0.3*hFifth + 0.2*hThird) * 2.0);
+      const E = 1.0 - offMass;
+      const X = Math.min(1.0, 0.25 + 1.5*hChar);
+      const cModal = O * E * X;
+
+      let m2 = 0, tri = 0;
+      for(let i=0; i<12; i++){
+        for(let j=i+1; j<12; j++){
+          const iv = mod12(j - i);
+          if(iv === 1 || iv === 11) m2 += normH[i]*normH[j];
+          else if(iv === 6) tri += normH[i]*normH[j];
+        }
+      }
+      const fource = (hRoot * (hChar + 0.15*hFifth)) / (0.05 + offMass + m2 + tri);
+      const score = match + 0.05 * Math.tanh(fource);
+      if(score > best.score) best = { score, tonic:t, mode:m, match, cModal, fource };
+    }
+  }
+  return best;
+}
+
+function buildSignature(formula, mappingMode='group'){
+  const composition = parseFormula(formula);
+  const nodes = Object.entries(composition).sort((a,b)=>Z[a[0]]-Z[b[0]]).map(([symbol,count]) => {
+    const atomicNumber = Z[symbol], grp = GRP[symbol];
+    const pc = mappingMode === 'group' ? groupPi(grp) : mod12(atomicNumber);
+    const band = atomicNumber === 0 ? 0 : Math.floor((atomicNumber-1)/12)+1;
+    return { element:symbol, atomic_number:atomicNumber, group:grp, count, pitch_class:pc, pitch_name:PITCH[pc], octave_band:band };
+  });
+  const weightedChord = nodes.flatMap(n => Array(Math.max(1, Math.round(n.count))).fill(n.pitch_class));
+  const rawHist = Array(12).fill(0);
+  nodes.forEach(n => rawHist[n.pitch_class] += n.count);
+  const totalW = rawHist.reduce((a,b)=>a+b, 0);
+  const normH = totalW > 0 ? rawHist.map(x=>x/totalW) : rawHist;
+  const histogram = {};
+  nodes.forEach(n => histogram[n.pitch_class] = (histogram[n.pitch_class]||0) + n.count);
+  const unique = Object.keys(histogram).map(Number).sort((a,b)=>a-b);
+  const modal = evaluateModalField(normH);
+
+  return {
+    formula: formula.trim(), composition, mapping_mode: mappingMode,
+    mapping_rule: mappingMode === 'group' ? 'pitch_class = periodic_group_phase(Z) mod 12' : 'pitch_class = atomic_number mod 12',
+    nodes, weighted_chord: weightedChord, pitch_class_histogram: histogram,
+    interval_walk: intervalWalk(unique),
+    dominant_pitch_class: weightedChord.length ? Number(Object.entries(histogram).sort((a,b)=>b[1]-a[1])[0][0]) : null,
+    overlay_state: stateOf(unique),
+    modal_field: {
+      optimal_tonic: modal.tonic,
+      optimal_tonic_name: PITCH[modal.tonic],
+      optimal_mode: modal.mode.name,
+      field_type: modal.mode.field,
+      char_pc: mod12(modal.tonic + modal.mode.char),
+      fource_lock: Number(modal.fource.toFixed(4)),
+      c_modal: Number(modal.cModal.toFixed(4)),
+      match_score: Number(modal.match.toFixed(4))
+    },
+    claim_boundary: 'derived_hte_mapping_only'
+  };
+}
+
+function buildLedger(){
+  return {
+    run_id: 'HTE-RUN-' + Math.random().toString(16).slice(2,12).toUpperCase(),
+    created_at: new Date().toISOString(),
+    observatory_version: '0.2.0-browser',
+    source: 'browser_manual_input',
+    formula: current?.formula || '',
+    signature: current,
+    claim_level: 'L2',
+    claim_level_label: 'derived_hte_mapping',
+    evidence_boundary: 'HTE-derived exploratory mapping only; no conventional material property claim is established by this run.'
+  };
+}
+
+function renderSignature(sig){
+  current = sig;
+  const pcs = Object.keys(sig.pitch_class_histogram).map(Number).sort((a,b)=>a-b);
+  const mf = sig.modal_field;
+  $('selected').textContent = sig.formula;
+  $('composition').textContent = Object.entries(sig.composition).map(([s,c])=>s+':'+c).join(' ');
+  $('modalField').textContent = `${mf.optimal_tonic_name} ${mf.optimal_mode} (${mf.field_type})`;
+
+  
