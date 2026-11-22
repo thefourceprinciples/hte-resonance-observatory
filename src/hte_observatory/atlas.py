@@ -20,7 +20,7 @@ CANONICAL_DOSSIERS: dict[str, dict] = {
         "name": "Element-0 (Substrate Zero)",
         "material_class": "sub-nucleonic reference substrate / vacuum carrier floor",
         "hte_role": "Substrate Zero / zero-octave calibration origin",
-        "isotopes": ["None (zero-nucleon reference substrate; Z=0, A=0)"],
+        "isotopes": list(("None (zero-nucleon reference substrate; Z=0, A=0)",)),
         "canonical_phrase": "Element-0 is the unperturbed carrier floor from which discrete baryonic matter emerges.",
         "fource_phrase": "Element-0 is the silence that makes the first note audible.",
         "one_line_lock": "Element-0 = Substrate Zero: the unperturbed carrier medium before discrete atomic boundary conditions.",
@@ -33,8 +33,8 @@ CANONICAL_DOSSIERS: dict[str, dict] = {
             "Piezo": "null — zero stress gradient.",
             "Fifth Ladder": "E0 Substrate calibration origin.",
         },
-        "interface_behavior": ["Provides unperturbed continuous reference medium (pi=0, omega=0)"],
-        "failure_modes": ["Zero-matter baseline — no physical containment failure modes"],
+        "interface_behavior": list(("Provides unperturbed continuous reference medium (pi=0, omega=0)",)),
+        "failure_modes": list(("Zero-matter baseline — no physical containment failure modes",)),
         "darkness_remainder": {
             "visible_accounting": "Zero nucleonic mass (Z=0, valence=0, chi=0.00).",
             "hidden_remainder": "Ambient carrier medium enabling gradient and wave propagation.",
@@ -46,7 +46,7 @@ CANONICAL_DOSSIERS: dict[str, dict] = {
         "name": "Hydrogen",
         "material_class": "element / gas / plasma-forming carrier / hydride former / isotope platform",
         "hte_role": "Origin Node / carrier seed / Fifth-Ladder root",
-        "isotopes": ["1H (protium, stable)", "2H (deuterium, stable)", "3H (tritium, radio)"],
+        "isotopes": list(("1H (protium, stable)", "2H (deuterium, stable)", "3H (tritium, radio)")),
         "canonical_phrase": "Hydrogen is the first carrier: the smallest material unit of elemental identity, the seed point from which the HTE lattice begins.",
         "fource_phrase": "Hydrogen is the first note of matter, but it only becomes a song under constraint.",
         "one_line_lock": "Hydrogen = Origin Carrier: the first HTE note, the smallest material actor, and the most boundary-sensitive seed of energy, storage, plasma, and lattice interaction.",
@@ -59,27 +59,27 @@ CANONICAL_DOSSIERS: dict[str, dict] = {
             "Piezo": "indirect — converts pressure/proton transport stress inside host lattices.",
             "Fifth Ladder": "canonical root — H -> O -> P -> Ti -> Cu -> Kr.",
         },
-        "interface_behavior": [
+        "interface_behavior": list((
             "Adsorbs onto catalytic surfaces and dissociates from H2 into atomic H",
             "Diffuses rapidly into metals and occupies interstitial lattice sites",
             "Forms metal hydrides and weakens grain boundaries (embrittlement)",
             "Participates in proton conduction and alters local electronic structure",
-        ],
-        "failure_modes": [
+        )),
+        "failure_modes": list((
             "Hydrogen Embrittlement (reduces tensile strength, ductility, and fracture toughness)",
             "Leakage and Permeation through seals and defects due to tiny molecular radius",
             "Flammability / Ignition Risk in air (wide flammable range, ~500°C autoignition)",
             "Cryogenic Risk (boil-off pressure rise and thermal contraction near -252.9°C)",
-        ],
+        )),
         "darkness_remainder": {
             "visible_accounting": "Smallest element, light diatomic gas (H2), simple 1s1 structure.",
             "hidden_remainder": "Embrittlement, seal permeation, storage difficulty, plasma potential, protonic transport, isotope divergence.",
         },
         "measurement_stack": {
-            "basic_identity": ["purity", "isotope ratio", "molecular form", "pressure", "temperature"],
-            "storage_behavior": ["leak rate", "permeation rate", "adsorption capacity", "desorption hysteresis", "cycling stability"],
-            "material_compatibility": ["embrittlement response", "crack growth rate", "tensile strength change", "ductility change"],
-            "energy_and_interface": ["reaction enthalpy", "proton conductivity", "plasma threshold", "surface dissociation", "diffusion coefficient"],
+            "basic_identity": list(("purity", "isotope ratio", "molecular form", "pressure", "temperature")),
+            "storage_behavior": list(("leak rate", "permeation rate", "adsorption capacity", "desorption hysteresis", "cycling stability")),
+            "material_compatibility": list(("embrittlement response", "crack growth rate", "tensile strength change", "ductility change")),
+            "energy_and_interface": list(("reaction enthalpy", "proton conductivity", "plasma threshold", "surface dissociation", "diffusion coefficient")),
         },
     },
 }
@@ -90,8 +90,8 @@ _Z_TO_SYMBOL: dict[int, str] = {meta: sym for sym, meta in ELEMENT_TABLE.items()
 def fifth_ladder_from_z(root_z: int, steps: int = 6) -> list[dict]:
     """Compute the n-step Fifth Ladder sequence p_n = (p_0 + 7n) mod 12."""
     if root_z <= 0:
-        return [{"step": 0, "Z": 0, "symbol": "E0", "pitch_raw": 0, "pitch_name": "C"}]
-    ladder: list[dict] = []
+        return list(({"step": 0, "Z": 0, "symbol": "E0", "pitch_raw": 0, "pitch_name": "C"},))
+    ladder: list[dict] = list()
     for n in range(steps):
         z_step = root_z + 7 * n
         sym = _Z_TO_SYMBOL.get(z_step, f"Z{z_step}")
@@ -108,28 +108,28 @@ def _auto_family_profile(symbol: str, z: int, group: int, block: str, chi: float
     """Synthesize Tier-1 engineering & interface rules for any element Z = 0..118."""
     if group == 1:
         role = "Alkali electron donor / high-mobility ionic carrier"
-        iface = ["Rapid surface oxidation & moisture reaction", "Intercalates into layered host cathodes (e.g. Li/Na batteries)"]
-        fails = ["Dendrite formation under high current density", "Exothermic hydrolysis / thermal runaway in air or water"]
+        iface = list(("Rapid surface oxidation & moisture reaction", "Intercalates into layered host cathodes (e.g. Li/Na batteries)"))
+        fails = list(("Dendrite formation under high current density", "Exothermic hydrolysis / thermal runaway in air or water"))
     elif group == 17:
         role = "Halogen electron acceptor / high-polarity bond terminator"
-        iface = ["Forms strong ionic/polar covalent surface passivation layers", "High electronegativity charge withdrawal"]
-        fails = ["Halide stress-corrosion cracking & outgassing toxicity"]
+        iface = list(("Forms strong ionic/polar covalent surface passivation layers", "High electronegativity charge withdrawal"))
+        fails = list(("Halide stress-corrosion cracking & outgassing toxicity",))
     elif group == 18:
         role = "Noble closed-shell buffer / plasma discharge medium"
-        iface = ["Chemically inert boundary gas; forms ionized plasma under high-voltage excitation"]
-        fails = ["Inert-gas bubble swelling / grain-boundary blistering under implantation"]
+        iface = list(("Chemically inert boundary gas; forms ionized plasma under high-voltage excitation",))
+        fails = list(("Inert-gas bubble swelling / grain-boundary blistering under implantation",))
     elif block == "d":
         role = "Transition-metal d-orbital host / catalytic & hydride lattice"
-        iface = ["Hosts interstitial light carriers (H/D/O) in d-band vacancies", "Catalyzes surface molecular dissociation"]
-        fails = ["Interstitial embrittlement, phase fatigue, and grain-boundary decohesion"]
+        iface = list(("Hosts interstitial light carriers (H/D/O) in d-band vacancies", "Catalyzes surface molecular dissociation"))
+        fails = list(("Interstitial embrittlement, phase fatigue, and grain-boundary decohesion",))
     elif block == "f":
         role = "Inner-shell f-orbital magnetic / high-density energy actor"
-        iface = ["Localized f-electron spin coupling & high-Z lattice mass"]
-        fails = ["Oxidation sensitivity, thermal brittleness, or radiotoxic containment (actinides)"]
+        iface = list(("Localized f-electron spin coupling & high-Z lattice mass",))
+        fails = list(("Oxidation sensitivity, thermal brittleness, or radiotoxic containment (actinides)",))
     else:
         role = "Main-group covalent / semiconductor network former"
-        iface = ["Forms directional sp-hybridized covalent bonds and dielectric/semiconductor interfaces"]
-        fails = ["Brittle fracture under tensile shock & interface trap-state defects"]
+        iface = list(("Forms directional sp-hybridized covalent bonds and dielectric/semiconductor interfaces",))
+        fails = list(("Brittle fracture under tensile shock & interface trap-state defects",))
 
     return {
         "material_class": f"element / group-{group} {block}-block actor (chi={chi:.2f})",
@@ -148,6 +148,7 @@ def build_element_atlas_entry(symbol: str, entry_date: str | None = None) -> dic
     """Build a full 17-section Materials Atlas Entry (MAE) for any element E0..Og."""
     coords = element_coordinates(symbol)
     z = coords.Z
+    o_matlas = 0 if z == 0 else ((z - 1) // 12) + 1
     override = CANONICAL_DOSSIERS.get(symbol, {})
     auto = _auto_family_profile(symbol, z, coords.group, coords.block, coords.electronegativity)
 
@@ -185,14 +186,14 @@ def build_element_atlas_entry(symbol: str, entry_date: str | None = None) -> dic
             "block": coords.block,
             "valence_electrons": coords.valence,
             "pauling_electronegativity": coords.electronegativity,
-            "isotopes": override.get("isotopes", [f"Standard isotopes of {symbol} share Z={z} and pi_raw={coords.pi_raw}"]),
+            "isotopes": override.get("isotopes", list((f"Standard isotopes of {symbol} share Z={z} and pi_raw={coords.pi_raw}",))),
         },
         "hte_signature": {
-            "coordinate_raw": {"p": coords.pi_raw, "o": coords.omega, "tuple": [coords.pi_raw, coords.omega]},
-            "coordinate_group": {"p": coords.pi_group, "o": coords.omega, "tuple": [coords.pi_group, coords.omega]},
+            "coordinate_raw": {"p": coords.pi_raw, "o": o_matlas, "tuple": list((coords.pi_raw, o_matlas))},
+            "coordinate_group": {"p": coords.pi_group, "o": o_matlas, "tuple": list((coords.pi_group, o_matlas))},
             "pitch_name_raw": PITCH_NAMES[coords.pi_raw],
             "pitch_name_group": PITCH_NAMES[coords.pi_group],
-            "atomic_chord": [coords.pi_raw],
+            "atomic_chord": list((coords.pi_raw,)),
             "diatomic_formula": diatomic_formula,
             "diatomic_chord": list((coords.pi_raw, coords.pi_raw)) if z > 0 else list(),
             "c_hte_unison": 1.0,
@@ -209,8 +210,8 @@ def build_element_atlas_entry(symbol: str, entry_date: str | None = None) -> dic
         "failure_modes": override.get("failure_modes", auto["failure_modes"]),
         "darkness_remainder": override.get("darkness_remainder", auto["darkness_remainder"]),
         "measurement_stack": override.get("measurement_stack", {
-            "basic_identity": ["purity", "stoichiometry", "crystal phase", "pressure", "temperature"],
-            "interface_and_compatibility": ["surface adsorption", "diffusion coefficient", "grain-boundary stability"],
+            "basic_identity": list(("purity", "stoichiometry", "crystal phase", "pressure", "temperature")),
+            "interface_and_compatibility": list(("surface adsorption", "diffusion coefficient", "grain-boundary stability")),
         }),
         "canonical_phrase": override.get("canonical_phrase", auto["one_line_lock"]),
         "fource_phrase": override.get("fource_phrase", auto["one_line_lock"]),
