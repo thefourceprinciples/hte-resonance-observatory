@@ -105,7 +105,6 @@ def compute_soft_states(norm_h: list[float], nodes: list[HTENode], delta_chi: fl
         }
         return {"dominant_state": "SUBSTRATE_ZERO", "state_probabilities": probs}
 
-    # Pairwise interval coupling energies
     tritone_energy = 0.0
     semitone_energy = 0.0
     fifth_energy = 0.0
@@ -120,11 +119,9 @@ def compute_soft_states(norm_h: list[float], nodes: list[HTENode], delta_chi: fl
             elif iv == 5:
                 fifth_energy += pair
 
-    # Shannon diversity of active pitch classes (0 when single pitch class)
     entropy = -sum(w * math.log(w) for w in norm_h if w > 1e-12)
     singlet_raw = math.exp(-3.0 * entropy)
 
-    # Polarity boost scales piezo tension gently when real electronegativity delta_chi is high
     polarity_factor = 1.0 + 0.25 * min(delta_chi, 3.5)
     piezo_raw = 4.0 * tritone_energy * polarity_factor
     gold_raw = 1.8 * norm_h[7] + 1.5 * fifth_energy
@@ -146,8 +143,6 @@ def compute_soft_states(norm_h: list[float], nodes: list[HTENode], delta_chi: fl
     probs = {k: round(v / total, 6) if total > 0 else 0.0 for k, v in raw_scores.items()}
     dominant = max(probs.items(), key=lambda kv: kv[1])[0]
     return {"dominant_state": dominant, "state_probabilities": probs}
-
-
 def _unit_template_vector(tonic: int, mode: ModeSpec) -> list[float]:
     vec = [0.0] * 12
     for deg in mode.intervals:
@@ -263,3 +258,108 @@ def build_hte_signature(
     """
     composition = parse_formula(formula)
     nodes: list[HTENode] = []
+    weighted_pitch_classes: list[int] = []
+
+    raw_hist = [0.0] * 12
+    group_hist = [0.0] * 12
+    chi_hist = [0.0] * 12
+    val_hist = [0.0] * 12
+
+    chis: list[float] = []
+    total_atoms = 0.0
+    total_valence = 0.0
+    chi_weighted_sum = 0.0
+
+    for symbol, count in sorted(composition.items(), key=lambda item: atomic_number(item[0])):
+        coords = element_coordinates(symbol)
+        z = coords.Z
+        pitch_class = coords.pi_group if mapping_mode == "group" else coords.pi_raw
+        int_count = max(1, int(round(count))) if count > 0 else 0
+        weighted_pitch_classes.extend([pitch_class] * int_count)
+
+        w_stoich = float(count)
+        w_chi = float(count) * (coords.electronegativity if coords.electronegativity > 0 else 0.1)
+        w_val = float(count) * (coords.valence if coords.valence > 0 else 0.1)
+
+        raw_hist[coords.pi_raw] += w_stoich
+        group_hist[coords.pi_group] += w_stoich
+        chi_hist[pitch_class] += w_chi
+        val_hist[pitch_class] += w_val
+
+        if coords.electronegativity > 0:
+            chis.append(coords.electronegativity)
+            chi_weighted_sum += float(count) * coords.electronegativity
+        total_atoms += float(count)
+        total_valence += float(count) * coords.valence
+
+        octave_band = 0 if z == 0 else ((z - 1) // 12) + 1
+        nodes.append(
+            HTENode(
+                element=symbol,
+                atomic_number=z,
+                count=count,
+                pitch_class=pitch_class,
+                pitch_name=PITCH_NAMES[pitch_class],
+                octave_band=octave_band,
+                group=coords.group,
+                period=coords.period,
+                block=coords.block,
+                valence=coords.valence,
+                electronegativity=coords.electronegativity,
+                group_pitch_class=coords.pi_group,
+                group_pitch_name=PITCH_NAMES[coords.pi_group],
+            )
+        )
+
+    histogram = Counter(weighted_pitch_classes)
+    unique = sorted(histogram)
+
+    base_hist = group_hist if mapping_mode == "group" else raw_hist
+    if weight_mode == "electronegativity":
+        active_hist = chi_hist
+    elif weight_mode == "valence":
+        active_hist = val_hist
+    else:
+        active_hist = base_hist
+
+    norm_active = _normalize(active_hist)
+    norm_raw = _normalize(raw_hist)
+    norm_grp = _normalize(group_hist)
+    norm_chi = _normalize(chi_hist)
+
+    delta_chi = round(max(chis) - min(chis), 4) if len(chis) >= 2 else 0.0
+    mean_chi = round(chi_weighted_sum / total_atoms, 4) if total_atoms > 0 else 0.0
+    valence_per_atom = round(total_valence / total_atoms, 4) if total_atoms > 0 else 0.0
+
+    soft_states = compute_soft_states(norm_active, nodes, delta_chi=delta_chi)
+
+    return {
+        "formula": formula,
+        "composition": composition,
+        "mapping_mode": mapping_mode,
+        "weight_mode": weight_mode,
+        "mapping_rule": (
+            "pitch_class = periodic_group_phase(Z) mod 12"
+            if mapping_mode == "group"
+            else "pitch_class = atomic_number mod 12"
+        ),
+        "nodes": [asdict(node) for node in nodes],
+        "weighted_chord": weighted_pitch_classes,
+        "pitch_class_histogram": {str(k): histogram[k] for k in unique},
+        "interval_walk": _interval_walk(unique),
+        "dominant_pitch_class": histogram.most_common(1)[0][0] if histogram else None,
+        "overlay_state": classify_overlay_state(unique),
+        "discovery_state": soft_states["dominant_state"],
+        "state_probabilities": soft_states["state_probabilities"],
+        "physical_metrics": {
+            "delta_chi": delta_chi,
+            "mean_chi": mean_chi,
+            "total_valence": round(total_valence, 4),
+            "valence_per_atom": valence_per_atom,
+        },
+        "modal_field": evaluate_modal_field(norm_active),
+        "modal_field_raw": evaluate_modal_field(norm_raw),
+        "modal_field_group": evaluate_modal_field(norm_grp),
+        "modal_field_chi": evaluate_modal_field(norm_chi),
+        "claim_boundary": "derived_hte_mapping_only",
+    }
