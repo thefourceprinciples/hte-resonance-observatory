@@ -84,7 +84,8 @@ CANONICAL_DOSSIERS: dict[str, dict] = {
     },
 }
 
-_Z_TO_SYMBOL: dict[int, str] = {meta: sym for sym, meta in ELEMENT_TABLE.items()}
+_Z_TO_SYMBOL: dict[int, str] = {meta[0]: sym for sym, meta in ELEMENT_TABLE.items()}
+
 
 
 def fifth_ladder_from_z(root_z: int, steps: int = 6) -> list[dict]:
