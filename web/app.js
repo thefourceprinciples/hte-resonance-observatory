@@ -1,4 +1,4 @@
-const RAW_EL_A = [
+const RAW_EL_A = Array.of(
   "E0:0:0:0:0:0:sub:None (zero-nucleon substrate)",
   "H:1:1:1:2.2:1.008:gas:1H (stable)|2H (stable)|3H (radio)",
   "He:2:18:2:0:4.003:gas:4He (stable)|3He (stable)",
@@ -29,8 +29,8 @@ const RAW_EL_A = [
   "Co:27:9:9:1.88:58.933:solid:59Co (stable)|60Co (radio)",
   "Ni:28:10:10:1.91:58.693:solid:58Ni (stable)|60Ni (stable)|62Ni (stable)|61Ni (stable)|64Ni (stable)",
   "Cu:29:11:11:1.9:63.546:solid:63Cu (stable)|65Cu (stable)"
-];
-const RAW_EL_B = [
+);
+const RAW_EL_B = Array.of(
   "Zn:30:12:2:1.65:65.38:solid:64Zn (stable)|66Zn (stable)|68Zn (stable)|67Zn (stable)|70Zn (stable)",
   "Ga:31:13:3:1.81:69.723:solid:69Ga (stable)|71Ga (stable)",
   "Ge:32:14:4:2.01:72.630:solid:74Ge (stable)|72Ge (stable)|70Ge (stable)|73Ge (stable)|76Ge (primordial)",
@@ -62,8 +62,8 @@ const RAW_EL_B = [
   "Ce:58:3:4:1.12:140.12:solid:140Ce (stable)|142Ce (stable)|138Ce (stable)",
   "Pr:59:3:3:1.13:140.91:solid:141Pr (stable)",
   "Nd:60:3:3:1.14:144.24:solid:142Nd (stable)|144Nd (primordial)|146Nd (stable)|143Nd (stable)"
-];
-const RAW_EL_C = [
+);
+const RAW_EL_C = Array.of(
   "Pm:61:3:3:1.13:145:synthetic:145Pm (radio)|147Pm (radio)",
   "Sm:62:3:3:1.17:150.36:solid:152Sm (stable)|154Sm (stable)|147Sm (primordial)|149Sm (stable)",
   "Eu:63:3:2:1.2:151.96:solid:153Eu (stable)|151Eu (primordial)",
@@ -95,8 +95,8 @@ const RAW_EL_C = [
   "Ac:89:3:3:1.1:227:solid:227Ac (radio)",
   "Th:90:3:4:1.3:232.04:solid:232Th (primordial)|230Th (radio)",
   "Pa:91:3:5:1.5:231.04:solid:231Pa (primordial)"
-];
-const RAW_EL_D = [
+);
+const RAW_EL_D = Array.of(
   "U:92:3:6:1.38:238.03:solid:238U (primordial)|235U (primordial)|234U (radio)",
   "Np:93:3:5:1.36:237:synthetic:237Np (radio)",
   "Pu:94:3:4:1.28:244:synthetic:244Pu (radio)|239Pu (radio)|240Pu (radio)|238Pu (radio)",
@@ -124,33 +124,33 @@ const RAW_EL_D = [
   "Lv:116:16:6:2:293:synthetic:293Lv (radio)|291Lv (radio)",
   "Ts:117:17:7:2.2:294:synthetic:294Ts (radio)|293Ts (radio)",
   "Og:118:18:8:2.2:294:synthetic:294Og (radio)"
-];
+);
 
-const ELEMENTS = [...RAW_EL_A, ...RAW_EL_B, ...RAW_EL_C, ...RAW_EL_D].map(s => {
+const ELEMENTS = RAW_EL_A.concat(RAW_EL_B, RAW_EL_C, RAW_EL_D).map(s => {
   const p = s.split(":");
-  return [p.at(0), Number(p.at(1)), Number(p.at(2)), Number(p.at(3)), Number(p.at(4)), Number(p.at(5)), p.at(6), p.at(7)];
+  return Array.of(p.at(0), Number(p.at(1)), Number(p.at(2)), Number(p.at(3)), Number(p.at(4)), Number(p.at(5)), p.at(6), p.at(7));
 });
-const Z = Object.fromEntries(ELEMENTS.map(e => [e.at(0), e.at(1)]));
-const Z_TO_SYM = Object.fromEntries(ELEMENTS.map(e => [e.at(1), e.at(0)]));
-const GRP = Object.fromEntries(ELEMENTS.map(e => [e.at(0), e.at(2)]));
-const VAL = Object.fromEntries(ELEMENTS.map(e => [e.at(0), e.at(3)]));
-const CHI = Object.fromEntries(ELEMENTS.map(e => [e.at(0), e.at(4)]));
-const MASS = Object.fromEntries(ELEMENTS.map(e => [e.at(0), e.at(5)]));
-const PHASE = Object.fromEntries(ELEMENTS.map(e => [e.at(0), e.at(6)]));
-const ISOTOPES = Object.fromEntries(ELEMENTS.map(e => [e.at(0), e.at(7).split("|")]));
-const PITCH = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
-const PC_COLORS = ['#00bfff','#ff55aa','#7cff00','#a020f0','#ffd700','#ff6b6b','#00ffcc','#ffaa00','#b388ff','#69f0ae','#ff80ab','#40c4ff'];
-const MODES = [
-  { name:'Ionian', intervals:[0,2,4,5,7,9,11], char:11, third:4, fifth:7, field:'Structural Clarity Field' },
-  { name:'Dorian', intervals:[0,2,3,5,7,9,10], char:9, third:3, fifth:7, field:'Restoration Field' },
-  { name:'Phrygian', intervals:[0,1,3,5,7,8,10], char:1, third:3, fifth:7, field:'Boundary / Threshold Field' },
-  { name:'Lydian', intervals:[0,2,4,6,7,9,11], char:6, third:4, fifth:7, field:'Expansion / Levitation Field' },
-  { name:'Mixolydian', intervals:[0,2,4,5,7,9,10], char:10, third:4, fifth:7, field:'Continuity Field' },
-  { name:'Aeolian', intervals:[0,2,3,5,7,8,10], char:8, third:3, fifth:7, field:'Memory / Gravitational Field' },
-  { name:'Locrian', intervals:[0,1,3,5,6,8,10], char:6, third:3, fifth:6, field:'Fracture / Collapse Field' }
-];
+const Z = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(1))));
+const Z_TO_SYM = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(1), e.at(0))));
+const GRP = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(2))));
+const VAL = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(3))));
+const CHI = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(4))));
+const MASS = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(5))));
+const PHASE = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(6))));
+const ISOTOPES = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(7).split("|"))));
+const PITCH = Array.of('C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B');
+const PC_COLORS = Array.of('#00bfff','#ff55aa','#7cff00','#a020f0','#ffd700','#ff6b6b','#00ffcc','#ffaa00','#b388ff','#69f0ae','#ff80ab','#40c4ff');
+const MODES = Array.of(
+  { name:'Ionian', intervals:Array.of(0,2,4,5,7,9,11), char:11, third:4, fifth:7, field:'Structural Clarity Field' },
+  { name:'Dorian', intervals:Array.of(0,2,3,5,7,9,10), char:9, third:3, fifth:7, field:'Restoration Field' },
+  { name:'Phrygian', intervals:Array.of(0,1,3,5,7,8,10), char:1, third:3, fifth:7, field:'Boundary / Threshold Field' },
+  { name:'Lydian', intervals:Array.of(0,2,4,6,7,9,11), char:6, third:4, fifth:7, field:'Expansion / Levitation Field' },
+  { name:'Mixolydian', intervals:Array.of(0,2,4,5,7,9,10), char:10, third:4, fifth:7, field:'Continuity Field' },
+  { name:'Aeolian', intervals:Array.of(0,2,3,5,7,8,10), char:8, third:3, fifth:7, field:'Memory / Gravitational Field' },
+  { name:'Locrian', intervals:Array.of(0,1,3,5,6,8,10), char:6, third:3, fifth:6, field:'Fracture / Collapse Field' }
+);
 
-const STATE_CATALOG = [
+const STATE_CATALOG = Array.of(
   { id:'SUBSTRATE_ZERO', label:'Substrate Zero', color:'#ffffff', example:'E0', kid:'The Quiet Blank Canvas — zero-atom background field.', eng:'Null-reference substrate (Z=0, π=0, ω=0) for baseline calibration.' },
   { id:'SINGLET_SEED', label:'Origin / Singlet', color:'#00bfff', example:'H', kid:'Origin Seed — first note of matter before constraint.', eng:'Single pitch-class occupancy; Origin Carrier seed awaiting boundary or bonding relation.' },
   { id:'GOLD_ANCHOR', label:'Gold Anchor', color:'#ffd700', example:'SiO2', kid:'The Rock-Solid Bridge — locked by a strong musical fifth.', eng:'Fifth-anchored harmonic lock; coherent energy/proton transfer or high-symmetry stability.' },
@@ -158,7 +158,7 @@ const STATE_CATALOG = [
   { id:'ARMOR_SHIELD', label:'Armor Shield', color:'#ff3b3b', example:'Fe2O3', kid:'The Heavy Fortress Wall — dense boundary shield.', eng:'Subdominant mass clustering; boundary strength (negative when embrittled by interstitial H).' },
   { id:'SHADOW_PHASE', label:'Shadow Phase', color:'#a020f0', example:'GaAs', kid:'The Hidden Twin — stored, trapped, or interstitial phase.', eng:'Interstitial/hydride storage or metastable band-gap switching hidden inside a host lattice.' },
   { id:'PLASMA_FLUX', label:'Plasma Flux', color:'#ff8c00', example:'YBa2Cu3O7', kid:'The Lightning Cloud — super-excited ionized flux.', eng:'High-entropy multi-mode excitation; ionized plasma seed or superionic transport.' }
-];
+);
 
 const BOUNDARY_PROFILES = {
   free_bulk: { label:'Free Bulk', stateOverride:null, risk:'Low bulk interface stress; watch gas diffusivity / leakage on light carriers.', remainder:'Visible gas/bulk mass; minimal grain-boundary constraint.' },
@@ -177,13 +177,13 @@ const CANONICAL_DOSSIERS = {
     constraints:'Boundary-free reference medium; serves as the ambient carrier baseline (u=0, ∇p=0).',
     thermal:'Unperturbed baseline field without internal phonon or kinetic degrees of freedom.',
     energy:'Ambient carrier medium through which discrete atomic waves (Z ≥ 1) propagate and interfere.',
-    storage:['1. Unbounded reference medium (calibration baseline only)'],
-    cuc:['E0 → silent carrier floor before boundary conditions','E0 + x·H → emergence of discrete baryonic matter out of substrate'],
-    states:['Origin: baseline — pre-nucleonic zero point prior to Z=1.','Gold: null — unexcited medium.','Shadow: null — no lattice structure.','Plasma: null — un-ionized reference floor.','Armor: null — zero boundary mass.','Piezo: null — zero stress gradient.','Fifth Ladder: E0 Substrate calibration origin.'],
-    iface:['Provides continuous reference medium enabling field gradients and standing waves'],
-    fails:['None — idealized reference substrate'],
-    measure:['Baseline calibration: background noise floor, zero-point offset'],
-    search:['1. Emergence curves (E0 + x·H, E0 + x·O) tracking condensation into matter'],
+    storage:Array.of('1. Unbounded reference medium (calibration baseline only)'),
+    cuc:Array.of('E0 → silent carrier floor before boundary conditions','E0 + x·H → emergence of discrete baryonic matter out of substrate'),
+    states:Array.of('Origin: baseline — pre-nucleonic zero point prior to Z=1.','Gold: null — unexcited medium.','Shadow: null — no lattice structure.','Plasma: null — un-ionized reference floor.','Armor: null — zero boundary mass.','Piezo: null — zero stress gradient.','Fifth Ladder: E0 Substrate calibration origin.'),
+    iface:Array.of('Provides continuous reference medium enabling field gradients and standing waves'),
+    fails:Array.of('None — idealized reference substrate'),
+    measure:Array.of('Baseline calibration: background noise floor, zero-point offset'),
+    search:Array.of('1. Emergence curves (E0 + x·H, E0 + x·O) tracking condensation into matter'),
     visible:'Z=0, Mass=0 u, Valence=0, Pauling χ=0.00, HTE (0, 0).',
     hidden:'Ambient continuous medium required to define gradients, vorticity, and wave propagation.',
     fourcePhrase:'Element-0 is the silence that makes the first note audible.',
@@ -198,20 +198,20 @@ const CANONICAL_DOSSIERS = {
     constraints:'Pressure, temperature, confinement, surface catalysis, metal lattice compatibility, leakage & ignition control.',
     thermal:'Cryogenic liquid below 20.27 K (-252.9°C); high energy per mass, low volumetric density as gas.',
     energy:'High mobility energy carrier; clean oxidation to H2O; proton conductor in PEM fuel cells; fusion feedstock.',
-    storage:['1. Compressed gas','2. Cryogenic liquid','3. Metal hydride (Shadow State)','4. Chemical carrier','5. Adsorbent material','6. Geological storage','7. Pipeline distribution'],
-    cuc:['H2 gas → fuel / carrier / leakage risk','H+ → proton / acid / conductor participant','H- → hydride / reducer','D → heavy isotope / fusion platform','Plasma H → stellar / ionized state','Metal-H → interstitial storage / embrittlement'],
-    states:['Origin: very high — Z=1, first pitch-class root and lattice seed.','Gold: conditional — active in fuel cells, PEM proton transfer, and redox pathways.','Shadow: high — stored, trapped, or absorbed as interstitial hydrides.','Plasma: very high — simplest ionized plasma and fusion seed.','Armor: low / negative at interfaces — weakens metal grain boundaries via embrittlement.','Piezo: indirect — converts pressure/proton transport stress inside host lattices.','Fifth Ladder: canonical root — H → O → P → Ti → Cu → Kr.'],
-    iface:['Adsorbs onto surfaces & dissociates from H2 into atomic H','Diffuses rapidly into metals & occupies interstitial sites','Forms metal hydrides & weakens grain boundaries','Participates in proton conduction & alters local electronic structure'],
-    fails:['Hydrogen Embrittlement (reduces tensile strength, ductility & fracture toughness)','Leakage & Permeation through seals due to tiny molecular radius','Flammability / Ignition Risk in air (~500°C autoignition)','Cryogenic Risk (boil-off & thermal contraction near -252.9°C)'],
-    measure:['Basic: purity, isotope ratio, molecular form, pressure, temperature','Storage: leak rate, permeation rate, adsorption capacity, hysteresis','Compatibility: embrittlement response, crack growth rate, fatigue life','Energy/Interface: reaction enthalpy, proton conductivity, plasma threshold'],
-    search:['1. Fifth Ladder materials (H → O → P → Ti → Cu → Kr)','2. Hydride storage systems (Shadow/Armor balance)','3. Proton conductors (H + ceramic/polymer matrices)','4. Embrittlement-resistant alloys & hydrogen-safe barrier coatings','5. Optical/electrical/mechanical H2 sensors'],
+    storage:Array.of('1. Compressed gas','2. Cryogenic liquid','3. Metal hydride (Shadow State)','4. Chemical carrier','5. Adsorbent material','6. Geological storage','7. Pipeline distribution'),
+    cuc:Array.of('H2 gas → fuel / carrier / leakage risk','H+ → proton / acid / conductor participant','H- → hydride / reducer','D → heavy isotope / fusion platform','Plasma H → stellar / ionized state','Metal-H → interstitial storage / embrittlement'),
+    states:Array.of('Origin: very high — Z=1, first pitch-class root and lattice seed.','Gold: conditional — active in fuel cells, PEM proton transfer, and redox pathways.','Shadow: high — stored, trapped, or absorbed as interstitial hydrides.','Plasma: very high — simplest ionized plasma and fusion seed.','Armor: low / negative at interfaces — weakens metal grain boundaries via embrittlement.','Piezo: indirect — converts pressure/proton transport stress inside host lattices.','Fifth Ladder: canonical root — H → O → P → Ti → Cu → Kr.'),
+    iface:Array.of('Adsorbs onto surfaces & dissociates from H2 into atomic H','Diffuses rapidly into metals & occupies interstitial sites','Forms metal hydrides & weakens grain boundaries','Participates in proton conduction & alters local electronic structure'),
+    fails:Array.of('Hydrogen Embrittlement (reduces tensile strength, ductility & fracture toughness)','Leakage & Permeation through seals due to tiny molecular radius','Flammability / Ignition Risk in air (~500°C autoignition)','Cryogenic Risk (boil-off & thermal contraction near -252.9°C)'),
+    measure:Array.of('Basic: purity, isotope ratio, molecular form, pressure, temperature','Storage: leak rate, permeation rate, adsorption capacity, hysteresis','Compatibility: embrittlement response, crack growth rate, fatigue life','Energy/Interface: reaction enthalpy, proton conductivity, plasma threshold'),
+    search:Array.of('1. Fifth Ladder materials (H → O → P → Ti → Cu → Kr)','2. Hydride storage systems (Shadow/Armor balance)','3. Proton conductors (H + ceramic/polymer matrices)','4. Embrittlement-resistant alloys & hydrogen-safe barrier coatings','5. Optical/electrical/mechanical H2 sensors'),
     visible:'Smallest element, light diatomic gas (H2), simple 1s1 structure.',
     hidden:'Embrittlement, seal permeation, storage difficulty, plasma potential, protonic transport, isotope divergence.',
     fourcePhrase:'Hydrogen is the first note of matter, but it only becomes a song under constraint.',
     lock:'Hydrogen = Origin Carrier: the first HTE note, the smallest material actor, and the most boundary-sensitive seed of energy, storage, plasma, and lattice interaction.'
   }
 };
-let current = null, prevSnapshot = null, atomHistory = [];
+let current = null, prevSnapshot = null, atomHistory = Array.of();
 let pinnedElement = null, activeDossierSym = 'H';
 const discovered = new Set();
 
@@ -224,9 +224,9 @@ const isNum = tok => /^(\d+\.\d+|\d+)$/.test(tok);
 function parseFormula(formula){
   const clean = formula.trim();
   if(!clean) throw new Error('Formula cannot be empty.');
-  const tokens = clean.match(/(E0|[A-Z][a-z]?|\(|\)|\d+\.\d+|\d+)/g) || [];
+  const tokens = clean.match(/(E0|[A-Z][a-z]?|\(|\)|\d+\.\d+|\d+)/g) || Array.of();
   if(tokens.join('') !== clean) throw new Error('Unsupported formula syntax.');
-  const stack = [new Map()];
+  const stack = Array.of(new Map());
   const add = (map, key, n) => map.set(key, (map.get(key)||0)+n);
   for(let i=0; i<tokens.length; i++){
     const token = tokens.at(i);
@@ -261,7 +261,7 @@ function classifyState(unique, nodes, boundary){
   if(unique.length >= 4 && hasSemitone(unique)) return 'PLASMA_FLUX';
   if(hasTritone(unique)) return 'PIEZO_TENSION';
   if(unique.includes(7)) return 'GOLD_ANCHOR';
-  if(unique.length >= 3 && unique.some(p => [0,5,8,10].includes(p))) return 'ARMOR_SHIELD';
+  if(unique.length >= 3 && unique.some(p => Array.of(0,5,8,10).includes(p))) return 'ARMOR_SHIELD';
   return 'SHADOW_PHASE';
 }
 
@@ -276,13 +276,13 @@ function computeCHTE(nodes){
 
 function fifthLadder(rootZ){
   if(!rootZ || rootZ < 1) return 'E0 Substrate';
-  const chain = [];
+  const chain = Array.of();
   for(let n=0; n<6; n++){ const zStep = rootZ + 7*n; if(Z_TO_SYM[zStep]) chain.push(Z_TO_SYM[zStep]); }
   return chain.join(' → ');
 }
 function getElementDossier(sym){
   const z = Z[sym] ?? 0, grp = GRP[sym] ?? 0, val = VAL[sym] ?? 0, chi = CHI[sym] ?? 0;
-  const mass = MASS[sym] ?? 0, phase = PHASE[sym] ?? 'solid', isos = ISOTOPES[sym] || [];
+  const mass = MASS[sym] ?? 0, phase = PHASE[sym] ?? 'solid', isos = ISOTOPES[sym] || Array.of();
   const pRaw = mod12(z), pGrp = groupPi(grp), oct = z === 0 ? 0 : Math.floor((z - 1) / 12) + 1;
   const ladder = fifthLadder(z);
   const base = { sym, z, grp, val, chi, mass, phase, isos, pRaw, pGrp, oct, ladder };
@@ -299,9 +299,9 @@ function getElementDossier(sym){
     constraints: isGas ? 'Pressure, cryogenic/compressed containment, seal permeation & leak control.' : isSyn ? 'Nuclear half-life, radiation shielding & remote hot-cell containment.' : 'Temperature, surface oxidation, grain-boundary stress & lattice compatibility.',
     thermal: isGas ? 'Cryogenic liquid below boiling point; low volumetric gas density.' : isMetal ? 'Conductive crystalline solid; thermal expansion & creep under high load.' : 'Directional covalent/dielectric thermal transport; watch thermal shock.',
     energy: chi >= 2.5 ? 'High-electronegativity charge acceptor / redox & dielectric actor.' : grp === 1 ? 'High-mobility electron/ion donor (battery & plasma carrier).' : 'Structural, catalytic, or electronic network host.',
-    storage: isGas ? ['1. Compressed gas cylinders','2. Cryogenic liquid','3. Adsorbent/clathrate matrix','4. Pipeline distribution'] : isSyn ? ['1. Shielded radiological containment','2. Target foil / isotopic trap'] : ['1. Bulk crystalline ingot / powder','2. Passivated surface / inert atmosphere','3. Alloyed or ceramic host matrix'],
-    cuc:[`Bulk ${sym} → baseline ${phase} phase`,`Ionized ${sym} → charge-transfer / plasma actor`,`Interface ${sym} → boundary-coupled catalyst or lattice modifier`,`Isotopic ${isos.at(0)||sym} → mass-shifted phonon & nuclear response`],
-    states:[
+    storage: isGas ? Array.of('1. Compressed gas cylinders','2. Cryogenic liquid','3. Adsorbent/clathrate matrix','4. Pipeline distribution') : isSyn ? Array.of('1. Shielded radiological containment','2. Target foil / isotopic trap') : Array.of('1. Bulk crystalline ingot / powder','2. Passivated surface / inert atmosphere','3. Alloyed or ceramic host matrix'),
+    cuc:Array.of(`Bulk ${sym} → baseline ${phase} phase`,`Ionized ${sym} → charge-transfer / plasma actor`,`Interface ${sym} → boundary-coupled catalyst or lattice modifier`,`Isotopic ${isos.at(0)||sym} → mass-shifted phonon & nuclear response`),
+    states:Array.of(
       `Origin: ${z<=1?'very high':'low'} — Z=${z}, octave layer ${oct}.`,
       `Gold: ${pGrp===7||pRaw===7?'high — fifth-anchored harmonic lock':'conditional — emerges in coherent transfer lattices'}.`,
       `Shadow: ${grp>=3&&grp<=12?'high — d-block interstitial/hydride host candidate':'conditional — interface or defect trapped'}.`,
@@ -309,11 +309,11 @@ function getElementDossier(sym){
       `Armor: ${isMetal&&grp>=4?'high — structural metallic matrix':'conditional — depends on grain-boundary compatibility'}.`,
       `Piezo: ${chi>=2.5||grp===4||grp===17?'high — polar electronegativity gradient':'indirect — stress coupling in asymmetric hosts'}.`,
       `Fifth Ladder: ${ladder}`
-    ],
-    iface:[`Forms group-${grp} surface & lattice bonds (Pauling χ=${chi.toFixed(2)})`,`Modulates local electronic density & boundary charge transfer`],
-    fails:[`Interface reactivity, thermal mismatch, or defect trapping under extreme pressure/temperature`],
-    measure:['Basic: purity, isotope ratio, stoichiometry, pressure, temperature','Compatibility: grain-boundary stability, corrosion/oxidation rate','Interface: surface adsorption energy, diffusion coefficient'],
-    search:[`1. Fifth Ladder pathway (${ladder})`,`2. Binary/ternary oxides & hydrides with Δχ contrast`,`3. Boundary-stabilized coatings & alloy hosts`],
+    ),
+    iface:Array.of(`Forms group-${grp} surface & lattice bonds (Pauling χ=${chi.toFixed(2)})`,`Modulates local electronic density & boundary charge transfer`),
+    fails:Array.of(`Interface reactivity, thermal mismatch, or defect trapping under extreme pressure/temperature`),
+    measure:Array.of('Basic: purity, isotope ratio, stoichiometry, pressure, temperature','Compatibility: grain-boundary stability, corrosion/oxidation rate','Interface: surface adsorption energy, diffusion coefficient'),
+    search:Array.of(`1. Fifth Ladder pathway (${ladder})`,`2. Binary/ternary oxides & hydrides with Δχ contrast`,`3. Boundary-stabilized coatings & alloy hosts`),
     visible:`Z=${z}, Mass=${mass} u, Group ${grp}, Valence=${val}, Pauling χ=${chi.toFixed(2)}, STP=${phase}.`,
     hidden:`Isotope mass divergence (${isos.join('/')}), interface charge transfer & boundary-dependent phase shifts.`,
     fourcePhrase:`${sym} is note ${PITCH.at(pRaw)} in octave ${oct}, revealing its full engineering song only under boundary constraint.`,
@@ -382,7 +382,7 @@ function evaluateModalField(normH){
 }
 function buildSignature(formula, mappingMode='group', weightMode='stoich', boundary='free_bulk'){
   const composition = parseFormula(formula);
-  const chis = [];
+  const chis = Array.of();
   let totalAtoms = 0, totalVal = 0, chiSum = 0;
 
   const nodes = Object.entries(composition).sort((a,b)=>Z[a.at(0)]-Z[b.at(0)]).map(([symbol,count]) => {
@@ -414,7 +414,7 @@ function buildSignature(formula, mappingMode='group', weightMode='stoich', bound
   return {
     entry_id:`MATLAS-${formula.trim().toUpperCase()}`, status:'canonical_draft', formula:formula.trim(),
     composition, mapping_mode:mappingMode, weight_mode:weightMode, boundary_context:boundary,
-    hte_coordinate: rootNode ? [rootNode.pitch_class, rootNode.octave_band] :,
+    hte_coordinate: rootNode ? Array.of(rootNode.pitch_class, rootNode.octave_band) : Array.of(0,0),
     c_hte_unison: computeCHTE(nodes),
     fifth_ladder: fifthLadder(rootNode ? rootNode.atomic_number : 0),
     nodes, pitch_class_histogram:histogram, overlay_state:st,
@@ -456,20 +456,20 @@ function renderSignature(sig, actionNote=''){
     const arrow = df > 0.001 ? '↑' : df < -0.001 ? '↓' : '→';
     $('deltaBanner').innerHTML = `${actionNote} &nbsp;|&nbsp; State: <strong>${prevSnapshot.state}</strong> → <strong>${sig.overlay_state}</strong> &nbsp;|&nbsp; C_HTE: <strong>${sig.c_hte_unison.toFixed(2)}</strong> &nbsp;|&nbsp; Fource: <strong>${mf.fource_lock.toFixed(3)} (${arrow})</strong>`;
   }
-  [...document.querySelectorAll('.grid button')].forEach((b,i)=>b.classList.toggle('active', sig.nodes.some(n=>n.atomic_number===i)));
+  Array.from(document.querySelectorAll('.grid button')).forEach((b,i)=>b.classList.toggle('active', sig.nodes.some(n=>n.atomic_number===i)));
 }
 function mapFormula(actionNote=''){
   try { renderSignature(buildSignature($('formula').value, $('modeSelect').value, $('weightSelect').value, $('boundarySelect').value), actionNote); $('log').classList.remove('error'); }
   catch(err){ $('log').classList.add('error'); $('log').textContent = 'ERROR:\n- ' + err.message; }
 }
-function loadFormula(f){ atomHistory = []; $('formula').value = f; mapFormula(`Loaded preset <strong>${f}</strong>`); }
+function loadFormula(f){ atomHistory = Array.of(); $('formula').value = f; mapFormula(`Loaded preset <strong>${f}</strong>`); }
 function resetAll(){
-  current=null; prevSnapshot=null; atomHistory=[]; $('formula').value=''; $('selected').textContent='—';
+  current=null; prevSnapshot=null; atomHistory=Array.of(); $('formula').value=''; $('selected').textContent='—';
   $('fifthLadder').textContent='—'; $('polarityMetrics').textContent='—'; $('modalField').textContent='—';
   $('fourceScore').textContent='—'; $('interfaceRisk').textContent='—'; $('state').textContent='VOID'; $('state').style.color='#8a8a8a';
   $('stateExplain').textContent='Stack purged — click any element tile below to start a fresh experiment!';
   $('deltaBanner').textContent='Stack purged. Ready for new atoms.';
-  [...document.querySelectorAll('.grid button')].forEach(b=>b.classList.remove('active'));
+  Array.from(document.querySelectorAll('.grid button')).forEach(b=>b.classList.remove('active'));
 }
 
 function formulaFromHistory(hist){
@@ -496,7 +496,7 @@ function undoLast(){
 }
 
 function captureAtlas(){ if(!current) return; const mf=current.modal_field; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.entry_id} (${current.boundary_context}) → ${current.overlay_state} | C_HTE=${current.c_hte_unison} | Ladder: ${current.fifth_ladder} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}]`; }
-function downloadLedger(){ if(!current) return; const blob=new Blob([JSON.stringify({ ...current, active_element_dossier: getElementDossier(activeDossierSym) },null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${current.entry_id.toLowerCase()}.json`; a.click(); }
+function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify({ ...current, active_element_dossier: getElementDossier(activeDossierSym) },null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${current.entry_id.toLowerCase()}.json`; a.click(); }
 function sonify(){
   if(!current) mapFormula();
   if(!current) return;
@@ -547,7 +547,7 @@ function drawDopingCurve(activeX = Number($('dopeSlider')?.value || 0.9)){
   const dctx = dc.getContext('2d'), w = dc.width, h = dc.height;
   dctx.clearRect(0, 0, w, h);
   const base = ($('dopeBase')?.value || 'YBa2Cu3O6').trim(), el = ($('dopeEl')?.value || 'O').trim();
-  const mode = $('modeSelect').value, weight = $('weightSelect').value, boundary = $('boundarySelect').value, pts = [];
+  const mode = $('modeSelect').value, weight = $('weightSelect').value, boundary = $('boundarySelect').value, pts = Array.of();
   for(let i = 0; i <= 40; i++){
     const x = i * 0.05;
     try { const sig = buildSignature(buildDopedFormula(base, el, x), mode, weight, boundary); pts.push({ x, f: sig.modal_field.fource_lock }); }
@@ -571,7 +571,7 @@ function drawDopingCurve(activeX = Number($('dopeSlider')?.value || 0.9)){
 function applyDoping(val){
   const x = Number(val); $('dopeVal').textContent = x.toFixed(2);
   const base = ($('dopeBase')?.value || 'YBa2Cu3O6').trim(), el = ($('dopeEl')?.value || 'O').trim();
-  atomHistory = []; $('formula').value = buildDopedFormula(base, el, x);
+  atomHistory = Array.of(); $('formula').value = buildDopedFormula(base, el, x);
   mapFormula(`Doped <strong>${base} + ${x.toFixed(2)} ${el}</strong>`); drawDopingCurve(x);
 }
 function loadDopingPreset(base, el, x){ $('dopeBase').value = base; $('dopeEl').value = el; $('dopeSlider').value = x; applyDoping(x); }
@@ -597,5 +597,5 @@ function draw(pcs, st){
     ctx.fillStyle=active?'#fff':(isTonic?'#ffd700':'#777'); ctx.font=`${12*devicePixelRatio}px monospace`; ctx.fillText(PITCH.at(p),x+14*devicePixelRatio,y+4*devicePixelRatio);
   }
 }
-function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):[]; draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
+function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):Array.of(); draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
 renderElementDossier('H', true); updateDiscoveryUI(); mapFormula(); drawDopingCurve(); loop();
