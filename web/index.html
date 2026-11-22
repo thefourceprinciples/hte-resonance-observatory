@@ -66,13 +66,20 @@
       <span><i class="ring-tonic"></i> Gold Halo = Inferred Modal Tonic</span>
     </div>
     <div class="delta-banner" id="deltaBanner">Stack atoms or slide fractional doping below to watch Fource Lock evolve.</div>
-    <div class="doping-box">
+        <div class="doping-box">
       <div class="doping-row">
         <strong>Doping Sweep:</strong>
-        <span>Base:</span><input id="dopeBase" value="YBa2Cu3O6" style="max-width:115px;padding:4px 7px;" onchange="drawDopingCurve()" />
-        <span>+ Dopant:</span><input id="dopeEl" value="O" style="max-width:46px;padding:4px 7px;text-align:center;" onchange="drawDopingCurve()" />
+        <span>Base:</span><input id="dopeBase" value="YBa2Cu3O6" style="max-width:110px;padding:4px 7px;" onchange="drawDopingCurve()" />
+        <span>+ Dopant:</span><input id="dopeEl" value="O" style="max-width:44px;padding:4px 7px;text-align:center;" onchange="drawDopingCurve()" />
         <span>x = <strong id="dopeVal" style="color:var(--accent)">0.90</strong></span>
         <input type="range" id="dopeSlider" min="0" max="2" step="0.05" value="0.90" oninput="applyDoping(this.value)" />
+      </div>
+      <div class="doping-row" style="gap:5px;">
+        <span style="color:var(--muted)">Presets:</span>
+        <button style="padding:3px 7px;font-size:.68rem;" onclick="loadDopingPreset('YBa2Cu3O6','O',0.90)">YBCO + x·O (Cuprate)</button>
+        <button style="padding:3px 7px;font-size:.68rem;" onclick="loadDopingPreset('BaTiO2','O',1.00)">BaTiO2 + x·O (Piezo)</button>
+        <button style="padding:3px 7px;font-size:.68rem;" onclick="loadDopingPreset('SiO1','O',1.00)">SiO + x·O (Oxide)</button>
+        <button style="padding:3px 7px;font-size:.68rem;" onclick="loadDopingPreset('GaAs','In',0.25)">GaAs + x·In (Semiconductor)</button>
       </div>
       <canvas id="dopingChart" aria-label="Fource Lock doping phase curve"></canvas>
     </div>
