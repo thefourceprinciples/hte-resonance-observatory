@@ -1,6 +1,7 @@
 const RAW_EL = "E0:0:0:0:0,H:1:1:1:2.2,He:2:18:2:0,Li:3:1:1:0.98,Be:4:2:2:1.57,B:5:13:3:2.04,C:6:14:4:2.55,N:7:15:5:3.04,O:8:16:6:3.44,F:9:17:7:3.98,Ne:10:18:8:0,Na:11:1:1:0.93,Mg:12:2:2:1.31,Al:13:13:3:1.61,Si:14:14:4:1.9,P:15:15:5:2.19,S:16:16:6:2.58,Cl:17:17:7:3.16,Ar:18:18:8:0,K:19:1:1:0.82,Ca:20:2:2:1,Sc:21:3:3:1.36,Ti:22:4:4:1.54,V:23:5:5:1.63,Cr:24:6:6:1.66,Mn:25:7:7:1.55,Fe:26:8:8:1.83,Co:27:9:9:1.88,Ni:28:10:10:1.91,Cu:29:11:11:1.9,Zn:30:12:2:1.65,Ga:31:13:3:1.81,Ge:32:14:4:2.01,As:33:15:5:2.18,Se:34:16:6:2.55,Br:35:17:7:2.96,Kr:36:18:8:3,Rb:37:1:1:0.82,Sr:38:2:2:0.95,Y:39:3:3:1.22,Zr:40:4:4:1.33,Nb:41:5:5:1.6,Mo:42:6:6:2.16,Tc:43:7:7:1.9,Ru:44:8:8:2.2,Rh:45:9:9:2.28,Pd:46:10:10:2.2,Ag:47:11:11:1.93,Cd:48:12:2:1.69,In:49:13:3:1.78,Sn:50:14:4:1.96,Sb:51:15:5:2.05,Te:52:16:6:2.1,I:53:17:7:2.66,Xe:54:18:8:2.6,Cs:55:1:1:0.79,Ba:56:2:2:0.89,La:57:3:3:1.1,Ce:58:3:4:1.12,Pr:59:3:3:1.13,Nd:60:3:3:1.14,Pm:61:3:3:1.13,Sm:62:3:3:1.17,Eu:63:3:2:1.2,Gd:64:3:3:1.2,Tb:65:3:3:1.1,Dy:66:3:3:1.22,Ho:67:3:3:1.23,Er:68:3:3:1.24,Tm:69:3:3:1.25,Yb:70:3:2:1.1,Lu:71:3:3:1.27,Hf:72:4:4:1.3,Ta:73:5:5:1.5,W:74:6:6:2.36,Re:75:7:7:1.9,Os:76:8:8:2.2,Ir:77:9:9:2.2,Pt:78:10:10:2.28,Au:79:11:11:2.54,Hg:80:12:2:2,Tl:81:13:3:1.62,Pb:82:14:4:2.33,Bi:83:15:5:2.02,Po:84:16:6:2,At:85:17:7:2.2,Rn:86:18:8:2.2,Fr:87:1:1:0.7,Ra:88:2:2:0.9,Ac:89:3:3:1.1,Th:90:3:4:1.3,Pa:91:3:5:1.5,U:92:3:6:1.38,Np:93:3:5:1.36,Pu:94:3:4:1.28,Am:95:3:3:1.13,Cm:96:3:3:1.28,Bk:97:3:3:1.3,Cf:98:3:3:1.3,Es:99:3:3:1.3,Fm:100:3:3:1.3,Md:101:3:3:1.3,No:102:3:2:1.3,Lr:103:3:3:1.3,Rf:104:4:4:1.3,Db:105:5:5:1.5,Sg:106:6:6:1.9,Bh:107:7:7:1.9,Hs:108:8:8:2,Mt:109:9:9:2,Ds:110:10:10:2,Rg:111:11:11:2.2,Cn:112:12:2:2,Nh:113:13:3:1.8,Fl:114:14:4:2,Mc:115:15:5:1.9,Lv:116:16:6:2,Ts:117:17:7:2.2,Og:118:18:8:2.2";
 const ELEMENTS = RAW_EL.split(",").map(s => { const p = s.split(":"); return Array.of(p.at(0), Number(p.at(1)), Number(p.at(2)), Number(p.at(3)), Number(p.at(4))); });
 const Z = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(1))));
+const Z_TO_SYM = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(1), e.at(0))));
 const GRP = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(2))));
 const VAL = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(3))));
 const CHI = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(4))));
@@ -19,18 +20,23 @@ const MODES = Array.of(
 
 const STATE_CATALOG = Array.of(
   { id:'SUBSTRATE_ZERO', label:'Substrate Zero', color:'#ffffff', example:'E0', kid:'The Quiet Blank Canvas — zero-atom background field.', eng:'Null-reference substrate (Z=0, π=0, ω=0) for baseline calibration.' },
-  { id:'SINGLET_SEED', label:'Singlet Seed', color:'#00bfff', example:'H', kid:'One Lone Atom Looking for a Friend — unbonded single note.', eng:'Single pitch-class occupancy; high Locrian tritone pull awaiting a bonding partner.' },
-  { id:'GOLD_ANCHOR', label:'Gold Anchor', color:'#ffd700', example:'SiO2', kid:'The Rock-Solid Bridge — locked by a strong musical fifth.', eng:'Anchored on pitch class 7 (G); candidate for high-symmetry bridging and low-friction stability.' },
-  { id:'PIEZO_TENSION', label:'Piezo Tension', color:'#7cff00', example:'BaTiO3', kid:'The Squeeze-and-Spark Spring — opposite poles pulling tight.', eng:'Contains a 6-semitone tritone axis; candidate for polar asymmetry and electromechanical stress coupling.' },
-  { id:'ARMOR_SHIELD', label:'Armor Shield', color:'#ff3b3b', example:'Fe2O3', kid:'The Heavy Fortress Wall — dense multi-atom shield.', eng:'3+ pitch classes anchored on {C, F, Ab, Bb}; candidate for mass damping and structural load absorption.' },
-  { id:'SHADOW_PHASE', label:'Shadow Phase', color:'#a020f0', example:'GaAs', kid:'The Hidden Twin — dark minor/phrygian phase shifter.', eng:'Tritone-free dark cluster without dominant fifth; candidate for metastable switching or band-gap hysteresis.' },
-  { id:'PLASMA_FLUX', label:'Plasma Flux', color:'#ff8c00', example:'YBa2Cu3O7', kid:'The Lightning Cloud — super-excited multi-note energy.', eng:'4+ pitch classes with adjacent semitone (m2) friction; candidate for high-entropy transport or catalytic flux.' }
+  { id:'SINGLET_SEED', label:'Origin / Singlet', color:'#00bfff', example:'H', kid:'Origin Seed — first note of matter before constraint.', eng:'Single pitch-class occupancy; Origin Carrier seed awaiting boundary or bonding relation.' },
+  { id:'GOLD_ANCHOR', label:'Gold Anchor', color:'#ffd700', example:'SiO2', kid:'The Rock-Solid Bridge — locked by a strong musical fifth.', eng:'Fifth-anchored harmonic lock; coherent energy/proton transfer or high-symmetry stability.' },
+  { id:'PIEZO_TENSION', label:'Piezo Tension', color:'#7cff00', example:'BaTiO3', kid:'The Squeeze-and-Spark Spring — opposite poles pulling tight.', eng:'Contains a 6-semitone tritone axis; polar stress-to-charge or lattice expansion coupling.' },
+  { id:'ARMOR_SHIELD', label:'Armor Shield', color:'#ff3b3b', example:'Fe2O3', kid:'The Heavy Fortress Wall — dense boundary shield.', eng:'Subdominant mass clustering; boundary strength (negative when embrittled by interstitial H).' },
+  { id:'SHADOW_PHASE', label:'Shadow Phase', color:'#a020f0', example:'GaAs', kid:'The Hidden Twin — stored, trapped, or interstitial phase.', eng:'Interstitial/hydride storage or metastable band-gap switching hidden inside a host lattice.' },
+  { id:'PLASMA_FLUX', label:'Plasma Flux', color:'#ff8c00', example:'YBa2Cu3O7', kid:'The Lightning Cloud — super-excited ionized flux.', eng:'High-entropy multi-mode excitation; ionized plasma seed or superionic transport.' }
 );
-let current = null;
-let prevSnapshot = null;
-let atomHistory = Array.of();
-const discovered = new Set();
+const BOUNDARY_PROFILES = {
+  free_bulk: { label:'Free Bulk', stateOverride:null, risk:'Low bulk interface stress; watch gas diffusivity / leakage on light carriers.', remainder:'Visible gas/bulk mass; minimal grain-boundary constraint.' },
+  metal_host: { label:'Metal Host / Hydride', stateOverride:'SHADOW_PHASE', risk:'HIGH EMBRITTLEMENT RISK: Interstitial H weakens metal grain boundaries & ductility.', remainder:'Hidden interstitial lattice loading & crack-growth remainder.' },
+  ceramic_matrix: { label:'Ceramic / Proton Matrix', stateOverride:'GOLD_ANCHOR', risk:'Thermal expansion mismatch & interface permeation at high temperature.', remainder:'Protonic transport channels & entropy redirection across dielectric walls.' },
+  cryo_pressure: { label:'Cryo / High-Pressure', stateOverride:'SHADOW_PHASE', risk:'Cryogenic contraction, boil-off pressure rise & seal permeation hazard.', remainder:'High-density confined phase under extreme thermal/pressure constraint.' },
+  plasma_excited: { label:'Plasma Excitation', stateOverride:'PLASMA_FLUX', risk:'Thermal wall load, ionization instability & confinement boundary erosion.', remainder:'Ionized collective plasma state exceeding neutral molecular bounds.' }
+};
 
+let current = null, prevSnapshot = null, atomHistory = Array.of();
+const discovered = new Set();
 const $ = id => document.getElementById(id);
 const mod12 = x => ((x % 12) + 12) % 12;
 const dist = (a,b) => { const d = Math.abs(a-b)%12; return d>6 ? 12-d : d; };
@@ -67,10 +73,11 @@ function parseFormula(formula){
 
 function hasTritone(u){ for(let i=0;i<u.length;i++) for(let j=i+1;j<u.length;j++) if(dist(u.at(i),u.at(j))===6) return true; return false; }
 function hasSemitone(u){ for(let i=0;i<u.length;i++) for(let j=i+1;j<u.length;j++) if(dist(u.at(i),u.at(j))===1) return true; return false; }
-
-function classifyState(unique, nodes){
+function classifyState(unique, nodes, boundary){
   if(!unique.length) return 'VOID';
   if(nodes.length === 1 && nodes.at(0).element === 'E0') return 'SUBSTRATE_ZERO';
+  const bp = BOUNDARY_PROFILES[boundary];
+  if(bp && bp.stateOverride && boundary !== 'free_bulk') return bp.stateOverride;
   if(unique.length === 1) return 'SINGLET_SEED';
   if(unique.length >= 4 && hasSemitone(unique)) return 'PLASMA_FLUX';
   if(hasTritone(unique)) return 'PIEZO_TENSION';
@@ -78,6 +85,23 @@ function classifyState(unique, nodes){
   if(unique.length >= 3 && unique.some(p => Array.of(0,5,8,10).includes(p))) return 'ARMOR_SHIELD';
   return 'SHADOW_PHASE';
 }
+
+function computeCHTE(nodes){
+  const pcs = nodes.flatMap(n => Array(Math.max(1, Math.round(n.count))).fill(n.pitch_class));
+  if(pcs.length < 2) return 1.0;
+  const W = { 0:1.0, 7:0.85, 5:0.75, 4:0.6, 3:0.55, 8:0.5, 9:0.5, 2:0.25, 10:0.25, 6:-0.5, 1:-0.6, 11:-0.6 };
+  let sum = 0, pairs = 0;
+  for(let i=0;i<pcs.length;i++) for(let j=i+1;j<pcs.length;j++){ sum += W[mod12(pcs.at(j)-pcs.at(i))] || 0; pairs++; }
+  return pairs > 0 ? Number((sum / pairs).toFixed(3)) : 1.0;
+}
+
+function fifthLadder(rootZ){
+  if(!rootZ || rootZ < 1) return 'E0 Substrate';
+  const chain = Array.of();
+  for(let n=0; n<6; n++){ const zStep = rootZ + 7*n; if(Z_TO_SYM[zStep]) chain.push(Z_TO_SYM[zStep]); }
+  return chain.join(' → ');
+}
+
 function evaluateModalField(normH){
   const normVal = Math.hypot(...normH);
   let best = { score:-1, tonic:0, mode:MODES.at(0), match:0, cModal:0, fource:0 };
@@ -103,8 +127,7 @@ function evaluateModalField(normH){
   }
   return best;
 }
-
-function buildSignature(formula, mappingMode='group', weightMode='stoich'){
+function buildSignature(formula, mappingMode='group', weightMode='stoich', boundary='free_bulk'){
   const composition = parseFormula(formula);
   const chis = Array.of();
   let totalAtoms = 0, totalVal = 0, chiSum = 0;
@@ -128,18 +151,26 @@ function buildSignature(formula, mappingMode='group', weightMode='stoich'){
   const histogram = {}; nodes.forEach(n => histogram[n.pitch_class] = (histogram[n.pitch_class]||0) + n.count);
   const unique = Object.keys(histogram).map(Number).sort((a,b)=>a-b);
   const modal = evaluateModalField(normH);
-  const st = classifyState(unique, nodes);
+  const st = classifyState(unique, nodes, boundary);
+  const rootNode = nodes.at(0);
 
   const deltaChi = chis.length >= 2 ? Number((Math.max(...chis) - Math.min(...chis)).toFixed(2)) : 0;
   const meanChi = totalAtoms > 0 ? Number((chiSum / totalAtoms).toFixed(2)) : 0;
   const valPerAtom = totalAtoms > 0 ? Number((totalVal / totalAtoms).toFixed(2)) : 0;
 
   return {
-    formula:formula.trim(), composition, mapping_mode:mappingMode, weight_mode:weightMode, nodes, pitch_class_histogram:histogram, overlay_state:st,
+    entry_id:`MATLAS-${formula.trim().toUpperCase()}`, status:'canonical_draft', formula:formula.trim(),
+    composition, mapping_mode:mappingMode, weight_mode:weightMode, boundary_context:boundary,
+    hte_coordinate: rootNode ? Array.of(rootNode.pitch_class, rootNode.octave_band) : Array.of(0,0),
+    c_hte_unison: computeCHTE(nodes),
+    fifth_ladder: fifthLadder(rootNode ? rootNode.atomic_number : 0),
+    nodes, pitch_class_histogram:histogram, overlay_state:st,
+    interface_profile: BOUNDARY_PROFILES[boundary] || BOUNDARY_PROFILES.free_bulk,
     physical:{ delta_chi:deltaChi, mean_chi:meanChi, val_per_atom:valPerAtom },
     modal_field:{ optimal_tonic:modal.tonic, optimal_tonic_name:PITCH.at(modal.tonic), optimal_mode:modal.mode.name, field_type:modal.mode.field, fource_lock:Number(modal.fource.toFixed(4)), c_modal:Number(modal.cModal.toFixed(4)) }
   };
 }
+
 function updateDiscoveryUI(){
   const box = $('discoveryBadges');
   box.innerHTML = `<span class="badge unlocked">Discovered: ${discovered.size} / ${STATE_CATALOG.length}</span>` +
@@ -149,41 +180,40 @@ function updateDiscoveryUI(){
 function renderSignature(sig, actionNote=''){
   if(current) prevSnapshot = { state: current.overlay_state, fource: current.modal_field.fource_lock, dchi: current.physical.delta_chi };
   current = sig;
-  const pcs = Object.keys(sig.pitch_class_histogram).map(Number).sort((a,b)=>a-b), mf = sig.modal_field, ph = sig.physical;
+  const mf = sig.modal_field, ph = sig.physical, ip = sig.interface_profile;
   const cat = STATE_CATALOG.find(s => s.id === sig.overlay_state);
   if(cat) discovered.add(cat.id);
   updateDiscoveryUI();
 
   const bondType = ph.delta_chi >= 1.7 ? 'Ionic' : ph.delta_chi >= 0.4 ? 'Polar Covalent' : 'Covalent / Metallic';
-  $('selected').textContent = sig.formula;
-  $('composition').textContent = sig.nodes.map(n => `${n.element}×${n.count} (Grp ${n.group}, χ=${n.chi} → ${n.pitch_name})`).join(' | ');
-  $('polarityMetrics').textContent = `Δχ = ${ph.delta_chi.toFixed(2)} (${bondType}) | Mean χ = ${ph.mean_chi.toFixed(2)} | Val/atom = ${ph.val_per_atom.toFixed(2)}`;
+  $('selected').textContent = `${sig.formula} → HTE (${sig.hte_coordinate.join(', ')}) | ${sig.nodes.map(n=>`${n.element}×${n.count}`).join(' ')}`;
+  $('fifthLadder').textContent = sig.fifth_ladder;
+  $('polarityMetrics').textContent = `Δχ = ${ph.delta_chi.toFixed(2)} (${bondType}) | Mean χ = ${ph.mean_chi.toFixed(2)} | Val = ${ph.val_per_atom.toFixed(2)}`;
   $('modalField').textContent = `${mf.optimal_tonic_name} ${mf.optimal_mode} (${mf.field_type})`;
-  $('fourceScore').textContent = `F = ${mf.fource_lock.toFixed(3)} | C = ${mf.c_modal.toFixed(3)}`;
-  $('classes').textContent = pcs.map(p=>p+'('+PITCH.at(p)+')').join(', ') || '—';
+  $('fourceScore').textContent = `C_HTE = ${sig.c_hte_unison >= 0 ? '+' : ''}${sig.c_hte_unison.toFixed(2)} | F = ${mf.fource_lock.toFixed(3)} | C_mod = ${mf.c_modal.toFixed(3)}`;
+  $('interfaceRisk').textContent = ip.risk;
   $('state').textContent = cat ? cat.label.toUpperCase() : sig.overlay_state;
   $('state').style.color = cat ? cat.color : '#00bfff';
   $('stateExplain').innerHTML = cat
-    ? `<strong>Kid View:</strong> ${cat.kid}<br><strong>Engineering Hypothesis (L2):</strong> ${cat.eng}`
+    ? `<strong>Kid View:</strong> ${cat.kid}<br><strong>Engineering Hypothesis (L2):</strong> ${cat.eng}<br><strong>Darkness Remainder:</strong> ${ip.remainder}`
     : 'Empty stack — click any element tile below to begin.';
 
   if(actionNote && prevSnapshot){
     const df = mf.fource_lock - prevSnapshot.fource;
     const arrow = df > 0.001 ? '↑' : df < -0.001 ? '↓' : '→';
-    $('deltaBanner').innerHTML = `${actionNote} &nbsp;|&nbsp; State: <strong>${prevSnapshot.state}</strong> → <strong>${sig.overlay_state}</strong> &nbsp;|&nbsp; Δχ: ${prevSnapshot.dchi.toFixed(2)} → <strong>${ph.delta_chi.toFixed(2)}</strong> &nbsp;|&nbsp; Fource: <strong>${mf.fource_lock.toFixed(3)} (${arrow})</strong>`;
+    $('deltaBanner').innerHTML = `${actionNote} &nbsp;|&nbsp; State: <strong>${prevSnapshot.state}</strong> → <strong>${sig.overlay_state}</strong> &nbsp;|&nbsp; C_HTE: <strong>${sig.c_hte_unison.toFixed(2)}</strong> &nbsp;|&nbsp; Fource: <strong>${mf.fource_lock.toFixed(3)} (${arrow})</strong>`;
   }
   [...document.querySelectorAll('.grid button')].forEach((b,i)=>b.classList.toggle('active', sig.nodes.some(n=>n.atomic_number===i)));
 }
-
 function mapFormula(actionNote=''){
-  try { renderSignature(buildSignature($('formula').value, $('modeSelect').value, $('weightSelect').value), actionNote); $('log').classList.remove('error'); }
+  try { renderSignature(buildSignature($('formula').value, $('modeSelect').value, $('weightSelect').value, $('boundarySelect').value), actionNote); $('log').classList.remove('error'); }
   catch(err){ $('log').classList.add('error'); $('log').textContent = 'ERROR:\n- ' + err.message; }
 }
 function loadFormula(f){ atomHistory = Array.of(); $('formula').value = f; mapFormula(`Loaded preset <strong>${f}</strong>`); }
 function resetAll(){
   current=null; prevSnapshot=null; atomHistory=Array.of(); $('formula').value=''; $('selected').textContent='—';
-  $('composition').textContent='—'; $('polarityMetrics').textContent='—'; $('modalField').textContent='—';
-  $('fourceScore').textContent='—'; $('classes').textContent='—'; $('state').textContent='VOID'; $('state').style.color='#8a8a8a';
+  $('fifthLadder').textContent='—'; $('polarityMetrics').textContent='—'; $('modalField').textContent='—';
+  $('fourceScore').textContent='—'; $('interfaceRisk').textContent='—'; $('state').textContent='VOID'; $('state').style.color='#8a8a8a';
   $('stateExplain').textContent='Stack purged — click any element tile below to start a fresh experiment!';
   $('deltaBanner').textContent='Stack purged. Ready for new atoms.';
   [...document.querySelectorAll('.grid button')].forEach(b=>b.classList.remove('active'));
@@ -195,9 +225,11 @@ function formulaFromHistory(hist){
   return Array.from(counts.entries()).map(([s,c]) => c > 1 ? `${s}${c}` : s).join('');
 }
 function stackElement(sym){
-  if(atomHistory.length === 0 && $('formula').value === 'SiO2') $('formula').value = '';
+  if(atomHistory.length === 0 && ($('formula').value === 'H2' || $('formula').value === 'SiO2')) $('formula').value = '';
   atomHistory.push(sym);
-  $('formula').value = formulaFromHistory(atomHistory);
+  const stacked = formulaFromHistory(atomHistory);
+  $('formula').value = stacked;
+  if($('dopeBase')){ $('dopeBase').value = stacked; $('dopeSlider').value = 0; $('dopeVal').textContent = '0.00'; drawDopingCurve(0); }
   mapFormula(`Added <strong>${sym}</strong>`);
   if($('autoChime') && $('autoChime').checked) sonify();
 }
@@ -208,8 +240,9 @@ function undoLast(){
   $('formula').value = formulaFromHistory(atomHistory);
   mapFormula(`Removed <strong>${removed}</strong>`);
 }
-function captureAtlas(){ if(!current) return; const mf=current.modal_field, ph=current.physical; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.formula} (${current.mapping_mode}/${current.weight_mode}) → ${current.overlay_state} | Δχ=${ph.delta_chi}, Val=${ph.val_per_atom} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}, C=${mf.c_modal}]`; }
-function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify(current,null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`hte-ledger-${current.formula}.json`; a.click(); }
+
+function captureAtlas(){ if(!current) return; const mf=current.modal_field; $('log').classList.remove('error'); $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.entry_id} (${current.boundary_context}) → ${current.overlay_state} | C_HTE=${current.c_hte_unison} | Ladder: ${current.fifth_ladder} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}]`; }
+function downloadLedger(){ if(!current) return; const blob=new Blob(Array.of(JSON.stringify(current,null,2)),{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${current.entry_id.toLowerCase()}.json`; a.click(); }
 function sonify(){
   if(!current) mapFormula();
   if(!current) return;
@@ -247,28 +280,23 @@ ELEMENTS.forEach(e=>{
 function buildDopedFormula(base, el, xVal){
   const x = Number(xVal);
   if(x <= 0.001) return base;
-  const rx = new RegExp(`(${el})(\\d*\\.?\\d*)$`);
+  const rx = new RegExp(`(${el})(?![a-z])(\\d*\\.?\\d*)`);
   const m = base.match(rx);
-  if(m){
-    const prev = m.at(2) ? Number(m.at(2)) : 1;
-    return base.replace(rx, `${el}${Number((prev + x).toFixed(2))}`);
-  }
+  if(m){ const prev = m.at(2) ? Number(m.at(2)) : 1; return base.replace(rx, `${el}${Number((prev + x).toFixed(2))}`); }
   return `${base}${el}${Number(x.toFixed(2))}`;
 }
 
 function drawDopingCurve(activeX = Number($('dopeSlider')?.value || 0.9)){
   const dc = $('dopingChart');
   if(!dc) return;
-  dc.width = dc.clientWidth * devicePixelRatio;
-  dc.height = dc.clientHeight * devicePixelRatio;
+  dc.width = dc.clientWidth * devicePixelRatio; dc.height = dc.clientHeight * devicePixelRatio;
   const dctx = dc.getContext('2d'), w = dc.width, h = dc.height;
   dctx.clearRect(0, 0, w, h);
-
   const base = ($('dopeBase')?.value || 'YBa2Cu3O6').trim(), el = ($('dopeEl')?.value || 'O').trim();
-  const mode = $('modeSelect').value, weight = $('weightSelect').value, pts = Array.of();
+  const mode = $('modeSelect').value, weight = $('weightSelect').value, boundary = $('boundarySelect').value, pts = Array.of();
   for(let i = 0; i <= 40; i++){
     const x = i * 0.05;
-    try { const sig = buildSignature(buildDopedFormula(base, el, x), mode, weight); pts.push({ x, f: sig.modal_field.fource_lock }); }
+    try { const sig = buildSignature(buildDopedFormula(base, el, x), mode, weight, boundary); pts.push({ x, f: sig.modal_field.fource_lock }); }
     catch(e) { return; }
   }
   const maxF = Math.max(0.5, ...pts.map(p => p.f));
@@ -278,25 +306,21 @@ function drawDopingCurve(activeX = Number($('dopeSlider')?.value || 0.9)){
     if(idx === 0) dctx.moveTo(px, py); else dctx.lineTo(px, py);
   });
   dctx.stroke();
-
   const curPt = pts.reduce((a, b) => Math.abs(b.x - activeX) < Math.abs(a.x - activeX) ? b : a);
   dctx.fillStyle = '#ffd700'; dctx.beginPath();
   dctx.arc((curPt.x / 2.0) * (w - 20) + 10, h - 10 - (curPt.f / maxF) * (h - 22), 4.5 * devicePixelRatio, 0, Math.PI * 2);
   dctx.fill();
-
   dctx.fillStyle = '#8a8a8a'; dctx.font = `${10 * devicePixelRatio}px monospace`;
   dctx.fillText(`Fource Lock Curve (${base} + x·${el}) | Peak F=${maxF.toFixed(2)}`, 10, 12 * devicePixelRatio);
 }
 
 function applyDoping(val){
-  const x = Number(val);
-  $('dopeVal').textContent = x.toFixed(2);
+  const x = Number(val); $('dopeVal').textContent = x.toFixed(2);
   const base = ($('dopeBase')?.value || 'YBa2Cu3O6').trim(), el = ($('dopeEl')?.value || 'O').trim();
-  atomHistory = Array.of();
-  $('formula').value = buildDopedFormula(base, el, x);
-  mapFormula(`Doped <strong>${base} + ${x.toFixed(2)} ${el}</strong>`);
-  drawDopingCurve(x);
+  atomHistory = Array.of(); $('formula').value = buildDopedFormula(base, el, x);
+  mapFormula(`Doped <strong>${base} + ${x.toFixed(2)} ${el}</strong>`); drawDopingCurve(x);
 }
+function loadDopingPreset(base, el, x){ $('dopeBase').value = base; $('dopeEl').value = el; $('dopeSlider').value = x; applyDoping(x); }
 
 const c=$('scope'), ctx=c.getContext('2d');
 function size(){ c.width=c.clientWidth*devicePixelRatio; c.height=c.clientHeight*devicePixelRatio; }
@@ -320,10 +344,4 @@ function draw(pcs, st){
   }
 }
 function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):Array.of(); draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
-function loadDopingPreset(base, el, x){
-  $('dopeBase').value = base;
-  $('dopeEl').value = el;
-  $('dopeSlider').value = x;
-  applyDoping(x);
-}
 updateDiscoveryUI(); mapFormula(); drawDopingCurve(); loop();
