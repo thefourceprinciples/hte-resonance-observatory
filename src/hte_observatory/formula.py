@@ -1,13 +1,13 @@
-"""Lightweight chemical formula parser for the HTE Observatory.
+"""Chemical formula parser for the HTE Observatory (v0.2).
 
-Supported in v0.1:
-- element symbols: H, Si, Fe
-- integer counts: H2, Fe2O3
+Supported:
+- element symbols: H, Si, Fe, Og (Z=1..118)
+- Element-0 substrate symbol: E0 (Z=0)
+- integer and fractional occupancy counts: H2, Fe2O3, YBa2Cu3O6.9
 - grouped expressions: Ca10(PO4)6(OH)2
 
-Out of scope for v0.1:
-- hydrates, charges, isotopes, fractional occupancy, aliases, and alloys.
-Those belong in the Materials Atlas connector layer.
+Out of scope:
+- hydrates, charges, isotopes, and aliases (belong in Materials Atlas layer).
 """
 
 from __future__ import annotations
@@ -17,14 +17,22 @@ from collections import defaultdict
 
 from .elements import ELEMENT_Z
 
-_TOKEN_RE = re.compile(r"([A-Z][a-z]?|\(|\)|\d+)")
+_TOKEN_RE = re.compile(r"(E0|[A-Z][a-z]?|\(|\)|\d+\.\d+|\d+)")
 
 
-def parse_formula(formula: str) -> dict[str, int]:
-    """Parse a chemical formula into {element_symbol: integer_count}.
+def _parse_number(tok: str) -> int | float:
+    return float(tok) if "." in tok else int(tok)
 
-    This is deliberately small and auditable. It catches unknown elements and
-    unbalanced parentheses rather than trying to be chemically omniscient.
+
+def _is_number(tok: str) -> bool:
+    return tok.isdigit() or bool(re.fullmatch(r"\d+\.\d+", tok))
+
+
+def parse_formula(formula: str) -> dict[str, int | float]:
+    """Parse a chemical formula into {element_symbol: count}.
+
+    Preserves integer counts for whole-number stoichiometries while supporting
+    fractional doping (e.g., YBa2Cu3O6.9) and the Element-0 substrate (E0).
     """
     clean = formula.strip()
     if not clean:
@@ -34,7 +42,7 @@ def parse_formula(formula: str) -> dict[str, int]:
     if "".join(tokens) != clean:
         raise ValueError(f"Unsupported formula syntax: {formula}")
 
-    stack: list[defaultdict[str, int]] = [defaultdict(int)]
+    stack: list[defaultdict[str, int | float]] = [defaultdict(int)]
     i = 0
     while i < len(tokens):
         token = tokens[i]
@@ -47,26 +55,28 @@ def parse_formula(formula: str) -> dict[str, int]:
             if len(stack) == 1:
                 raise ValueError(f"Unmatched closing parenthesis in: {formula}")
             group = stack.pop()
-            multiplier = 1
-            if i + 1 < len(tokens) and tokens[i + 1].isdigit():
-                multiplier = int(tokens[i + 1])
+            multiplier: int | float = 1
+            if i + 1 < len(tokens) and _is_number(tokens[i + 1]):
+                multiplier = _parse_number(tokens[i + 1])
                 i += 1
             for symbol, count in group.items():
-                stack[-1][symbol] += count * multiplier
+                val = count * multiplier
+                stack[-1][symbol] += int(val) if isinstance(val, float) and val.is_integer() else val
             i += 1
             continue
 
-        if token.isdigit():
+        if _is_number(token):
             raise ValueError(f"Dangling multiplier {token} in: {formula}")
 
         symbol = token
         if symbol not in ELEMENT_Z:
             raise ValueError(f"Unknown element symbol: {symbol}")
-        count = 1
-        if i + 1 < len(tokens) and tokens[i + 1].isdigit():
-            count = int(tokens[i + 1])
+        count: int | float = 1
+        if i + 1 < len(tokens) and _is_number(tokens[i + 1]):
+            count = _parse_number(tokens[i + 1])
             i += 1
-        stack[-1][symbol] += count
+        val = stack[-1][symbol] + count
+        stack[-1][symbol] = int(val) if isinstance(val, float) and val.is_integer() else val
         i += 1
 
     if len(stack) != 1:
