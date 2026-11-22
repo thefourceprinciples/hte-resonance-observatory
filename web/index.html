@@ -5,58 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>HTE Resonance Observatory v0.4 — Materials Atlas Engine (MAE)</title>
   <style>
-    :root {
-      color-scheme: dark;
-      --bg:#030303; --panel:#090909; --ink:#e7e7e7; --muted:#8a8a8a; --line:#222;
-      --accent:#00bfff; --gold:#ffd700; --piezo:#7cff00; --armor:#ff3b3b; --shadow:#a020f0; --plasma:#ff8c00;
-    }
+    :root { color-scheme: dark; --bg:#030303; --panel:#090909; --ink:#e7e7e7; --muted:#8a8a8a; --line:#222; --accent:#00bfff; --gold:#ffd700; }
     * { box-sizing: border-box; }
-    body {
-      margin:0; min-height:100vh; display:grid; grid-template-columns: 1.12fr 1.03fr;
-      background:radial-gradient(circle at 30% 45%, #101018, #030303 60%, #000);
-      color:var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-    main { display:flex; flex-direction:column; align-items:center; justify-content:center; border-right:1px solid var(--line); min-height:100vh; padding:14px; gap:9px; }
-    aside { background:var(--panel); min-height:100vh; display:flex; flex-direction:column; }
-    canvas#scope { width:min(66vmin,560px); height:min(66vmin,560px); border:1px solid #171717; border-radius:10px; background:#000; box-shadow:0 0 80px rgba(255,255,255,.05); }
-    .legend { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; font-size:.72rem; color:var(--muted); }
-    .legend span { display:inline-flex; align-items:center; gap:6px; }
-    .dot-el { width:10px; height:10px; border-radius:50%; background:var(--accent); display:inline-block; }
-    .ring-tonic { width:12px; height:12px; border-radius:50%; border:2px solid var(--gold); display:inline-block; }
-    .delta-banner { width:min(66vmin,560px); background:#0c0c12; border:1px solid #232334; border-radius:8px; padding:7px 12px; font-size:.73rem; color:#cceeff; text-align:center; }
-    .doping-box { width:min(66vmin,560px); background:#08080c; border:1px solid #222230; border-radius:8px; padding:8px 11px; display:flex; flex-direction:column; gap:6px; }
-    .doping-row { display:flex; align-items:center; gap:7px; font-size:.73rem; color:#ccc; flex-wrap:wrap; }
-    .doping-row input[type=range] { flex:1; min-width:110px; accent-color:var(--accent); cursor:pointer; }
-    canvas#dopingChart { width:100%; height:58px; background:#030305; border:1px solid #1a1a24; border-radius:6px; display:block; }
-    header, section, footer { padding:10px 14px; border-bottom:1px solid var(--line); }
-    h1 { margin:0; font-size:.96rem; letter-spacing:2px; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; }
-    .sub { margin-top:4px; color:var(--muted); font-size:.72rem; line-height:1.38; }
+    body { margin:0; min-height:100vh; display:grid; grid-template-columns:1.05fr 1fr 0.88fr; background:radial-gradient(circle at 25% 45%,#101018,#030303 60%,#000); color:var(--ink); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    main { display:flex; flex-direction:column; align-items:center; justify-content:center; border-right:1px solid var(--line); min-height:100vh; padding:12px; gap:8px; }
+    aside { background:var(--panel); min-height:100vh; display:flex; flex-direction:column; border-right:1px solid var(--line); }
+    aside.dossier-pane { background:#060609; border-right:none; max-height:100vh; overflow-y:auto; }
+    canvas#scope { width:min(54vmin,480px); height:min(54vmin,480px); border:1px solid #171717; border-radius:10px; background:#000; box-shadow:0 0 80px rgba(255,255,255,.05); }
+    .legend { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; font-size:.7rem; color:var(--muted); }
+    .legend span { display:inline-flex; align-items:center; gap:5px; }
+    .dot-el { width:9px; height:9px; border-radius:50%; background:var(--accent); display:inline-block; }
+    .ring-tonic { width:11px; height:11px; border-radius:50%; border:2px solid var(--gold); display:inline-block; }
+    .delta-banner { width:min(54vmin,480px); background:#0c0c12; border:1px solid #232334; border-radius:8px; padding:6px 10px; font-size:.71rem; color:#cceeff; text-align:center; }
+    .doping-box { width:min(54vmin,480px); background:#08080c; border:1px solid #222230; border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:5px; }
+    .doping-row { display:flex; align-items:center; gap:6px; font-size:.71rem; color:#ccc; flex-wrap:wrap; }
+    .doping-row input[type=range] { flex:1; min-width:95px; accent-color:var(--accent); cursor:pointer; }
+    canvas#dopingChart { width:100%; height:54px; background:#030305; border:1px solid #1a1a24; border-radius:6px; display:block; }
+    header, section, footer { padding:9px 12px; border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:.9rem; letter-spacing:1.5px; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; gap:6px; }
+    .sub { margin-top:3px; color:var(--muted); font-size:.7rem; line-height:1.35; }
     .formula { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
-    input, select { background:#050505; color:#fff; border:1px solid #2a2a2a; border-radius:8px; padding:7px 8px; font-family:inherit; font-size:.76rem; }
-    input { flex:1; min-width:95px; }
-    button { background:#111; color:#ddd; border:1px solid #2a2a2a; padding:7px 8px; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:800; font-size:.73rem; }
+    input, select { background:#050505; color:#fff; border:1px solid #2a2a2a; border-radius:7px; padding:6px 7px; font-family:inherit; font-size:.74rem; }
+    input { flex:1; min-width:85px; }
+    button { background:#111; color:#ddd; border:1px solid #2a2a2a; padding:6px 7px; border-radius:7px; cursor:pointer; font-family:inherit; font-weight:800; font-size:.71rem; }
     button:hover { background:#1b1b1b; color:#fff; border-color:#444; }
     button.active { background:#f0f0f0 !important; color:#000 !important; }
-    .chk { display:inline-flex; align-items:center; gap:4px; font-size:.72rem; color:#ccc; cursor:pointer; user-select:none; }
-    .row { display:flex; justify-content:space-between; gap:10px; font-size:.76rem; margin:3.5px 0; }
+    .chk { display:inline-flex; align-items:center; gap:4px; font-size:.7rem; color:#ccc; cursor:pointer; user-select:none; }
+    .row { display:flex; justify-content:space-between; gap:8px; font-size:.74rem; margin:3px 0; }
     .label { color:var(--muted); }
-    .value { text-align:right; max-width:72%; overflow-wrap:anywhere; }
+    .value { text-align:right; max-width:70%; overflow-wrap:anywhere; }
     .highlight { color:var(--accent); font-weight:700; }
     .warn { color:#ff8a8a; font-weight:700; }
-    .explain { background:#06080c; border-left:3px solid var(--accent); padding:6px 10px; margin-top:5px; font-size:.71rem; line-height:1.42; color:#d8e6f0; }
-    .badges { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
-    .badge { border:1px solid #2a2a2a; border-radius:999px; padding:2px 8px; font-size:.64rem; color:#666; }
+    .explain { background:#06080c; border-left:3px solid var(--accent); padding:6px 9px; margin-top:4px; font-size:.7rem; line-height:1.4; color:#d8e6f0; }
+    .badges { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
+    .badge { border:1px solid #2a2a2a; border-radius:999px; padding:2px 7px; font-size:.62rem; color:#666; }
     .badge.unlocked { color:#fff; border-color:var(--accent); background:rgba(0,191,255,.12); }
     details { border-bottom:1px solid var(--line); background:#070709; }
-    summary { padding:8px 14px; font-size:.74rem; font-weight:700; cursor:pointer; color:#ffd700; }
-    .glossary { padding:8px 14px 12px; display:grid; gap:6px; max-height:180px; overflow:auto; font-size:.71rem; }
-    .g-card { border:1px solid #1e1e26; border-radius:6px; padding:6px 8px; background:#0b0b0f; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .grid { display:grid; grid-template-columns: repeat(9,1fr); gap:4px; padding:9px 14px; max-height:165px; overflow:auto; border-bottom:1px solid var(--line); }
-    .grid button { white-space:pre-line; padding:5px 2px; font-size:.67rem; border-top-width:3px; }
+    summary { padding:7px 12px; font-size:.72rem; font-weight:700; cursor:pointer; color:#ffd700; }
+    .glossary { padding:7px 12px 10px; display:grid; gap:5px; max-height:160px; overflow:auto; font-size:.7rem; }
+    .g-card { border:1px solid #1e1e26; border-radius:6px; padding:5px 7px; background:#0b0b0f; display:flex; justify-content:space-between; align-items:center; gap:6px; }
+    .grid { display:grid; grid-template-columns:repeat(9,1fr); gap:3px; padding:8px 12px; max-height:175px; overflow:auto; border-bottom:1px solid var(--line); }
+    .grid button { white-space:pre-line; padding:4px 2px; font-size:.65rem; border-top-width:3px; position:relative; }
+    .grid button.has-canonical::after { content:'★'; position:absolute; top:1px; right:2px; font-size:.55rem; color:var(--gold); }
     .controls { display:flex; gap:5px; flex-wrap:wrap; }
-    pre { margin:0; padding:9px 14px; background:#050505; color:#d0d0d0; white-space:pre-wrap; overflow:auto; font-size:.7rem; line-height:1.38; min-height:105px; flex:1; }
+    pre { margin:0; padding:8px 12px; background:#050505; color:#d0d0d0; white-space:pre-wrap; overflow:auto; font-size:.69rem; line-height:1.36; min-height:90px; flex:1; }
+    .dossier-body { padding:10px 12px; display:flex; flex-direction:column; gap:9px; font-size:.72rem; line-height:1.45; }
+    .d-card { background:#0b0b10; border:1px solid #1d1d28; border-radius:8px; padding:8px 10px; }
+    .d-card h2 { margin:0 0 5px; font-size:.74rem; text-transform:uppercase; letter-spacing:1px; color:var(--gold); }
+    .d-card ul { margin:4px 0 0; padding-left:16px; color:#d6d6e0; }
+    .d-card li { margin-bottom:3px; }
+    .d-lock { border-left:3px solid var(--gold); background:#0e0d08; padding:7px 9px; font-style:italic; color:#fff5cc; }
     .error { color:#ff8a8a; }
-    @media (max-width:920px){ body{grid-template-columns:1fr;} main, aside{min-height:auto;} }
+    @media (max-width:1180px){ body{grid-template-columns:1fr;} main, aside{min-height:auto; max-height:none;} }
   </style>
 </head>
 <body>
@@ -66,29 +66,30 @@
       <span><i class="dot-el"></i> Solid Dot = Active Element Note</span>
       <span><i class="ring-tonic"></i> Gold Halo = Inferred Modal Tonic</span>
     </div>
-    <div class="delta-banner" id="deltaBanner">Stack atoms, switch Interface Context, or slide fractional doping below.</div>
+    <div class="delta-banner" id="deltaBanner">Hover any element on the periodic grid to inspect its Materials Atlas Legend, or click to stack.</div>
     <div class="doping-box">
       <div class="doping-row">
         <strong>Doping Sweep:</strong>
-        <span>Base:</span><input id="dopeBase" value="YBa2Cu3O6" style="max-width:105px;padding:4px 6px;" onchange="drawDopingCurve()" />
-        <span>+ Dopant:</span><input id="dopeEl" value="O" style="max-width:42px;padding:4px 6px;text-align:center;" onchange="drawDopingCurve()" />
+        <span>Base:</span><input id="dopeBase" value="YBa2Cu3O6" style="max-width:100px;padding:4px 6px;" onchange="drawDopingCurve()" />
+        <span>+ Dopant:</span><input id="dopeEl" value="O" style="max-width:40px;padding:4px 6px;text-align:center;" onchange="drawDopingCurve()" />
         <span>x = <strong id="dopeVal" style="color:var(--accent)">0.90</strong></span>
         <input type="range" id="dopeSlider" min="0" max="2" step="0.05" value="0.90" oninput="applyDoping(this.value)" />
       </div>
-      <div class="doping-row" style="gap:5px;">
+      <div class="doping-row" style="gap:4px;">
         <span style="color:var(--muted)">Presets:</span>
-        <button style="padding:3px 6px;font-size:.67rem;" onclick="loadDopingPreset('YBa2Cu3O6','O',0.90)">YBCO + x·O</button>
-        <button style="padding:3px 6px;font-size:.67rem;" onclick="loadDopingPreset('BaTiO2','O',1.00)">BaTiO2 + x·O</button>
-        <button style="padding:3px 6px;font-size:.67rem;" onclick="loadDopingPreset('SiO1','O',1.00)">SiO + x·O</button>
-        <button style="padding:3px 6px;font-size:.67rem;" onclick="loadDopingPreset('GaAs','In',0.25)">GaAs + x·In</button>
+        <button style="padding:3px 6px;font-size:.66rem;" onclick="loadDopingPreset('YBa2Cu3O6','O',0.90)">YBCO</button>
+        <button style="padding:3px 6px;font-size:.66rem;" onclick="loadDopingPreset('BaTiO2','O',1.00)">BaTiO3</button>
+        <button style="padding:3px 6px;font-size:.66rem;" onclick="loadDopingPreset('SiO1','O',1.00)">SiO2</button>
+        <button style="padding:3px 6px;font-size:.66rem;" onclick="loadDopingPreset('GaAs','In',0.25)">GaAs+In</button>
       </div>
       <canvas id="dopingChart" aria-label="Fource Lock doping phase curve"></canvas>
     </div>
   </main>
+
   <aside>
     <header>
-      <h1>HTE Resonance Observatory <span style="color:var(--accent)">v0.4 MAE</span></h1>
-      <div class="sub">Materials Atlas Engine — Interface-Aware 7-State Discovery &amp; Fifth-Ladder Workbench (L2 Overlay)</div>
+      <h1>HTE Observatory <span style="color:var(--accent)">v0.4 MAE</span></h1>
+      <div class="sub">Hover any tile to preview its 17-section Atlas Dossier on the right; click to stack atoms.</div>
     </header>
     <section>
       <div class="formula">
@@ -98,16 +99,16 @@
           <option value="raw">Raw Z mod 12 (v1)</option>
         </select>
         <select id="weightSelect" onchange="mapFormula();drawDopingCurve()" aria-label="Weight mode">
-          <option value="stoich" selected>Stoich Count</option>
-          <option value="electronegativity">Pauling χ Weight</option>
-          <option value="valence">Valence e⁻ Weight</option>
+          <option value="stoich" selected>Stoich</option>
+          <option value="electronegativity">Pauling χ</option>
+          <option value="valence">Valence e⁻</option>
         </select>
         <select id="boundarySelect" onchange="mapFormula()" aria-label="Interface boundary context">
-          <option value="free_bulk" selected>Boundary: Free Bulk</option>
-          <option value="metal_host">Boundary: Metal Host / Hydride</option>
-          <option value="ceramic_matrix">Boundary: Ceramic / Proton Matrix</option>
-          <option value="cryo_pressure">Boundary: Cryo / High-Pressure</option>
-          <option value="plasma_excited">Boundary: Plasma Excitation</option>
+          <option value="free_bulk" selected>Free Bulk</option>
+          <option value="metal_host">Metal Host / Hydride</option>
+          <option value="ceramic_matrix">Ceramic Matrix</option>
+          <option value="cryo_pressure">Cryo / Pressure</option>
+          <option value="plasma_excited">Plasma Excited</option>
         </select>
         <button onclick="mapFormula()">Map</button>
         <button onclick="undoLast()">Undo (-1)</button>
@@ -117,17 +118,17 @@
     </section>
     <section>
       <div class="row"><span class="label">Formula / HTE (p, o)</span><span class="value" id="selected">—</span></div>
-      <div class="row"><span class="label">Stack &amp; Fifth Ladder</span><span class="value highlight" id="fifthLadder">—</span></div>
+      <div class="row"><span class="label">Fifth Ladder</span><span class="value highlight" id="fifthLadder">—</span></div>
       <div class="row"><span class="label">Bond polarity / Valence</span><span class="value" id="polarityMetrics">—</span></div>
-      <div class="row"><span class="label">Modal field (Gold Halo)</span><span class="value highlight" id="modalField">—</span></div>
-      <div class="row"><span class="label">C_HTE Unison / Fource</span><span class="value" id="fourceScore">—</span></div>
-      <div class="row"><span class="label">Interface &amp; Failure Risk</span><span class="value warn" id="interfaceRisk">—</span></div>
+      <div class="row"><span class="label">Modal field</span><span class="value highlight" id="modalField">—</span></div>
+      <div class="row"><span class="label">C_HTE / Fource</span><span class="value" id="fourceScore">—</span></div>
+      <div class="row"><span class="label">Interface Risk</span><span class="value warn" id="interfaceRisk">—</span></div>
       <div class="row"><span class="label">Discovered state</span><span class="value highlight" id="state">VOID</span></div>
-      <div class="explain" id="stateExplain">Click any element tile below to stack atoms and generate a Materials Atlas Entry!</div>
+      <div class="explain" id="stateExplain">Hover or click any element tile below to inspect and stack!</div>
       <div class="badges" id="discoveryBadges"></div>
     </section>
     <details>
-      <summary>7-State Discovery &amp; Engineering Glossary (Click to Expand)</summary>
+      <summary>7-State Discovery &amp; Engineering Glossary</summary>
       <div class="glossary" id="glossaryList"></div>
     </details>
     <div class="grid" id="grid"></div>
@@ -139,12 +140,24 @@
       <button onclick="loadFormula('SiO2')">SiO2</button>
       <button onclick="loadFormula('BaTiO3')">BaTiO3</button>
       <button onclick="loadFormula('YBa2Cu3O7')">YBCO</button>
-      <button onclick="captureAtlas()">Log Entry</button>
-      <button onclick="downloadLedger()">Export MATLAS JSON</button>
+      <button onclick="captureAtlas()">Log</button>
+      <button onclick="downloadLedger()">Export JSON</button>
       <button onclick="resetAll()">Purge</button>
     </footer>
-    <pre id="log">MATERIALS ATLAS LOG (v0.4 MAE):\n- Ready. Try H, H2, or switch Boundary Context to see interface behavior.</pre>
+    <pre id="log">MATERIALS ATLAS LOG (v0.4 MAE):\n- Hover any element tile to preview its full Materials Atlas Entry on the right.</pre>
   </aside>
+
+  <aside class="dossier-pane">
+    <header>
+      <h1>
+        <span id="dossierTitle">MATLAS-E001-HYDROGEN</span>
+        <button id="pinBtn" onclick="togglePinDossier()" title="Pin or unpin the hovered element legend">📌 Unpinned (Hover Live)</button>
+      </h1>
+      <div class="sub" id="dossierMeta">STATUS: canonical draft | Hover any tile on the periodic table to preview; click Pin to lock scrolling.</div>
+    </header>
+    <div class="dossier-body" id="dossierBody"></div>
+  </aside>
+
   <script src="./app.js"></script>
 </body>
 </html>
