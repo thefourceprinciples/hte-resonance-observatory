@@ -86,8 +86,6 @@ def classify_overlay_state(pitch_classes: list[int]) -> str:
     if len(unique) >= 3 and any(pc in {0, 5, 8, 10} for pc in unique):
         return "ARMOR_OVERLAY_CANDIDATE"
     return "MIXED_OVERLAY"
-
-
 def compute_soft_states(norm_h: list[float], nodes: list[HTENode], delta_chi: float = 0.0) -> dict:
     """Compute continuous 7-state phase probabilities and dominant discovery state."""
     active_pcs = [i for i, w in enumerate(norm_h) if w > 1e-9]
@@ -98,7 +96,8 @@ def compute_soft_states(norm_h: list[float], nodes: list[HTENode], delta_chi: fl
         }
         return {"dominant_state": "VOID", "state_probabilities": probs}
 
-    if len(nodes) == 1 and nodes[0].element == "E0":
+    first_node = next(iter(nodes))
+    if len(nodes) == 1 and first_node.element == "E0":
         probs = {
             "SUBSTRATE_ZERO": 1.0, "SINGLET_SEED": 0.0, "GOLD_ANCHOR": 0.0,
             "PIEZO_TENSION": 0.0, "ARMOR_SHIELD": 0.0, "SHADOW_PHASE": 0.0, "PLASMA_FLUX": 0.0,
@@ -141,8 +140,10 @@ def compute_soft_states(norm_h: list[float], nodes: list[HTENode], delta_chi: fl
     }
     total = sum(raw_scores.values())
     probs = {k: round(v / total, 6) if total > 0 else 0.0 for k, v in raw_scores.items()}
-    dominant = max(probs.items(), key=lambda kv: kv[1])[0]
+    dominant = max(probs, key=probs.get)
     return {"dominant_state": dominant, "state_probabilities": probs}
+
+
 def _unit_template_vector(tonic: int, mode: ModeSpec) -> list[float]:
     vec = [0.0] * 12
     for deg in mode.intervals:
@@ -236,8 +237,6 @@ def evaluate_modal_field(h: list[float], epsilon: float = 0.05) -> dict:
         "heatmap_modes": mode_names,
         "heatmap_12x7": heatmap,
     }
-
-
 def _normalize(vec: list[float]) -> list[float]:
     total = sum(vec)
     return [x / total for x in vec] if total > 0 else vec
@@ -270,7 +269,7 @@ def build_hte_signature(
     total_valence = 0.0
     chi_weighted_sum = 0.0
 
-    for symbol, count in sorted(composition.items(), key=lambda item: atomic_number(item[0])):
+    for symbol, count in sorted(composition.items(), key=lambda item: atomic_number(next(iter(item)))):
         coords = element_coordinates(symbol)
         z = coords.Z
         pitch_class = coords.pi_group if mapping_mode == "group" else coords.pi_raw
@@ -313,6 +312,8 @@ def build_hte_signature(
 
     histogram = Counter(weighted_pitch_classes)
     unique = sorted(histogram)
+    top_entry = next(iter(histogram.most_common(1)), None)
+    dominant_pc = next(iter(top_entry)) if top_entry is not None else None
 
     base_hist = group_hist if mapping_mode == "group" else raw_hist
     if weight_mode == "electronegativity":
@@ -347,7 +348,7 @@ def build_hte_signature(
         "weighted_chord": weighted_pitch_classes,
         "pitch_class_histogram": {str(k): histogram[k] for k in unique},
         "interval_walk": _interval_walk(unique),
-        "dominant_pitch_class": histogram.most_common(1)[0][0] if histogram else None,
+        "dominant_pitch_class": dominant_pc,
         "overlay_state": classify_overlay_state(unique),
         "discovery_state": soft_states["dominant_state"],
         "state_probabilities": soft_states["state_probabilities"],
