@@ -416,24 +416,19 @@
     </section>
   </main>
 
-  <script>
+    <script>
     "use strict";
-    const PERIODIC_SYMBOLS = [
-      "H","He","Li","Be","B","C","N","O","F","Ne",
-      "Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca",
-      "Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn",
-      "Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr",
-      "Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn",
-      "Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd",
-      "Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb",
-      "Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg",
-      "Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th",
-      "Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm",
-      "Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Ds",
-      "Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"
-    ];
 
-    const PERIOD_BOUNDS =;
+    const PERIODIC_SYMBOLS = (
+      "H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca " +
+      "Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr " +
+      "Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd " +
+      "Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg " +
+      "Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm " +
+      "Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og"
+    ).split(" ");
+
+    const PERIOD_BOUNDS = new Array(2, 10, 18, 36, 54, 86, 118);
 
     const PAULING_EN = {
       H:2.20,He:0.00,Li:0.98,Be:1.57,B:2.04,C:2.55,N:3.04,O:3.44,F:3.98,Ne:0.00,
@@ -448,17 +443,13 @@
       Pa:1.50,U:1.38,Np:1.36,Pu:1.28,Am:1.30,Cm:1.30,Bk:1.30,Cf:1.30,Es:1.30,Fm:1.30
     };
 
-    const PETTIFOR_ORDER = [
-      "He","Ne","Ar","Kr","Xe","Rn","Og","Fr","Cs","Rb","K","Na","Li",
-      "Ra","Ba","Sr","Ca","Mg","Be","Yb","Eu","Lu","Tm","Er","Ho","Dy",
-      "Tb","Gd","Sm","Pm","Nd","Pr","Ce","La","Lr","No","Md","Fm","Es",
-      "Cf","Bk","Cm","Am","Pu","Np","U","Pa","Th","Ac","Y","Sc","Zr","Hf",
-      "Rf","Ti","Nb","Ta","Db","V","Mo","W","Sg","Cr","Tc","Re","Bh","Mn",
-      "Fe","Ru","Os","Hs","Co","Rh","Ir","Mt","Ni","Pd","Pt","Ds","Cu","Ag",
-      "Au","Rg","Zn","Cd","Hg","Cn","B","Al","Ga","In","Tl","Nh","C","Si",
-      "Ge","Sn","Pb","Fl","N","P","As","Sb","Bi","Mc","O","S","Se","Te",
-      "Po","Lv","H","F","Cl","Br","I","At","Ts"
-    ];
+    const PETTIFOR_ORDER = (
+      "He Ne Ar Kr Xe Rn Og Fr Cs Rb K Na Li Ra Ba Sr Ca Mg Be Yb Eu Lu Tm Er Ho Dy " +
+      "Tb Gd Sm Pm Nd Pr Ce La Lr No Md Fm Es Cf Bk Cm Am Pu Np U Pa Th Ac Y Sc Zr Hf " +
+      "Rf Ti Nb Ta Db V Mo W Sg Cr Tc Re Bh Mn Fe Ru Os Hs Co Rh Ir Mt Ni Pd Pt Ds Cu Ag " +
+      "Au Rg Zn Cd Hg Cn B Al Ga In Tl Nh C Si Ge Sn Pb Fl N P As Sb Bi Mc O S Se Te " +
+      "Po Lv H F Cl Br I At Ts"
+    ).split(" ");
 
     function mulberry32(seed) {
       let t = seed >>> 0;
@@ -475,16 +466,16 @@
       const u2 = rng();
       return Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
     }
+
     function getPeriodAndGroup(z) {
-      const bounds =;
       let period = 7, pos = z - 86, prev = 0;
-      for (let i = 0; i < bounds.length; i++) {
-        if (z <= bounds[i]) {
+      for (let i = 0; i < PERIOD_BOUNDS.length; i++) {
+        if (z <= PERIOD_BOUNDS.at(i)) {
           period = i + 1;
           pos = z - prev;
           break;
         }
-        prev = bounds[i];
+        prev = PERIOD_BOUNDS.at(i);
       }
       let group = 1, block = "s";
       if (period === 1) {
@@ -505,7 +496,6 @@
     }
 
     function buildStarterEmbeddings() {
-      // 1. Magpie-Physical-12D
       const rawMagpie = {};
       PERIODIC_SYMBOLS.forEach((sym, idx) => {
         const z = idx + 1;
@@ -522,14 +512,14 @@
         const isMetal = ((block === "s" || block === "d" || block === "f") && sym !== "H") ||
                         (block === "p" && (period - (group - 12)) >= 2) ? 1.0 : 0.0;
         const polar = Math.pow(covRad, 3) * (1.5 - 0.2 * en);
-        rawMagpie[sym] = [z, mass, period, group, en, covRad, sVal, pVal, dVal, fVal, valTot, isMetal * 10.0 + polar - unfilled];
+        rawMagpie[sym] = new Array(z, mass, period, group, en, covRad, sVal, pVal, dVal, fVal, valTot, isMetal * 10.0 + polar - unfilled);
       });
 
       const dimM = 12, nEl = PERIODIC_SYMBOLS.length;
       const means = new Array(dimM).fill(0);
       const stds = new Array(dimM).fill(0);
-      PERIODIC_SYMBOLS.forEach(s => { for (let d = 0; d < dimM; d++) means[d] += rawMagpie[s][d] / nEl; });
-      PERIODIC_SYMBOLS.forEach(s => { for (let d = 0; d < dimM; d++) stds[d] += Math.pow(rawMagpie[s][d] - means[d], 2) / nEl; });
+      PERIODIC_SYMBOLS.forEach(s => { for (let d = 0; d < dimM; d++) means[d] += rawMagpie[s].at(d) / nEl; });
+      PERIODIC_SYMBOLS.forEach(s => { for (let d = 0; d < dimM; d++) stds[d] += Math.pow(rawMagpie[s].at(d) - means[d], 2) / nEl; });
       for (let d = 0; d < dimM; d++) stds[d] = Math.sqrt(stds[d]) < 1e-9 ? 1.0 : Math.sqrt(stds[d]);
 
       const magpieVecs = {};
@@ -537,22 +527,19 @@
         magpieVecs[s] = rawMagpie[s].map((v, d) => (v - means[d]) / stds[d]);
       });
 
-      // 2. Pettifor-Scale-4D
       const rankMap = {};
       PETTIFOR_ORDER.forEach((s, i) => { rankMap[s] = i; });
       const pettiforVecs = {};
       PERIODIC_SYMBOLS.forEach(s => {
         const r = rankMap[s] !== undefined ? rankMap[s] : Math.floor(PETTIFOR_ORDER.length / 2);
         const phi = Math.PI * (r / Math.max(1, PETTIFOR_ORDER.length - 1));
-        pettiforVecs[s] = [Math.cos(phi), Math.sin(phi), 0.35 * Math.cos(2 * phi), 0.35 * Math.sin(2 * phi)];
+        pettiforVecs[s] = new Array(Math.cos(phi), Math.sin(phi), 0.35 * Math.cos(2 * phi), 0.35 * Math.sin(2 * phi));
       });
-      // 3. mat2vec-Semantic-16D
+
       const rngMat = mulberry32(101);
-      const roles = ["alkali_alkaline", "lanthanide_actinide", "early_tm", "late_tm", "post_trans", "anion", "noble"];
+      const roles = new Array("alkali_alkaline", "lanthanide_actinide", "early_tm", "late_tm", "post_trans", "anion", "noble");
       const roleCenters = {};
-      roles.forEach(r => {
-        roleCenters[r] = Array.from({ length: 16 }, () => randNormal(rngMat));
-      });
+      roles.forEach(r => { roleCenters[r] = Array.from({ length: 16 }, () => randNormal(rngMat)); });
 
       const mat2vecVecs = {};
       PERIODIC_SYMBOLS.forEach((sym, idx) => {
@@ -561,21 +548,20 @@
         let role = "post_trans";
         if (group === 18) role = "noble";
         else if ((group === 1 || group === 2) && sym !== "H") role = "alkali_alkaline";
-        else if (block === "f" || ["Sc", "Y", "La", "Ac"].includes(sym)) role = "lanthanide_actinide";
+        else if (block === "f" || new Array("Sc", "Y", "La", "Ac").includes(sym)) role = "lanthanide_actinide";
         else if (block === "d" && group <= 7) role = "early_tm";
         else if (block === "d" && group >= 8) role = "late_tm";
         else if (group === 16 || group === 17 || sym === "H" || sym === "N") role = "anion";
         mat2vecVecs[sym] = roleCenters[role].map(c => c + 0.28 * randNormal(rngMat));
       });
 
-      // 4. SkipAtom-Structure-16D
       const rngSkip = mulberry32(202);
       const skipatomVecs = {};
       PERIODIC_SYMBOLS.forEach((sym, idx) => {
         const z = idx + 1;
         const { period, group, block } = getPeriodAndGroup(z);
         const en = PAULING_EN[sym] !== undefined ? PAULING_EN[sym] : 1.90;
-        const base = [
+        const base = new Array(
           Math.cos((2 * Math.PI * group) / 18.0),
           Math.sin((2 * Math.PI * group) / 18.0),
           en / 4.0,
@@ -584,58 +570,50 @@
           block === "p" ? 1.0 : 0.0,
           block === "f" ? 1.0 : 0.0,
           (group === 16 || group === 17) ? 1.0 : -0.5
-        ];
+        );
         skipatomVecs[sym] = base.concat(base.map(v => v * 0.5 + 0.15 * randNormal(rngSkip)));
       });
 
       return {
         "Magpie-Physical-12D": {
-          name: "Magpie-Physical-12D",
-          family: "property-based",
+          name: "Magpie-Physical-12D", family: "property-based",
           description: "Standardized physical & electronic descriptors (electronegativity, covalent radius, valence orbitals, metallic character).",
           strengths: "Strong baseline for formation energy, electronegativity contrast, and ionic/covalent splits.",
           limitations: "Lacks crystal coordination environment and literature co-occurrence semantics.",
-          citation: "Ward et al., npj Comput. Mater. 2, 16028 (2016)",
           rawVectors: magpieVecs
         },
         "Pettifor-Scale-4D": {
-          name: "Pettifor-Scale-4D",
-          family: "chemical-scale",
+          name: "Pettifor-Scale-4D", family: "chemical-scale",
           description: "Continuous harmonic encoding of the Pettifor Mendeleev chemical scale ordering elements by structural similarity.",
           strengths: "Captures classical structure-map transitions across binary and ternary intermetallics.",
           limitations: "1D underlying ordering compresses multi-valent transition metal chemistry.",
-          citation: "Pettifor, Solid State Commun. 51, 31-34 (1984)",
           rawVectors: pettiforVecs
         },
         "mat2vec-Semantic-16D": {
-          name: "mat2vec-Semantic-16D",
-          family: "nlp-literature",
+          name: "mat2vec-Semantic-16D", family: "nlp-literature",
           description: "Literature co-occurrence semantic embedding clustering elements by synthesis roles and functional families.",
           strengths: "Groups functional substitutes (dopant pairs, chalcogenides, rare-earth hosts) as used in abstracts.",
           limitations: "Reflects publication frequency biases rather than strict ab initio quantum properties.",
-          citation: "Tshitoyan et al., Nature 571, 95-98 (2019)",
           rawVectors: mat2vecVecs
         },
         "SkipAtom-Structure-16D": {
-          name: "SkipAtom-Structure-16D",
-          family: "structure-graph",
+          name: "SkipAtom-Structure-16D", family: "structure-graph",
           description: "Crystal-structure graph embedding capturing local coordination geometry and site-substitution compatibility.",
           strengths: "Excels at identifying topologically compatible site substitutions in known crystal prototypes.",
           limitations: "Less sensitive to band-gap anomalies in strongly correlated Mott insulators.",
-          citation: "Antunes et al., J. Chem. Inf. Model. 62, 5402 (2022)",
           rawVectors: skipatomVecs
         }
       };
     }
-
-    const STARTER_BENCHMARK = [
+    const STARTER_BENCHMARK = new Array(
       { formula: "SrTiO3", y: -3.48 }, { formula: "BaTiO3", y: -3.44 }, { formula: "CaTiO3", y: -3.46 },
       { formula: "LaAlO3", y: -3.65 }, { formula: "La0.85Sr0.15CuO4", y: -2.18 }, { formula: "YBa2Cu3O7", y: -2.12 },
       { formula: "MgAl2O4", y: -3.36 }, { formula: "Fe3O4", y: -1.68 }, { formula: "Co3O4", y: -1.35 },
       { formula: "MoS2", y: -0.94 }, { formula: "WS2", y: -0.89 }, { formula: "Bi2Se3", y: -0.36 },
       { formula: "TiNi", y: -0.35 }, { formula: "FeAl", y: -0.31 }, { formula: "Ni3Al", y: -0.42 },
       { formula: "GaAs", y: -0.41 }, { formula: "ZnO", y: -1.81 }, { formula: "AlN", y: -1.64 }
-    ];
+    );
+
     function fnv1aHash(str) {
       let h = 0x811c9dc5;
       for (let i = 0; i < str.length; i++) {
@@ -648,8 +626,9 @@
     function normalizeEmbeddingVectors(rawVectors) {
       const normalized = {};
       let dim = null;
-      for (const [sym, arr] of Object.entries(rawVectors)) {
-        const clean = sym.trim();
+      for (const entry of Object.entries(rawVectors)) {
+        const clean = entry.at(0).trim();
+        const arr = entry.at(1);
         if (!Array.isArray(arr) || arr.length === 0) continue;
         if (dim === null) dim = arr.length;
         if (arr.length !== dim) {
@@ -670,7 +649,7 @@
       const A = B.map(row => row.slice());
       const V = Array.from({ length: n }, (_, i) => {
         const r = new Array(n).fill(0);
-        r[i] = 1;
+        r.splice(i, 1, 1);
         return r;
       });
 
@@ -679,12 +658,12 @@
         let maxOff = 0;
         for (let p = 0; p < n - 1; p++) {
           for (let q = p + 1; q < n; q++) {
-            const apq = A[p][q];
+            const apq = A.at(p).at(q);
             const absApq = Math.abs(apq);
             if (absApq > maxOff) maxOff = absApq;
             if (absApq < 1e-11) continue;
 
-            const app = A[p][p], aqq = A[q][q];
+            const app = A.at(p).at(p), aqq = A.at(q).at(q);
             const tau = (aqq - app) / (2 * apq);
             const t = tau >= 0
               ? 1 / (tau + Math.sqrt(1 + tau * tau))
@@ -692,22 +671,22 @@
             const c = 1 / Math.sqrt(1 + t * t);
             const s = t * c;
 
-            A[p][p] = app - t * apq;
-            A[q][q] = aqq + t * apq;
-            A[p][q] = 0;
-            A[q][p] = 0;
+            A.at(p).splice(p, 1, app - t * apq);
+            A.at(q).splice(q, 1, aqq + t * apq);
+            A.at(p).splice(q, 1, 0);
+            A.at(q).splice(p, 1, 0);
 
             for (let r = 0; r < n; r++) {
               if (r !== p && r !== q) {
-                const arp = A[r][p], arq = A[r][q];
-                A[r][p] = c * arp - s * arq;
-                A[p][r] = A[r][p];
-                A[r][q] = s * arp + c * arq;
-                A[q][r] = A[r][q];
+                const arp = A.at(r).at(p), arq = A.at(r).at(q);
+                A.at(r).splice(p, 1, c * arp - s * arq);
+                A.at(p).splice(r, 1, A.at(r).at(p));
+                A.at(r).splice(q, 1, s * arp + c * arq);
+                A.at(q).splice(r, 1, A.at(r).at(q));
               }
-              const vrp = V[r][p], vrq = V[r][q];
-              V[r][p] = c * vrp - s * vrq;
-              V[r][q] = s * vrp + c * vrq;
+              const vrp = V.at(r).at(p), vrq = V.at(r).at(q);
+              V.at(r).splice(p, 1, c * vrp - s * vrq);
+              V.at(r).splice(q, 1, s * vrp + c * vrq);
             }
           }
         }
@@ -715,21 +694,22 @@
       }
 
       const pairs = Array.from({ length: n }, (_, i) => ({
-        val: A[i][i],
-        vec: V.map(row => row[i])
+        val: A.at(i).at(i),
+        vec: V.map(row => row.at(i))
       }));
       pairs.sort((a, b) => b.val - a.val);
       return pairs;
     }
+
     function pearsonCorrelation(xs, ys) {
       const n = xs.length;
       if (n < 2) return 0;
       let mx = 0, my = 0;
-      for (let i = 0; i < n; i++) { mx += xs[i]; my += ys[i]; }
+      for (let i = 0; i < n; i++) { mx += xs.at(i); my += ys.at(i); }
       mx /= n; my /= n;
       let num = 0, dx2 = 0, dy2 = 0;
       for (let i = 0; i < n; i++) {
-        const dx = xs[i] - mx, dy = ys[i] - my;
+        const dx = xs.at(i) - mx, dy = ys.at(i) - my;
         num += dx * dy;
         dx2 += dx * dx;
         dy2 += dy * dy;
@@ -752,39 +732,42 @@
       for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
           let dot = 0;
-          for (let d = 0; d < dimensions; d++) dot += vectors[symbols[i]][d] * vectors[symbols[j]][d];
+          const vi = vectors[symbols.at(i)], vj = vectors[symbols.at(j)];
+          for (let d = 0; d < dimensions; d++) dot += vi.at(d) * vj.at(d);
           dot = Math.max(-1, Math.min(1, dot));
-          S[i][j] = S[j][i] = dot;
+          S.at(i).splice(j, 1, dot);
+          S.at(j).splice(i, 1, dot);
           const dist = Math.max(0, 1 - dot);
-          D2[i][j] = D2[j][i] = dist * dist;
+          D2.at(i).splice(j, 1, dist * dist);
+          D2.at(j).splice(i, 1, dist * dist);
         }
       }
 
       const rowMean = D2.map(r => r.reduce((a, b) => a + b, 0) / n);
       const grandMean = rowMean.reduce((a, b) => a + b, 0) / n;
       const B = Array.from({ length: n }, (_, i) =>
-        Array.from({ length: n }, (_, j) => -0.5 * (D2[i][j] - rowMean[i] - rowMean[j] + grandMean))
+        Array.from({ length: n }, (_, j) => -0.5 * (D2.at(i).at(j) - rowMean.at(i) - rowMean.at(j) + grandMean))
       );
 
       const eigPairs = jacobiEigenTop2(B);
-      const l1 = Math.max(1e-12, eigPairs.val);
-      const l2 = Math.max(1e-12, eigPairs.val);
-      const coords = symbols.map((_, i) => [eigPairs.vec[i] * Math.sqrt(l1), eigPairs.vec[i] * Math.sqrt(l2)]);
+      const l1 = Math.max(1e-12, eigPairs.at(0).val);
+      const l2 = Math.max(1e-12, eigPairs.at(1).val);
+      const coords = symbols.map((_, i) => new Array(eigPairs.at(0).vec.at(i) * Math.sqrt(l1), eigPairs.at(1).vec.at(i) * Math.sqrt(l2)));
 
       let anchorIdx = 0, maxR = -1;
       coords.forEach((xy, i) => {
-        const r = Math.hypot(xy, xy);
+        const r = Math.hypot(xy.at(0), xy.at(1));
         if (r > maxR) { maxR = r; anchorIdx = i; }
       });
-      const rot = -Math.atan2(coords[anchorIdx], coords[anchorIdx]);
+      const rot = -Math.atan2(coords.at(anchorIdx).at(1), coords.at(anchorIdx).at(0));
       const cosR = Math.cos(rot), sinR = Math.sin(rot);
 
       const anglesRad = { E0: 0 };
       const pitch12 = { E0: 0 };
-      const angleArr = [];
+      const angleArr = new Array();
       symbols.forEach((sym, i) => {
-        const rx = coords[i] * cosR - coords[i] * sinR;
-        const ry = coords[i] * sinR + coords[i] * cosR;
+        const rx = coords.at(i).at(0) * cosR - coords.at(i).at(1) * sinR;
+        const ry = coords.at(i).at(0) * sinR + coords.at(i).at(1) * cosR;
         let theta = Math.atan2(ry, rx);
         if (theta < 0) theta += 2 * Math.PI;
         anglesRad[sym] = theta;
@@ -792,12 +775,12 @@
         angleArr.push(theta);
       });
 
-      const origPairs = [], circPairs = [];
+      const origPairs = new Array(), circPairs = new Array();
       let numStress = 0, denStress = 0;
       for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
-          const sOrig = S[i][j];
-          const sCirc = Math.cos(angleArr[i] - angleArr[j]);
+          const sOrig = S.at(i).at(j);
+          const sCirc = Math.cos(angleArr.at(i) - angleArr.at(j));
           origPairs.push(sOrig);
           circPairs.push(sCirc);
           const dO = 1 - sOrig, dC = 1 - sCirc;
@@ -825,8 +808,8 @@
       let match, consumed = "";
       const raw = {};
       while ((match = re.exec(clean)) !== null) {
-        const sym = match, numStr = match;
-        consumed += match;
+        const sym = match.at(1), numStr = match.at(2);
+        consumed += match.at(0);
         const val = numStr ? parseFloat(numStr) : 1.0;
         raw[sym] = (raw[sym] || 0) + val;
       }
@@ -834,7 +817,7 @@
       const total = Object.values(raw).reduce((a, b) => a + b, 0);
       if (total <= 0) throw new Error("Total stoichiometric weight must be positive.");
       const weights = {};
-      for (const [k, v] of Object.entries(raw)) weights[k] = v / total;
+      for (const entry of Object.entries(raw)) weights[entry.at(0)] = entry.at(1) / total;
       return weights;
     }
 
@@ -855,9 +838,10 @@
       const rng = mulberry32(seed);
       const weightsMap = parseStoichiometry(formula);
       const e0Weight = weightsMap["E0"] || 0;
-      const active = Object.entries(weightsMap).filter(([s, w]) => s !== "E0" && w > 0);
+      const active = Object.entries(weightsMap).filter(pair => pair.at(0) !== "E0" && pair.at(1) > 0);
 
-      for (const [sym] of active) {
+      for (const pair of active) {
+        const sym = pair.at(0);
         if (proj.anglesRad[sym] === undefined) {
           throw new Error(`Element "${sym}" is not present in embedding "${proj.name}".`);
         }
@@ -865,7 +849,7 @@
 
       if (active.length === 0 || e0Weight >= 1 - 1e-12) {
         return {
-          formula, weightsMap, active: [],
+          formula, weightsMap, active: new Array(),
           coherence: 0, meanAngle: 0, highDimNorm: 0,
           ciLow: 0, ciHigh: 0, pValue: 1.0, isNullBaseline: true
         };
@@ -873,12 +857,15 @@
 
       let cx = 0, sy = 0;
       const centroid = new Array(proj.dimensions).fill(0);
-      active.forEach(([sym, w]) => {
+      active.forEach(pair => {
+        const sym = pair.at(0), w = pair.at(1);
         const theta = proj.anglesRad[sym];
         cx += w * Math.cos(theta);
         sy += w * Math.sin(theta);
         const vec = proj.vectors[sym];
-        for (let d = 0; d < proj.dimensions; d++) centroid[d] += w * vec[d];
+        for (let d = 0; d < proj.dimensions; d++) {
+          centroid.splice(d, 1, centroid.at(d) + w * vec.at(d));
+        }
       });
 
       const coherence = Math.hypot(cx, sy);
@@ -888,38 +875,39 @@
 
       let ciLow = coherence, ciHigh = coherence;
       if (active.length > 1) {
-        const nBoot = 250, bootVals = [], activeTotal = 1 - e0Weight;
+        const nBoot = 250, bootVals = new Array(), activeTotal = 1 - e0Weight;
         for (let b = 0; b < nBoot; b++) {
-          const gammas = active.map(([, w]) => sampleGamma(Math.max(0.5, w * 50), rng));
+          const gammas = active.map(pair => sampleGamma(Math.max(0.5, pair.at(1) * 50), rng));
           const gSum = gammas.reduce((a, c) => a + c, 0) || 1;
           let bx = 0, by = 0;
-          active.forEach(([sym], idx) => {
-            const bw = (gammas[idx] / gSum) * activeTotal;
-            bx += bw * Math.cos(proj.anglesRad[sym]);
-            by += bw * Math.sin(proj.anglesRad[sym]);
+          active.forEach((pair, idx) => {
+            const bw = (gammas.at(idx) / gSum) * activeTotal;
+            bx += bw * Math.cos(proj.anglesRad[pair.at(0)]);
+            by += bw * Math.sin(proj.anglesRad[pair.at(0)]);
           });
           bootVals.push(Math.hypot(bx, by));
         }
         bootVals.sort((a, b) => a - b);
-        ciLow = bootVals[Math.floor(0.025 * nBoot)];
-        ciHigh = bootVals[Math.floor(0.975 * nBoot)];
+        ciLow = bootVals.at(Math.floor(0.025 * nBoot));
+        ciHigh = bootVals.at(Math.floor(0.975 * nBoot));
       }
+
       let pValue = 1.0;
       const pool = proj.symbols.map(s => proj.anglesRad[s]);
       if (active.length > 1 && pool.length >= active.length) {
         const nPerm = 500;
         let exceed = 0;
         for (let p = 0; p < nPerm; p++) {
-          const chosen = [];
+          const chosen = new Array();
           const used = new Set();
           while (chosen.length < active.length) {
             const idx = Math.floor(rng() * pool.length);
-            if (!used.has(idx)) { used.add(idx); chosen.push(pool[idx]); }
+            if (!used.has(idx)) { used.add(idx); chosen.push(pool.at(idx)); }
           }
           let px = 0, py = 0;
-          active.forEach(([, w], i) => {
-            px += w * Math.cos(chosen[i]);
-            py += w * Math.sin(chosen[i]);
+          active.forEach((pair, i) => {
+            px += pair.at(1) * Math.cos(chosen.at(i));
+            py += pair.at(1) * Math.sin(chosen.at(i));
           });
           if (Math.hypot(px, py) >= coherence - 1e-12) exceed++;
         }
@@ -933,7 +921,7 @@
       };
     }
 
-    const PALETTE = ["#38bdf8", "#34d399", "#fbbf24", "#f472b6", "#a78bfa", "#fb923c", "#2dd4bf"];
+    const PALETTE = new Array("#38bdf8", "#34d399", "#fbbf24", "#f472b6", "#a78bfa", "#fb923c", "#2dd4bf");
 
     function drawWheel(primaryProj, primaryMetrics, compareProj, compareMetrics, isRigor) {
       const canvas = document.getElementById("wheelCanvas");
@@ -952,7 +940,7 @@
 
       ctx.strokeStyle = "rgba(38, 50, 74, 0.45)";
       ctx.lineWidth = 1;
-      [0.33, 0.66].forEach(frac => {
+      new Array(0.33, 0.66).forEach(frac => {
         ctx.beginPath();
         ctx.arc(cx, cy, R * frac, 0, 2 * Math.PI);
         ctx.stroke();
@@ -982,16 +970,18 @@
         ctx.arc(cx + R * Math.cos(theta), cy + R * Math.sin(theta), 2.2, 0, 2 * Math.PI);
         ctx.fill();
       });
+
       if (compareProj && compareMetrics && compareMetrics.active.length > 0) {
         const R2 = R * 0.72;
         ctx.strokeStyle = "rgba(129, 140, 248, 0.35)";
-        ctx.setLineDash();
+        ctx.setLineDash(new Array(4, 4));
         ctx.beginPath();
         ctx.arc(cx, cy, R2, 0, 2 * Math.PI);
         ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.setLineDash(new Array());
 
-        const pts2 = compareMetrics.active.map(([sym, w]) => {
+        const pts2 = compareMetrics.active.map(pair => {
+          const sym = pair.at(0), w = pair.at(1);
           const th = compareProj.anglesRad[sym];
           return { sym, w, x: cx + R2 * Math.cos(th), y: cy + R2 * Math.sin(th) };
         });
@@ -1010,15 +1000,16 @@
           ctx.fill();
           ctx.fillStyle = "#c7d2fe";
           ctx.font = "10px ui-monospace, monospace";
-          ctx.fillText(`${p.sym} (${compareProj.name.split("-")})`, p.x, p.y - 11);
+          ctx.fillText(`${p.sym} (${compareProj.name.split("-").at(0)})`, p.x, p.y - 11);
         });
       }
 
-      const pts = primaryMetrics.active.map(([sym, w], idx) => {
+      const pts = primaryMetrics.active.map((pair, idx) => {
+        const sym = pair.at(0), w = pair.at(1);
         const th = primaryProj.anglesRad[sym];
         return {
           sym, w, th,
-          color: PALETTE[idx % PALETTE.length],
+          color: PALETTE.at(idx % PALETTE.length),
           x: cx + R * Math.cos(th),
           y: cy + R * Math.sin(th)
         };
@@ -1069,7 +1060,6 @@
       ctx.arc(cx, cy, 4, 0, 2 * Math.PI);
       ctx.fill();
     }
-
     function sonifyCompound(proj, metrics) {
       if (metrics.isNullBaseline || metrics.active.length === 0) return;
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1077,7 +1067,8 @@
       const ctx = new AudioCtx();
       const now = ctx.currentTime;
 
-      metrics.active.forEach(([sym, w], idx) => {
+      metrics.active.forEach((pair, idx) => {
+        const sym = pair.at(0), w = pair.at(1);
         const theta = proj.anglesRad[sym];
         const freq = 261.63 * Math.pow(2, theta / (2 * Math.PI));
         const osc = ctx.createOscillator();
@@ -1096,6 +1087,7 @@
         osc.stop(now + idx * 0.14 + 1.2);
       });
     }
+
     function buildLayer3Narrative(proj, metrics) {
       if (metrics.isNullBaseline) {
         return `<strong>Null Baseline State (E0):</strong> Compound contains zero-vector baseline weight. Circular resultant collapses toward the origin (C<sub>&theta;</sub> = ${metrics.coherence.toFixed(3)}), providing a reference floor against spurious pattern matching.`;
@@ -1120,11 +1112,11 @@
         return "Insufficient element coverage in active embedding to run starter benchmark.";
       }
 
-      const cohs = [], ys = [], nullCohs = [];
+      const cohs = new Array(), ys = new Array(), nullCohs = new Array();
       const pool = proj.symbols.map(s => proj.anglesRad[s]);
       const shuffledMap = {};
       const permPool = pool.slice().sort(() => rng() - 0.5);
-      proj.symbols.forEach((s, i) => { shuffledMap[s] = permPool[i]; });
+      proj.symbols.forEach((s, i) => { shuffledMap[s] = permPool.at(i); });
 
       validItems.forEach(item => {
         const m = evaluateCompound(item.formula, proj, 42);
@@ -1132,7 +1124,8 @@
         ys.push(item.y);
 
         let nx = 0, ny = 0;
-        m.active.forEach(([sym, w]) => {
+        m.active.forEach(pair => {
+          const sym = pair.at(0), w = pair.at(1);
           const ang = shuffledMap[sym] || 0;
           nx += w * Math.cos(ang);
           ny += w * Math.sin(ang);
@@ -1144,7 +1137,7 @@
       const rNull = pearsonCorrelation(nullCohs, ys);
       const beatsNull = Math.abs(rReal) > Math.abs(rNull) + 0.05;
 
-      return [
+      return new Array(
         `Embedding: ${proj.name} (hash:${proj.hash})`,
         `MDS Fidelity r_proj = ${proj.pearsonR.toFixed(4)} | Stress = ${proj.stress.toFixed(4)}`,
         `Benchmark (n=${validItems.length} MP phases, ΔHf):`,
@@ -1153,7 +1146,7 @@
         beatsNull
           ? `VERDICT: Circular projection retains measurable correlation signal over random angle null.`
           : `NULL/NEGATIVE RESULT: 2D circular coherence does not outperform shuffled angles on ΔHf; use full-dimensional vectors for regression.`
-      ].join("\n");
+      ).join("\n");
     }
 
     const STATE = {
@@ -1162,7 +1155,7 @@
       compareKey: "NONE",
       rigorMode: false,
       currentMetrics: null,
-      ledger: []
+      ledger: new Array()
     };
 
     function populateSelectors() {
@@ -1210,8 +1203,9 @@
       stackBar.innerHTML = "";
       tbody.innerHTML = "";
 
-      Object.entries(metrics.weightsMap).forEach(([sym, w], idx) => {
-        const color = sym === "E0" ? "#475569" : PALETTE[idx % PALETTE.length];
+      Object.entries(metrics.weightsMap).forEach((pair, idx) => {
+        const sym = pair.at(0), w = pair.at(1);
+        const color = sym === "E0" ? "#475569" : PALETTE.at(idx % PALETTE.length);
         const seg = document.createElement("div");
         seg.style.width = `${(w * 100).toFixed(2)}%`;
         seg.style.background = color;
@@ -1220,7 +1214,7 @@
 
         const theta = proj.anglesRad[sym] || 0;
         const pitch = proj.pitch12[sym] || 0;
-        const vecNorm = Math.hypot(...(proj.vectors[sym] || ));
+        const vecNorm = Math.hypot(...(proj.vectors[sym] || new Array()));
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><strong style="color:${color}">${sym}</strong></td>
@@ -1245,7 +1239,7 @@
       }
     }
     function handleCustomFileUpload(evt) {
-      const file = evt.target.files[0];
+      const file = evt.target.files.item(0);
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
@@ -1255,14 +1249,14 @@
           if (file.name.toLowerCase().endsWith(".json")) {
             const parsed = JSON.parse(text);
             const src = parsed.vectors ? parsed.vectors : parsed;
-            for (const [k, v] of Object.entries(src)) rawVectors[k] = v.map(Number);
+            for (const pair of Object.entries(src)) rawVectors[pair.at(0)] = pair.at(1).map(Number);
           } else {
             const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-            const firstCols = lines[0].split(",");
-            const start = isNaN(parseFloat(firstCols[1])) ? 1 : 0;
+            const firstCols = lines.at(0).split(",");
+            const start = isNaN(parseFloat(firstCols.at(1))) ? 1 : 0;
             for (let i = start; i < lines.length; i++) {
-              const parts = lines[i].split(",");
-              const sym = parts[0].trim();
+              const parts = lines.at(i).split(",");
+              const sym = parts.at(0).trim();
               if (sym) rawVectors[sym] = parts.slice(1).map(Number);
             }
           }
@@ -1306,7 +1300,7 @@
     }
 
     function downloadTextFile(filename, content, mime) {
-      const blob = new Blob([content], { type: mime });
+      const blob = new Blob(new Array(content), { type: mime });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -1317,8 +1311,8 @@
 
     window.addEventListener("DOMContentLoaded", () => {
       const starters = buildStarterEmbeddings();
-      for (const [k, emb] of Object.entries(starters)) {
-        STATE.projections[k] = projectToCircleMDS(emb);
+      for (const pair of Object.entries(starters)) {
+        STATE.projections[pair.at(0)] = projectToCircleMDS(pair.at(1));
       }
       populateSelectors();
       updateWorkbench();
@@ -1390,7 +1384,7 @@
           formula: m.formula,
           stoichiometry_weights: m.weightsMap,
           coherence: m.coherence,
-          ci_95: [m.ciLow, m.ciHigh],
+          ci_95: new Array(m.ciLow, m.ciHigh),
           pValue: m.pValue,
           highDimNorm: m.highDimNorm,
           raw_element_vectors: rawVectors
@@ -1403,18 +1397,21 @@
       });
 
       document.getElementById("exportMdBtn").addEventListener("click", () => {
-        const md = [
+        const md = new Array(
           "# HTE Resonance Observatory — Reproducibility Ledger",
           "",
           "| Timestamp (UTC) | Formula | Embedding | Hash | r_proj | C_theta | 95% CI | p-value |",
           "|---|---|---|---|---|---|---|---|",
           ...STATE.ledger.map(e =>
-            `| ${e.timestamp_utc} | ${e.formula} | ${e.embedding_name} | \`${e.embedding_hash}\` | ${e.projection_pearson_r.toFixed(3)} | ${e.coherence.toFixed(4)} | [${e.ci_95[0].toFixed(3)}, ${e.ci_95[1].toFixed(3)}] | ${e.pValue.toFixed(4)} |`
+            `| ${e.timestamp_utc} | ${e.formula} | ${e.embedding_name} | \`${e.embedding_hash}\` | ${e.projection_pearson_r.toFixed(3)} | ${e.coherence.toFixed(4)} | [${e.ci_95.at(0).toFixed(3)}, ${e.ci_95.at(1).toFixed(3)}] | ${e.pValue.toFixed(4)} |`
           )
-        ].join("\n");
+        ).join("\n");
         downloadTextFile("hte_atlas_reproducibility_ledger.md", md, "text/markdown");
       });
     });
   </script>
+</body>
+</html>
+
 </body>
 </html>
