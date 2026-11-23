@@ -6,14 +6,14 @@ import sys
 from pathlib import Path
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 
-def test_index_html_structure_and_rigor_elements() -> None:
-    index_path = ROOT / "index.html"
-    assert index_path.exists(), "index.html must exist at repository root."
+def test_web_index_html_structure_and_rigor_elements() -> None:
+    index_path = ROOT / "web" / "index.html"
+    assert index_path.exists(), "web/index.html must exist for GitHub Pages deployment."
     html = index_path.read_text(encoding="utf-8")
 
     # Verify complete HTML framing and three-layer UI controls
@@ -31,15 +31,15 @@ def test_index_html_structure_and_rigor_elements() -> None:
     assert "z % 12" not in html
 
 
-def test_index_html_inline_js_syntax_with_node() -> None:
+def test_web_index_html_inline_js_syntax_with_node() -> None:
     node_bin = shutil.which("node")
     if node_bin is None:
         pytest.skip("Node.js not installed; skipping JS syntax check.")
 
-    html = (ROOT / "index.html").read_text(encoding="utf-8")
+    html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
     start = html.find("<script>")
     end = html.rfind("</script>")
-    assert start != -1 and end != -1 and end > start, "Missing inline <script> block in index.html."
+    assert start != -1 and end != -1 and end > start, "Missing inline <script> block in web/index.html."
 
     js_code = html[start + len("<script>") : end]
     proc = subprocess.run(
@@ -48,7 +48,7 @@ def test_index_html_inline_js_syntax_with_node() -> None:
         text=True,
         capture_output=True,
     )
-    assert proc.returncode == 0, f"JavaScript syntax error in index.html:\n{proc.stderr}"
+    assert proc.returncode == 0, f"JavaScript syntax error in web/index.html:\n{proc.stderr}"
 
 
 def test_end_to_end_python_pipeline_smoke() -> None:
