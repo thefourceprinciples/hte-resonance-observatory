@@ -1,23 +1,23 @@
-from hte_observatory import build_hte_signature, parse_formula
-from hte_observatory.ledger import build_run_ledger
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+import pytest
+
+ROOT = Path(__file__).resolve().parents
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from hte_observatory import evaluate_compound, parse_stoichiometry, project_to_circle_mds
+from build_starter_embeddings import build_magpie_embedding
 
 
-def test_parse_simple_formula():
-    assert parse_formula("SiO2") == {"Si": 1, "O": 2}
+def test_core_stoichiometry_and_coherence_bounds() -> None:
+    weights = parse_stoichiometry("YBa2Cu3O7")
+    assert pytest.approx(sum(weights.values()), rel=1e-9) == 1.0
 
-
-def test_parse_grouped_formula():
-    assert parse_formula("Ca10(PO4)6(OH)2") == {"Ca": 10, "P": 6, "O": 26, "H": 2}
-
-
-def test_build_signature_uses_atomic_number_mod_12():
-    signature = build_hte_signature("SiO2")
-    assert signature["pitch_class_histogram"] == {"2": 1, "8": 2}
-    assert signature["mapping_rule"] == "pitch_class = atomic_number mod 12"
-    assert signature["claim_boundary"] == "derived_hte_mapping_only"
-
-
-def test_ledger_claim_boundary():
-    ledger = build_run_ledger("H2O")
-    assert ledger["claim_level"] == "L2"
-    assert "does not establish" in ledger["evidence_boundary"]
+    emb = build_magpie_embedding()
+    proj = project_to_circle_mds(emb)
+    res = evaluate_compound("YBa2Cu3O7", emb, proj, n_bootstrap=30, n_permutations=30)
+    assert 0.0 <= res.modal_coherence <= 1.0
+    assert 0.0 < res.null_permutation_p_value <= 1.0
