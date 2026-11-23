@@ -103,3 +103,9 @@ pip install -e ".[dev]"
 # Execute all unit, rigor, and HTML/JS smoke tests
 pytest -v
 ```
+---
+
+### Interpreting Validation Outputs
+* **`circular_features_mae` vs. `full_embedding_baseline_mae`:** Quantifies the exact predictive trade-off incurred when compressing a multi-dimensional elemental representation down to $S^1$.
+* **`ablation_shuffled_circle_mae`:** Establishes whether the circular geometry carries genuine chemical ordering beyond random angle assignments.
+* **`family_cv_mae`:** Tests out-of-distribution generalization when an entire structural class (such as perovskites, cuprates, or spinels) is held out during training.
