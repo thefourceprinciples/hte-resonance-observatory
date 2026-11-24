@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HTE Resonance Observatory — v0.4 MAE</title>
+  <title>HTE Resonance Observatory — Unified Workbench (v0.4 MAE / v5.0 Rigor)</title>
   <style>
     :root {
       --bg: #070b14;
@@ -13,8 +13,10 @@
       --text: #e6edf7;
       --muted: #8b9ec2;
       --accent: #38bdf8;
+      --accent-2: #818cf8;
       --gold: #fbbf24;
       --good: #34d399;
+      --bad: #f87171;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
@@ -23,24 +25,77 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100vh;
-      overflow: hidden;
+      min-height: 100vh;
       background: var(--bg);
       color: var(--text);
       font-family: var(--sans);
       font-size: 13px;
+      line-height: 1.45;
     }
 
-    body {
+    /* Top Version & Rigor Bar */
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 16px;
+      background: #090d16;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .brand-group { display: flex; align-items: center; gap: 10px; }
+    .brand-group strong { letter-spacing: 0.04em; font-size: 14px; }
+    .mode-pill {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(251, 191, 36, 0.16);
+      color: var(--gold);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+    }
+    body.rigor-mode .mode-pill {
+      background: rgba(52, 211, 153, 0.16);
+      color: var(--good);
+      border-color: rgba(52, 211, 153, 0.4);
+    }
+
+    .switcher-controls { display: flex; align-items: center; gap: 8px; }
+    .mode-btn {
+      cursor: pointer;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .mode-btn.active-v4 { border-color: var(--gold); color: var(--gold); background: rgba(251, 191, 36, 0.12); }
+    .mode-btn.active-v5 { border-color: var(--good); color: var(--good); background: rgba(52, 211, 153, 0.12); }
+
+    /* Rigor Mode Visibility Rules */
+    body.rigor-mode .mae-only { display: none !important; }
+    body:not(.rigor-mode) .rigor-only { display: none !important; }
+
+    /* Main 3-Column Workbench */
+    .workspace {
       display: grid;
-      grid-template-columns: 360px 1fr 400px;
+      grid-template-columns: 365px 1fr 415px;
       gap: 10px;
       padding: 10px;
+      max-width: 1800px;
+      margin: 0 auto;
     }
-
-    @media (max-width: 1200px) {
-      html, body { height: auto; overflow: auto; }
-      body { grid-template-columns: 1fr; }
+    @media (max-width: 1260px) {
+      .workspace { grid-template-columns: 1fr; }
     }
 
     .pane {
@@ -50,8 +105,12 @@
       padding: 12px;
       display: flex;
       flex-direction: column;
+      gap: 10px;
+      max-height: calc(100vh - 64px);
       overflow-y: auto;
-      min-height: 0;
+    }
+    @media (max-width: 1260px) {
+      .pane { max-height: none; }
     }
 
     .pane-header {
@@ -59,36 +118,32 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
-      margin-bottom: 10px;
+      padding-bottom: 7px;
     }
-
     .pane-header h2 {
       margin: 0;
-      font-size: 13px;
+      font-size: 12.5px;
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      color: var(--text);
     }
 
-    .badge-v4 {
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 4px;
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--accent);
-      border: 1px solid rgba(56, 189, 248, 0.35);
+    .subcard {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px;
     }
 
     .control-row {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 8px;
+      align-items: center;
     }
 
-    input[type="text"], select {
-      background: var(--panel-alt);
+    input[type="text"], input[type="number"], select {
+      background: #0a0f1c;
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 6px;
@@ -97,418 +152,973 @@
       font-size: 12px;
     }
 
-    button {
+    button.btn {
       cursor: pointer;
-      background: var(--panel-alt);
+      background: #182238;
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 5px 9px;
-      font-size: 12px;
+      font-size: 11.5px;
+      transition: border-color 0.15s;
     }
-    button:hover { border-color: var(--accent); }
+    button.btn:hover { border-color: var(--accent); }
+    button.btn.primary {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
 
-    canvas#v4Wheel {
+    /* Canvases */
+    canvas#scope {
       width: 100%;
       max-width: 320px;
-      height: auto;
-      aspect-ratio: 1 / 1;
+      height: 320px;
       border-radius: 50%;
-      background: radial-gradient(circle, #11192e 0%, #070b14 75%);
       border: 1px solid var(--border);
       margin: 0 auto;
+      display: block;
+      background: #050811;
     }
-
-    .ptable-grid {
-      display: grid;
-      grid-template-columns: repeat(18, minmax(0, 1fr));
-      gap: 2px;
+    canvas#dopingChart {
+      width: 100%;
+      height: 110px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #080d18;
+      display: block;
       margin-top: 6px;
     }
 
-    .el-tile {
-      aspect-ratio: 1 / 1.12;
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-family: var(--mono);
-      padding: 1px;
-    }
-    .el-tile:hover, .el-tile.active {
-      border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.18);
-    }
-    .el-tile .sym { font-size: 10px; font-weight: 700; line-height: 1; }
-    .el-tile .num { font-size: 7px; color: var(--muted); line-height: 1; }
-
+    /* Key-Value Readouts */
     .kv-row {
       display: flex;
       justify-content: space-between;
+      gap: 8px;
       border-bottom: 1px solid rgba(35, 48, 77, 0.6);
       padding: 4px 0;
       font-family: var(--mono);
       font-size: 11px;
     }
+    .kv-row:last-child { border-bottom: none; }
+    .kv-row span:first-child { color: var(--muted); }
 
-    .dossier-box {
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 12px;
-      line-height: 1.5;
-      flex: 1;
-      overflow-y: auto;
+    /* 119-Element Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(15, minmax(0, 1fr));
+      gap: 3px;
     }
-    .dossier-box h3 {
-      margin: 8px 0 3px;
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+    }
+    .grid button {
+      cursor: pointer;
+      background: #101729;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-top-width: 3px;
+      border-radius: 4px;
+      padding: 3px 1px;
+      font-family: var(--mono);
+      font-size: 9.5px;
+      line-height: 1.15;
+      white-space: pre-line;
+      text-align: center;
+    }
+    .grid button:hover, .grid button.active {
+      background: rgba(56, 189, 248, 0.22);
+      border-color: var(--accent);
+    }
+    .grid button.has-canonical { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.45); }
+
+    /* Discovery Badges & Glossary */
+    .badges { display: flex; flex-wrap: wrap; gap: 4px; }
+    .badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #0d1322;
+      border: 1px solid #2a2a2a;
+      color: var(--muted);
+    }
+    .badge.unlocked { color: var(--text); background: rgba(56, 189, 248, 0.1); }
+
+    .g-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(35, 48, 77, 0.5);
+      font-size: 11px;
+    }
+    .g-card:last-child { border-bottom: none; }
+    .g-card button {
+      cursor: pointer;
+      background: #182238;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3px 7px;
+      font-family: var(--mono);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    /* MATLAS 9-Section Dossier */
+    .d-lock {
+      background: rgba(251, 191, 36, 0.1);
+      border-left: 3px solid var(--gold);
+      padding: 7px 9px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      margin-bottom: 8px;
+    }
+    .d-card {
+      background: #0d1322;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 7px;
+      font-size: 11.5px;
+    }
+    .d-card h2 {
+      margin: 0 0 4px;
       font-size: 11px;
       text-transform: uppercase;
-      color: var(--accent);
       letter-spacing: 0.04em;
+      color: var(--accent);
     }
+    .d-card ul { margin: 4px 0 0; padding-left: 16px; }
+    .d-card li { margin-bottom: 2px; }
+
+    /* Log & Ledger */
+    pre#log {
+      background: #060911;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      max-height: 150px;
+      overflow: auto;
+      white-space: pre-wrap;
+      color: #a5f3fc;
+      margin: 0;
+    }
+    pre#log.error { color: var(--bad); border-color: var(--bad); }
   </style>
 </head>
 <body>
-  <!-- LEFT PANE: 12-FOLD STANDING-WAVE WHEEL & DOPING PHASE SWEEP -->
-  <section class="pane">
-    <div class="pane-header">
-      <h2>12-Fold Standing-Wave Wheel</h2>
-      <span class="badge-v4">v0.4 MAE</span>
+  <!-- TOP UNIFIED VERSION & RIGOR SWITCHER -->
+  <header class="top-bar">
+    <div class="brand-group">
+      <strong>HTE RESONANCE OBSERVATORY</strong>
+      <span class="mode-pill" id="activeModePill">ACTIVE: v0.4 MAE (Exploratory + Harmonic)</span>
     </div>
-    <canvas id="v4Wheel" width="340" height="340"></canvas>
-    <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">
-      <span style="color:var(--accent);">&#9679;</span> Active Element &nbsp;
-      <span style="color:var(--gold);">&#9675;</span> Gold Modal Tonic Halo
+    <div class="switcher-controls">
+      <button type="button" class="mode-btn active-v4" id="btnModeV4">v0.4 MAE</button>
+      <button type="button" class="mode-btn" id="btnModeV5">v5.0 Rigor</button>
     </div>
+  </header>
 
-    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
-        <span>Fource Lock Doping Sweep (x): <strong id="v4SweepLabel" style="font-family:var(--mono);">0.15</strong></span>
-        <span style="color:var(--muted);">La<sub>1-x</sub>Sr<sub>x</sub>CuO<sub>4</sub></span>
+  <main class="workspace">
+    <!-- LEFT PANE: 12-FOLD STANDING-WAVE WHEEL, DOPING SWEEP & 7-STATE CATALOG -->
+    <section class="pane">
+      <div class="pane-header">
+        <h2>12-Fold Standing-Wave Wheel</h2>
+        <span class="mae-only" style="font-size:11px;color:var(--gold);">&#9675; Gold Modal Tonic</span>
+        <span class="rigor-only" style="font-family:var(--mono);font-size:11px;color:var(--good);">S&sup1; Phase Manifold</span>
       </div>
-      <input type="range" id="v4SweepSlider" min="0" max="1" step="0.01" value="0.15" style="width:100%;" />
-      <div class="control-row" style="margin-top:8px;">
-        <button class="v4-preset" data-f="YBa2Cu3O7">YBCO</button>
-        <button class="v4-preset" data-f="BaTiO3">BaTiO3</button>
-        <button class="v4-preset" data-f="SiO2">SiO2</button>
-        <button class="v4-preset" data-f="GaAs">GaAs</button>
-        <button class="v4-preset" data-f="E0">E0 Substrate</button>
+
+      <canvas id="scope" width="320" height="320"></canvas>
+
+      <div class="subcard">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <strong style="font-size:11.5px;text-transform:uppercase;color:var(--accent);">Stoichiometric Doping Sweep</strong>
+          <span style="font-family:var(--mono);font-size:11px;">x = <strong id="dopeVal" style="color:var(--gold);">0.90</strong></span>
+        </div>
+        <div class="control-row" style="margin-bottom:6px;">
+          <input type="text" id="dopeBase" value="YBa2Cu3O6" placeholder="Base (e.g. YBa2Cu3O6)" style="flex:1;min-width:110px;" />
+          <input type="text" id="dopeEl" value="O" placeholder="Dopant" style="width:54px;text-align:center;" />
+        </div>
+        <input type="range" id="dopeSlider" min="0" max="2" step="0.05" value="0.90" style="width:100%;" oninput="applyDoping(this.value)" />
+        <canvas id="dopingChart"></canvas>
+        <div class="control-row" style="margin-top:6px;">
+          <button type="button" class="btn" onclick="loadDopingPreset('YBa2Cu3O6','O',0.90)">YBCO (O<sub>6.9</sub>)</button>
+          <button type="button" class="btn" onclick="loadDopingPreset('La2CuO4','Sr',0.15)">LSCO (Sr<sub>0.15</sub>)</button>
+          <button type="button" class="btn" onclick="loadDopingPreset('BaTiO3','Zr',0.10)">BZT (Zr<sub>0.10</sub>)</button>
+          <button type="button" class="btn" onclick="loadDopingPreset('E0','H',1.00)">E0 + H</button>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <!-- CENTER PANE: MULTI-ELEMENT STACKING & 119-ELEMENT PERIODIC TABLE -->
-  <section class="pane">
-    <div class="pane-header">
-      <h2>HTE Observatory &bull; 119-Element Grid</h2>
-      <span style="font-size:11px;color:var(--muted);">Hover to preview Atlas &bull; Click to stack</span>
-    </div>
-
-    <div class="control-row">
-      <input type="text" id="v4Formula" value="Be" style="flex:1;min-width:120px;" />
-      <select id="v4Proj">
-        <option value="v2">Group-Phase (v2)</option>
-        <option value="v1">Raw Z mod 12 (v1)</option>
-      </select>
-      <select id="v4Boundary">
-        <option value="Free Bulk">Free Bulk</option>
-        <option value="Metal Host / Hydride">Metal Host / Hydride</option>
-        <option value="Ceramic Matrix">Ceramic Matrix</option>
-        <option value="Cryo / Pressure">Cryo / Pressure</option>
-        <option value="Plasma Excited">Plasma Excited</option>
-      </select>
-    </div>
-
-    <div class="control-row">
-      <button id="v4EvalBtn" style="border-color:var(--accent);color:var(--accent);">Evaluate</button>
-      <button id="v4ClearBtn">Clear</button>
-      <button id="v4UndoBtn">Undo (-1)</button>
-      <button id="v4SonifyBtn">Sonify</button>
-    </div>
-
-    <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px;">
-      <div class="kv-row"><span>Formula / HTE (p, o)</span><strong id="v4OutSig">Be &mdash; HTE (1, 1)</strong></div>
-      <div class="kv-row"><span>6-Step Fifth Ladder</span><span id="v4OutLadder">Be &rarr; Na &rarr; Ar &rarr; Mn &rarr; Ge &rarr; Y</span></div>
-      <div class="kv-row"><span>Modal Field / C_HTE</span><span id="v4OutCoh">C_HTE +1.00 | Boundary: Free Bulk</span></div>
-      <div class="kv-row" style="border-bottom:none;"><span>7-State Discovery</span><strong id="v4OutState" style="color:var(--gold);">ORIGIN / SINGLET</strong></div>
-    </div>
-
-    <div id="v4Grid" class="ptable-grid"></div>
-  </section>
-
-  <!-- RIGHT PANE: DOCKED SCROLLABLE MATERIALS ATLAS LEGEND (MATLAS-Exxx) -->
-  <section class="pane">
-    <div class="pane-header">
-      <h2 id="v4AtlasHeader">MATLAS-E004-BERYLLIUM</h2>
-      <div style="display:flex;gap:4px;">
-        <button id="v4PinBtn" title="Pin/Lock Dossier">&#128204;</button>
-        <button id="v4CopyBtn" title="Copy Markdown Dossier">&#128203; Copy .md</button>
+      <div class="subcard">
+        <div style="font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">7-State Discovery Ledger</div>
+        <div id="discoveryBadges" class="badges" style="margin-bottom:8px;"></div>
+        <div id="glossaryList"></div>
       </div>
-    </div>
-    <div id="v4AtlasBody" class="dossier-box"></div>
-  </section>
+    </section>
 
-  <!-- FLOATING VERSION SWITCHER PILL -->
-  <div id="version-switcher" style="position:fixed;bottom:12px;left:12px;z-index:9999;display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(9,13,22,0.92);border:1px solid #26324a;border-radius:8px;font-family:system-ui,-apple-system,sans-serif;font-size:11px;color:#e6edf7;box-shadow:0 4px 14px rgba(0,0,0,0.45);">
-    <span style="padding:2px 6px;border-radius:4px;background:rgba(251,191,36,0.18);color:#fbbf24;font-family:monospace;font-weight:700;">v0.4 MAE</span>
-    <a href="v5.html" style="text-decoration:none;padding:3px 9px;border-radius:5px;background:#182032;color:#38bdf8;border:1px solid #26324a;font-weight:600;">Switch to v5.0 Rigor &rarr;</a>
-  </div>
+    <!-- CENTER PANE: FORMULA STACKER, OBSERVABLES & 119-ELEMENT PERIODIC GRID -->
+    <section class="pane">
+      <div class="pane-header">
+        <h2>HTE Observatory &bull; 119-Element Grid</h2>
+        <span style="font-size:11px;color:var(--muted);">Hover to preview Atlas &bull; Click to stack</span>
+      </div>
+
+      <div class="control-row">
+        <input type="text" id="formula" value="SiO2" placeholder="Formula (e.g. SiO2, YBa2Cu3O7, E0)" style="flex:1;min-width:130px;" />
+        <select id="modeSelect" onchange="mapFormula('Changed projection mode'); drawDopingCurve();">
+          <option value="group">Group-Phase (v2)</option>
+          <option value="raw">Raw Z mod 12 (v1)</option>
+        </select>
+        <select id="weightSelect" onchange="mapFormula('Changed weighting'); drawDopingCurve();">
+          <option value="stoich">Stoichiometric</option>
+          <option value="electronegativity">Pauling &chi;</option>
+          <option value="valence">Valence e-</option>
+        </select>
+        <select id="boundarySelect" onchange="mapFormula('Changed boundary'); drawDopingCurve();">
+          <option value="free_bulk">Free Bulk</option>
+          <option value="metal_host">Metal Host / Hydride</option>
+          <option value="ceramic_matrix">Ceramic / Proton Matrix</option>
+          <option value="cryo_pressure">Cryo / High-Pressure</option>
+          <option value="plasma_excited">Plasma Excitation</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <button type="button" class="btn primary" onclick="mapFormula('Manual evaluation')">Evaluate</button>
+        <button type="button" class="btn" onclick="undoLast()">Undo (-1)</button>
+        <button type="button" class="btn" onclick="resetAll()">Clear</button>
+        <button type="button" class="btn mae-only" onclick="sonify()">&#128266; Sonify</button>
+        <label class="mae-only" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);cursor:pointer;">
+          <input type="checkbox" id="autoChime" /> Auto-Chime
+        </label>
+        <button type="button" class="btn" onclick="captureAtlas()">+ Log Atlas</button>
+        <button type="button" class="btn" onclick="downloadLedger()">Export JSON</button>
+      </div>
+
+      <div id="deltaBanner" style="font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);border-radius:6px;padding:5px 8px;">
+        Ready. Hover any element tile to inspect its 9-section MATLAS dossier, or click to stack.
+      </div>
+
+      <div class="subcard">
+        <div class="kv-row"><span>Formula / HTE (p, o)</span><strong id="selected">—</strong></div>
+        <div class="kv-row"><span>6-Step Fifth Ladder</span><span id="fifthLadder">—</span></div>
+        <div class="kv-row"><span>Polarity &amp; Valence</span><span id="polarityMetrics">—</span></div>
+        <div class="kv-row"><span>Modal Field / Tonic</span><span id="modalField">—</span></div>
+        <div class="kv-row"><span>Coherence &amp; Fource Lock</span><span id="fourceScore">—</span></div>
+        <div class="kv-row"><span>Boundary / Interface Risk</span><span id="interfaceRisk" style="color:var(--gold);">—</span></div>
+        <div class="kv-row"><span>7-State Classification</span><strong id="state" style="color:var(--gold);">—</strong></div>
+        <div id="stateExplain" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);"></div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+
+      <div class="subcard">
+        <div style="font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Session Atlas Capture Log</div>
+        <pre id="log">HTE Resonance Observatory initialized. Click "+ Log Atlas" to append snapshots.</pre>
+      </div>
+    </section>
+
+    <!-- RIGHT PANE: DOCKED 9-SECTION MATERIALS ATLAS DOSSIER (MATLAS-Exxx) -->
+    <section class="pane">
+      <div class="pane-header">
+        <div>
+          <h2 id="dossierTitle">MATLAS-E001-HYDROGEN</h2>
+          <div id="dossierMeta" style="font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:2px;"></div>
+        </div>
+        <div style="display:flex;gap:5px;">
+          <button type="button" class="btn" id="pinBtn" onclick="togglePinDossier()">&#128204; Unpinned</button>
+          <button type="button" class="btn primary" id="copyMdBtn" onclick="copyDossierMarkdown()">&#128203; Copy .md</button>
+        </div>
+      </div>
+      <div id="dossierBody" style="overflow-y:auto;flex:1;padding-right:2px;"></div>
+    </section>
+  </main>
   <script>
     "use strict";
 
-    const V4_ELEMENTS = (
-      "E0 H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca " +
-      "Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr " +
-      "Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd " +
-      "Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg " +
-      "Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm " +
-      "Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og"
-    ).split(" ");
+    const RAW_EL_A = Array.of(
+      "E0:0:0:0:0:0:sub:None (zero-nucleon substrate)",
+      "H:1:1:1:2.2:1.008:gas:1H (stable)|2H (stable)|3H (radio)",
+      "He:2:18:2:0:4.003:gas:4He (stable)|3He (stable)",
+      "Li:3:1:1:0.98:6.94:solid:7Li (stable)|6Li (stable)",
+      "Be:4:2:2:1.57:9.012:solid:9Be (stable)|10Be (radio)",
+      "B:5:13:3:2.04:10.81:solid:11B (stable)|10B (stable)",
+      "C:6:14:4:2.55:12.011:solid:12C (stable)|13C (stable)|14C (radio)",
+      "N:7:15:5:3.04:14.007:gas:14N (stable)|15N (stable)",
+      "O:8:16:6:3.44:15.999:gas:16O (stable)|18O (stable)|17O (stable)",
+      "F:9:17:7:3.98:18.998:gas:19F (stable)|18F (radio)",
+      "Ne:10:18:8:0:20.180:gas:20Ne (stable)|22Ne (stable)|21Ne (stable)",
+      "Na:11:1:1:0.93:22.990:solid:23Na (stable)|22Na (radio)",
+      "Mg:12:2:2:1.31:24.305:solid:24Mg (stable)|26Mg (stable)|25Mg (stable)",
+      "Al:13:13:3:1.61:26.982:solid:27Al (stable)|26Al (radio)",
+      "Si:14:14:4:1.9:28.085:solid:28Si (stable)|29Si (stable)|30Si (stable)",
+      "P:15:15:5:2.19:30.974:solid:31P (stable)|32P (radio)",
+      "S:16:16:6:2.58:32.06:solid:32S (stable)|34S (stable)|33S (stable)|36S (stable)",
+      "Cl:17:17:7:3.16:35.45:gas:35Cl (stable)|37Cl (stable)|36Cl (radio)",
+      "Ar:18:18:8:0:39.948:gas:40Ar (stable)|36Ar (stable)|38Ar (stable)",
+      "K:19:1:1:0.82:39.098:solid:39K (stable)|41K (stable)|40K (primordial)",
+      "Ca:20:2:2:1:40.078:solid:40Ca (stable)|44Ca (stable)|42Ca (stable)|48Ca (primordial)",
+      "Sc:21:3:3:1.36:44.956:solid:45Sc (stable)|46Sc (radio)",
+      "Ti:22:4:4:1.54:47.867:solid:48Ti (stable)|46Ti (stable)|47Ti (stable)|49Ti (stable)|50Ti (stable)",
+      "V:23:5:5:1.63:50.942:solid:51V (stable)|50V (primordial)",
+      "Cr:24:6:6:1.66:51.996:solid:52Cr (stable)|53Cr (stable)|50Cr (stable)|54Cr (stable)",
+      "Mn:25:7:7:1.55:54.938:solid:55Mn (stable)|53Mn (radio)",
+      "Fe:26:8:8:1.83:55.845:solid:56Fe (stable)|54Fe (stable)|57Fe (stable)|58Fe (stable)",
+      "Co:27:9:9:1.88:58.933:solid:59Co (stable)|60Co (radio)",
+      "Ni:28:10:10:1.91:58.693:solid:58Ni (stable)|60Ni (stable)|62Ni (stable)|61Ni (stable)|64Ni (stable)",
+      "Cu:29:11:11:1.9:63.546:solid:63Cu (stable)|65Cu (stable)"
+    );
+    const RAW_EL_B = Array.of(
+      "Zn:30:12:2:1.65:65.38:solid:64Zn (stable)|66Zn (stable)|68Zn (stable)|67Zn (stable)|70Zn (stable)",
+      "Ga:31:13:3:1.81:69.723:solid:69Ga (stable)|71Ga (stable)",
+      "Ge:32:14:4:2.01:72.630:solid:74Ge (stable)|72Ge (stable)|70Ge (stable)|73Ge (stable)|76Ge (primordial)",
+      "As:33:15:5:2.18:74.922:solid:75As (stable)|73As (radio)",
+      "Se:34:16:6:2.55:78.971:solid:80Se (stable)|78Se (stable)|76Se (stable)|77Se (stable)|82Se (primordial)",
+      "Br:35:17:7:2.96:79.904:liquid:79Br (stable)|81Br (stable)",
+      "Kr:36:18:8:3:83.798:gas:84Kr (stable)|86Kr (stable)|82Kr (stable)|83Kr (stable)|80Kr (stable)",
+      "Rb:37:1:1:0.82:85.468:solid:85Rb (stable)|87Rb (primordial)",
+      "Sr:38:2:2:0.95:87.62:solid:88Sr (stable)|86Sr (stable)|87Sr (stable)|84Sr (stable)|90Sr (radio)",
+      "Y:39:3:3:1.22:88.906:solid:89Y (stable)|90Y (radio)",
+      "Zr:40:4:4:1.33:91.224:solid:90Zr (stable)|94Zr (stable)|92Zr (stable)|91Zr (stable)|96Zr (primordial)",
+      "Nb:41:5:5:1.6:92.906:solid:93Nb (stable)|94Nb (radio)",
+      "Mo:42:6:6:2.16:95.95:solid:98Mo (stable)|96Mo (stable)|95Mo (stable)|92Mo (stable)|100Mo (primordial)",
+      "Tc:43:7:7:1.9:98:synthetic:98Tc (radio)|99Tc (radio)|97Tc (radio)",
+      "Ru:44:8:8:2.2:101.07:solid:102Ru (stable)|104Ru (stable)|101Ru (stable)|99Ru (stable)",
+      "Rh:45:9:9:2.28:102.91:solid:103Rh (stable)|105Rh (radio)",
+      "Pd:46:10:10:2.2:106.42:solid:106Pd (stable)|108Pd (stable)|105Pd (stable)|110Pd (stable)|104Pd (stable)",
+      "Ag:47:11:11:1.93:107.87:solid:107Ag (stable)|109Ag (stable)",
+      "Cd:48:12:2:1.69:112.41:solid:114Cd (stable)|112Cd (stable)|111Cd (stable)|110Cd (stable)|113Cd (primordial)",
+      "In:49:13:3:1.78:114.82:solid:115In (primordial)|113In (stable)",
+      "Sn:50:14:4:1.96:118.71:solid:120Sn (stable)|118Sn (stable)|116Sn (stable)|119Sn (stable)|117Sn (stable)",
+      "Sb:51:15:5:2.05:121.76:solid:121Sb (stable)|123Sb (stable)",
+      "Te:52:16:6:2.1:127.60:solid:130Te (primordial)|128Te (primordial)|126Te (stable)|125Te (stable)",
+      "I:53:17:7:2.66:126.90:solid:127I (stable)|129I (radio)|131I (radio)",
+      "Xe:54:18:8:2.6:131.29:gas:132Xe (stable)|129Xe (stable)|131Xe (stable)|134Xe (stable)|136Xe (primordial)",
+      "Cs:55:1:1:0.79:132.91:solid:133Cs (stable)|137Cs (radio)",
+      "Ba:56:2:2:0.89:137.33:solid:138Ba (stable)|137Ba (stable)|136Ba (stable)|135Ba (stable)",
+      "La:57:3:3:1.1:138.91:solid:139La (stable)|138La (primordial)",
+      "Ce:58:3:4:1.12:140.12:solid:140Ce (stable)|142Ce (stable)|138Ce (stable)",
+      "Pr:59:3:3:1.13:140.91:solid:141Pr (stable)",
+      "Nd:60:3:3:1.14:144.24:solid:142Nd (stable)|144Nd (primordial)|146Nd (stable)|143Nd (stable)"
+    );
+    const RAW_EL_C = Array.of(
+      "Pm:61:3:3:1.13:145:synthetic:145Pm (radio)|147Pm (radio)",
+      "Sm:62:3:3:1.17:150.36:solid:152Sm (stable)|154Sm (stable)|147Sm (primordial)|149Sm (stable)",
+      "Eu:63:3:2:1.2:151.96:solid:153Eu (stable)|151Eu (primordial)",
+      "Gd:64:3:3:1.2:157.25:solid:158Gd (stable)|160Gd (stable)|156Gd (stable)|157Gd (stable)",
+      "Tb:65:3:3:1.1:158.93:solid:159Tb (stable)",
+      "Dy:66:3:3:1.22:162.50:solid:164Dy (stable)|162Dy (stable)|163Dy (stable)|161Dy (stable)",
+      "Ho:67:3:3:1.23:164.93:solid:165Ho (stable)",
+      "Er:68:3:3:1.24:167.26:solid:166Er (stable)|168Er (stable)|167Er (stable)|170Er (stable)",
+      "Tm:69:3:3:1.25:168.93:solid:169Tm (stable)",
+      "Yb:70:3:2:1.1:173.05:solid:174Yb (stable)|172Yb (stable)|173Yb (stable)|171Yb (stable)",
+      "Lu:71:3:3:1.27:174.97:solid:175Lu (stable)|176Lu (primordial)",
+      "Hf:72:4:4:1.3:178.49:solid:180Hf (stable)|178Hf (stable)|177Hf (stable)|179Hf (stable)",
+      "Ta:73:5:5:1.5:180.95:solid:181Ta (stable)|180mTa (primordial)",
+      "W:74:6:6:2.36:183.84:solid:184W (stable)|186W (stable)|182W (stable)|183W (stable)",
+      "Re:75:7:7:1.9:186.21:solid:187Re (primordial)|185Re (stable)",
+      "Os:76:8:8:2.2:190.23:solid:192Os (stable)|190Os (stable)|189Os (stable)|188Os (stable)",
+      "Ir:77:9:9:2.2:192.22:solid:193Ir (stable)|191Ir (stable)",
+      "Pt:78:10:10:2.28:195.08:solid:195Pt (stable)|194Pt (stable)|196Pt (stable)|198Pt (stable)",
+      "Au:79:11:11:2.54:196.97:solid:197Au (stable)|198Au (radio)",
+      "Hg:80:12:2:2:200.59:liquid:202Hg (stable)|200Hg (stable)|199Hg (stable)|201Hg (stable)",
+      "Tl:81:13:3:1.62:204.38:solid:205Tl (stable)|203Tl (stable)",
+      "Pb:82:14:4:2.33:207.2:solid:208Pb (stable)|206Pb (stable)|207Pb (stable)|204Pb (stable)",
+      "Bi:83:15:5:2.02:208.98:solid:209Bi (primordial)",
+      "Po:84:16:6:2:209:solid:209Po (radio)|210Po (radio)",
+      "At:85:17:7:2.2:210:solid:210At (radio)|211At (radio)",
+      "Rn:86:18:8:2.2:222:gas:222Rn (radio)|220Rn (radio)",
+      "Fr:87:1:1:0.7:223:solid:223Fr (radio)",
+      "Ra:88:2:2:0.9:226:solid:226Ra (radio)|228Ra (radio)",
+      "Ac:89:3:3:1.1:227:solid:227Ac (radio)",
+      "Th:90:3:4:1.3:232.04:solid:232Th (primordial)|230Th (radio)",
+      "Pa:91:3:5:1.5:231.04:solid:231Pa (primordial)"
+    );
+    const RAW_EL_D = Array.of(
+      "U:92:3:6:1.38:238.03:solid:238U (primordial)|235U (primordial)|234U (radio)",
+      "Np:93:3:5:1.36:237:synthetic:237Np (radio)",
+      "Pu:94:3:4:1.28:244:synthetic:244Pu (radio)|239Pu (radio)|240Pu (radio)|238Pu (radio)",
+      "Am:95:3:3:1.13:243:synthetic:243Am (radio)|241Am (radio)",
+      "Cm:96:3:3:1.28:247:synthetic:247Cm (radio)|244Cm (radio)|248Cm (radio)",
+      "Bk:97:3:3:1.3:247:synthetic:247Bk (radio)|249Bk (radio)",
+      "Cf:98:3:3:1.3:251:synthetic:251Cf (radio)|249Cf (radio)|252Cf (radio)",
+      "Es:99:3:3:1.3:252:synthetic:252Es (radio)|254Es (radio)",
+      "Fm:100:3:3:1.3:257:synthetic:257Fm (radio)",
+      "Md:101:3:3:1.3:258:synthetic:258Md (radio)|260Md (radio)",
+      "No:102:3:2:1.3:259:synthetic:259No (radio)",
+      "Lr:103:3:3:1.3:266:synthetic:266Lr (radio)|262Lr (radio)",
+      "Rf:104:4:4:1.3:267:synthetic:267Rf (radio)|265Rf (radio)",
+      "Db:105:5:5:1.5:268:synthetic:268Db (radio)|270Db (radio)",
+      "Sg:106:6:6:1.9:269:synthetic:269Sg (radio)|271Sg (radio)",
+      "Bh:107:7:7:1.9:270:synthetic:270Bh (radio)|274Bh (radio)",
+      "Hs:108:8:8:2:277:synthetic:277Hs (radio)|270Hs (radio)",
+      "Mt:109:9:9:2:278:synthetic:278Mt (radio)|276Mt (radio)",
+      "Ds:110:10:10:2:281:synthetic:281Ds (radio)|279Ds (radio)",
+      "Rg:111:11:11:2.2:282:synthetic:282Rg (radio)|280Rg (radio)",
+      "Cn:112:12:2:2:285:synthetic:285Cn (radio)|283Cn (radio)",
+      "Nh:113:13:3:1.8:286:synthetic:286Nh (radio)|284Nh (radio)",
+      "Fl:114:14:4:2:289:synthetic:289Fl (radio)|286Fl (radio)",
+      "Mc:115:15:5:1.9:290:synthetic:290Mc (radio)|288Mc (radio)",
+      "Lv:116:16:6:2:293:synthetic:293Lv (radio)|291Lv (radio)",
+      "Ts:117:17:7:2.2:294:synthetic:294Ts (radio)|293Ts (radio)",
+      "Og:118:18:8:2.2:294:synthetic:294Og (radio)"
+    );
 
-    const V4_NOTES = new Array("C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B");
-    let v4Pinned = false;
-    let v4History = new Array("Be");
-    let v4CurrentDossierMd = "";
+    const ELEMENTS = RAW_EL_A.concat(RAW_EL_B, RAW_EL_C, RAW_EL_D).map(s => {
+      const p = s.split(":");
+      return Array.of(p.at(0), Number(p.at(1)), Number(p.at(2)), Number(p.at(3)), Number(p.at(4)), Number(p.at(5)), p.at(6), p.at(7));
+    });
+    const Z = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(1))));
+    const Z_TO_SYM = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(1), e.at(0))));
+    const GRP = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(2))));
+    const VAL = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(3))));
+    const CHI = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(4))));
+    const MASS = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(5))));
+    const PHASE = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(6))));
+    const ISOTOPES = Object.fromEntries(ELEMENTS.map(e => Array.of(e.at(0), e.at(7).split("|"))));
 
-    function getV4Coord(z, mode) {
-      if (z === 0) return { p: 0, o: 0 };
-      const p = mode === "v1" ? (z % 12) : ((z * 7) % 12);
-      const o = Math.floor((z - 1) / 12) + 1;
-      return { p, o };
-    }
+    const PITCH = Array.of('C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B');
+    const PC_COLORS = Array.of('#00bfff','#ff55aa','#7cff00','#a020f0','#ffd700','#ff6b6b','#00ffcc','#ffaa00','#b388ff','#69f0ae','#ff80ab','#40c4ff');
 
-    function getFifthLadder(p0) {
-      const steps = new Array();
-      for (let n = 0; n < 6; n++) {
-        const pn = (p0 + 7 * n) % 12;
-        const rep = V4_ELEMENTS.find((s, idx) => idx > 0 && ((idx * 7) % 12) === pn) || "E0";
-        steps.push(rep);
+    const MODES = Array.of(
+      { name:'Ionian', intervals:Array.of(0,2,4,5,7,9,11), char:11, third:4, fifth:7, field:'Structural Clarity Field' },
+      { name:'Dorian', intervals:Array.of(0,2,3,5,7,9,10), char:9, third:3, fifth:7, field:'Restoration Field' },
+      { name:'Phrygian', intervals:Array.of(0,1,3,5,7,8,10), char:1, third:3, fifth:7, field:'Boundary / Threshold Field' },
+      { name:'Lydian', intervals:Array.of(0,2,4,6,7,9,11), char:6, third:4, fifth:7, field:'Expansion / Levitation Field' },
+      { name:'Mixolydian', intervals:Array.of(0,2,4,5,7,9,10), char:10, third:4, fifth:7, field:'Continuity Field' },
+      { name:'Aeolian', intervals:Array.of(0,2,3,5,7,8,10), char:8, third:3, fifth:7, field:'Memory / Gravitational Field' },
+      { name:'Locrian', intervals:Array.of(0,1,3,5,6,8,10), char:6, third:3, fifth:6, field:'Fracture / Collapse Field' }
+    );
+
+    const STATE_CATALOG = Array.of(
+      { id:'SUBSTRATE_ZERO', label:'Substrate Zero', color:'#ffffff', example:'E0', kid:'The Quiet Blank Canvas — zero-atom background field.', eng:'Null-reference substrate (Z=0, π=0, ω=0) for baseline calibration.' },
+      { id:'SINGLET_SEED', label:'Origin / Singlet', color:'#00bfff', example:'H', kid:'Origin Seed — first note of matter before constraint.', eng:'Single pitch-class occupancy; Origin Carrier seed awaiting boundary or bonding relation.' },
+      { id:'GOLD_ANCHOR', label:'Gold Anchor', color:'#ffd700', example:'SiO2', kid:'The Rock-Solid Bridge — locked by a strong musical fifth.', eng:'Fifth-anchored harmonic lock; coherent energy/proton transfer or high-symmetry stability.' },
+      { id:'PIEZO_TENSION', label:'Piezo Tension', color:'#7cff00', example:'BaTiO3', kid:'The Squeeze-and-Spark Spring — opposite poles pulling tight.', eng:'Contains a 6-semitone tritone axis; polar stress-to-charge or lattice expansion coupling.' },
+      { id:'ARMOR_SHIELD', label:'Armor Shield', color:'#ff3b3b', example:'Fe2O3', kid:'The Heavy Fortress Wall — dense boundary shield.', eng:'Subdominant mass clustering; boundary strength (negative when embrittled by interstitial H).' },
+      { id:'SHADOW_PHASE', label:'Shadow Phase', color:'#a020f0', example:'GaAs', kid:'The Hidden Twin — stored, trapped, or interstitial phase.', eng:'Interstitial/hydride storage or metastable band-gap switching hidden inside a host lattice.' },
+      { id:'PLASMA_FLUX', label:'Plasma Flux', color:'#ff8c00', example:'YBa2Cu3O7', kid:'The Lightning Cloud — super-excited ionized flux.', eng:'High-entropy multi-mode excitation; ionized plasma seed or superionic transport.' }
+    );
+
+    const BOUNDARY_PROFILES = {
+      free_bulk: { label:'Free Bulk', stateOverride:null, risk:'Low bulk interface stress; watch gas diffusivity / leakage on light carriers.', remainder:'Visible gas/bulk mass; minimal grain-boundary constraint.' },
+      metal_host: { label:'Metal Host / Hydride', stateOverride:'SHADOW_PHASE', risk:'HIGH EMBRITTLEMENT RISK: Interstitial H weakens metal grain boundaries & ductility.', remainder:'Hidden interstitial lattice loading & crack-growth remainder.' },
+      ceramic_matrix: { label:'Ceramic / Proton Matrix', stateOverride:'GOLD_ANCHOR', risk:'Thermal expansion mismatch & interface permeation at high temperature.', remainder:'Protonic transport channels & entropy redirection across dielectric walls.' },
+      cryo_pressure: { label:'Cryo / High-Pressure', stateOverride:'SHADOW_PHASE', risk:'Cryogenic contraction, boil-off pressure rise & seal permeation hazard.', remainder:'High-density confined phase under extreme thermal/pressure constraint.' },
+      plasma_excited: { label:'Plasma Excitation', stateOverride:'PLASMA_FLUX', risk:'Thermal wall load, ionization instability & confinement boundary erosion.', remainder:'Ionized collective plasma state exceeding neutral molecular bounds.' }
+    };
+    const CANONICAL_DOSSIERS = {
+      E0: {
+        entry_id:'MATLAS-E000-SUBSTRATE', status:'canonical draft', name:'Element-0 (Substrate Zero)',
+        cls:'sub-nucleonic reference substrate / vacuum carrier floor',
+        role:'Substrate Zero / zero-octave calibration origin (Z=0, π=0, ω=0)',
+        isoNote:'None — Element-0 has zero protons and zero neutrons (Z=0, A=0), so it has no isotopes.',
+        chordNote:'Null substrate chord {0}; zero-point reference floor prior to discrete nucleonic excitation.',
+        constraints:'Boundary-free reference medium; serves as the ambient carrier baseline (u=0, ∇p=0).',
+        thermal:'Unperturbed baseline field without internal phonon or kinetic degrees of freedom.',
+        energy:'Ambient carrier medium through which discrete atomic waves (Z ≥ 1) propagate and interfere.',
+        storage:Array.of('1. Unbounded reference medium (calibration baseline only)'),
+        cuc:Array.of('E0 → silent carrier floor before boundary conditions','E0 + x·H → emergence of discrete baryonic matter out of substrate'),
+        states:Array.of('Origin: baseline — pre-nucleonic zero point prior to Z=1.','Gold: null — unexcited medium.','Shadow: null — no lattice structure.','Plasma: null — un-ionized reference floor.','Armor: null — zero boundary mass.','Piezo: null — zero stress gradient.','Fifth Ladder: E0 Substrate calibration origin.'),
+        iface:Array.of('Provides continuous reference medium enabling field gradients and standing waves'),
+        fails:Array.of('None — idealized reference substrate'),
+        measure:Array.of('Baseline calibration: background noise floor, zero-point offset'),
+        search:Array.of('1. Emergence curves (E0 + x·H, E0 + x·O) tracking condensation into matter'),
+        visible:'Z=0, Mass=0 u, Valence=0, Pauling χ=0.00, HTE (0, 0).',
+        hidden:'Ambient continuous medium required to define gradients, vorticity, and wave propagation.',
+        fourcePhrase:'Element-0 is the silence that makes the first note audible.',
+        lock:'Element-0 = Substrate Zero: the unperturbed carrier medium before discrete atomic boundary conditions.'
+      },
+      H: {
+        entry_id:'MATLAS-E001-HYDROGEN', status:'canonical draft', name:'Hydrogen',
+        cls:'element / gas / plasma-forming carrier / hydride former / isotope platform',
+        role:'Origin Node / carrier seed / Fifth-Ladder root',
+        isoNote:'1H = protium (stable, dominant), 2H = deuterium (stable, fusion-relevant), 3H = tritium (radioactive). All share Z=1 and p(H)=1.',
+        chordNote:'Atomic chord {1}; diatomic H2 chord {1, 1} with I(H,H)=0 and C_HTE(H2)=+1.00 (pure unison lock).',
+        constraints:'Pressure, temperature, confinement, surface catalysis, metal lattice compatibility, leakage & ignition control.',
+        thermal:'Cryogenic liquid below 20.27 K (-252.9°C); high energy per mass, low volumetric density as gas.',
+        energy:'High mobility energy carrier; clean oxidation to H2O; proton conductor in PEM fuel cells; fusion feedstock.',
+        storage:Array.of('1. Compressed gas','2. Cryogenic liquid','3. Metal hydride (Shadow State)','4. Chemical carrier','5. Adsorbent material','6. Geological storage','7. Pipeline distribution'),
+        cuc:Array.of('H2 gas → fuel / carrier / leakage risk','H+ → proton / acid / conductor participant','H- → hydride / reducer','D → heavy isotope / fusion platform','Plasma H → stellar / ionized state','Metal-H → interstitial storage / embrittlement'),
+        states:Array.of('Origin: very high — Z=1, first pitch-class root and lattice seed.','Gold: conditional — active in fuel cells, PEM proton transfer, and redox pathways.','Shadow: high — stored, trapped, or absorbed as interstitial hydrides.','Plasma: very high — simplest ionized plasma and fusion seed.','Armor: low / negative at interfaces — weakens metal grain boundaries via embrittlement.','Piezo: indirect — converts pressure/proton transport stress inside host lattices.','Fifth Ladder: canonical root — H → O → P → Ti → Cu → Kr.'),
+        iface:Array.of('Adsorbs onto surfaces & dissociates from H2 into atomic H','Diffuses rapidly into metals & occupies interstitial sites','Forms metal hydrides & weakens grain boundaries','Participates in proton conduction & alters local electronic structure'),
+        fails:Array.of('Hydrogen Embrittlement (reduces tensile strength, ductility & fracture toughness)','Leakage & Permeation through seals due to tiny molecular radius','Flammability / Ignition Risk in air (~500°C autoignition)','Cryogenic Risk (boil-off & thermal contraction near -252.9°C)'),
+        measure:Array.of('Basic: purity, isotope ratio, molecular form, pressure, temperature','Storage: leak rate, permeation rate, adsorption capacity, hysteresis','Compatibility: embrittlement response, crack growth rate, fatigue life','Energy/Interface: reaction enthalpy, proton conductivity, plasma threshold'),
+        search:Array.of('1. Fifth Ladder materials (H → O → P → Ti → Cu → Kr)','2. Hydride storage systems (Shadow/Armor balance)','3. Proton conductors (H + ceramic/polymer matrices)','4. Embrittlement-resistant alloys & hydrogen-safe barrier coatings','5. Optical/electrical/mechanical H2 sensors'),
+        visible:'Smallest element, light diatomic gas (H2), simple 1s1 structure.',
+        hidden:'Embrittlement, seal permeation, storage difficulty, plasma potential, protonic transport, isotope divergence.',
+        fourcePhrase:'Hydrogen is the first note of matter, but it only becomes a song under constraint.',
+        lock:'Hydrogen = Origin Carrier: the first HTE note, the smallest material actor, and the most boundary-sensitive seed of energy, storage, plasma, and lattice interaction.'
       }
-      return steps.join(" -> ");
+    };
+
+    let current = null, prevSnapshot = null, atomHistory = Array.of();
+    let pinnedElement = null, activeDossierSym = 'H';
+    const discovered = new Set();
+
+    const $ = id => document.getElementById(id);
+    const mod12 = x => ((x % 12) + 12) % 12;
+    const dist = (a,b) => { const d = Math.abs(a-b)%12; return d>6 ? 12-d : d; };
+    const groupPi = g => g === 0 ? 0 : mod12(Math.round(((g - 1) * 12) / 18));
+    const isNum = tok => /^(\d+\.\d+|\d+)$/.test(tok);
+
+    function parseFormula(formula){
+      const clean = formula.trim();
+      if(!clean) throw new Error('Formula cannot be empty.');
+      const tokens = clean.match(/(E0|[A-Z][a-z]?|\(|\)|\d+\.\d+|\d+)/g) || Array.of();
+      if(tokens.join('') !== clean) throw new Error('Unsupported formula syntax.');
+      const stack = Array.of(new Map());
+      const add = (map, key, n) => map.set(key, (map.get(key)||0)+n);
+      for(let i=0; i<tokens.length; i++){
+        const token = tokens.at(i);
+        if(token === '('){ stack.push(new Map()); continue; }
+        if(token === ')'){
+          if(stack.length === 1) throw new Error('Unmatched closing parenthesis.');
+          const group = stack.pop();
+          let mult = 1;
+          if(tokens.at(i+1) && isNum(tokens.at(i+1))) mult = Number(tokens.at(++i));
+          group.forEach((count, symbol) => add(stack.at(-1), symbol, count*mult));
+          continue;
+        }
+        if(isNum(token)) throw new Error('Dangling multiplier: '+token);
+        if(Z[token] === undefined) throw new Error('Unknown element: '+token);
+        let count = 1;
+        if(tokens.at(i+1) && isNum(tokens.at(i+1))) count = Number(tokens.at(++i));
+        add(stack.at(-1), token, count);
+      }
+      if(stack.length !== 1) throw new Error('Unmatched opening parenthesis.');
+      return Object.fromEntries(stack.at(0));
     }
 
-    function classify7State(formula, coh) {
-      if (formula === "E0") return "SUBSTRATE ZERO (E0)";
-      if (formula.includes("YBa2Cu3O7") || formula.includes("CuO")) return "PLASMA FLUX";
-      if (formula.includes("SiO2")) return "GOLD ANCHOR";
-      if (formula.includes("BaTiO3")) return "PIEZO TENSION";
-      if (formula.includes("Fe")) return "ARMOR SHIELD";
-      if (formula.includes("GaAs") || formula.includes("H")) return "SHADOW PHASE";
-      return coh > 0.85 ? "ORIGIN / SINGLET" : "HARMONIC COMPLEX";
+    function hasTritone(u){ for(let i=0;i<u.length;i++) for(let j=i+1;j<u.length;j++) if(dist(u.at(i),u.at(j))===6) return true; return false; }
+    function hasSemitone(u){ for(let i=0;i<u.length;i++) for(let j=i+1;j<u.length;j++) if(dist(u.at(i),u.at(j))===1) return true; return false; }
+
+    function classifyState(unique, nodes, boundary){
+      if(!unique.length) return 'VOID';
+      if(nodes.length === 1 && nodes.at(0).element === 'E0') return 'SUBSTRATE_ZERO';
+      const bp = BOUNDARY_PROFILES[boundary];
+      if(bp && bp.stateOverride && boundary !== 'free_bulk') return bp.stateOverride;
+      if(unique.length === 1) return 'SINGLET_SEED';
+      if(unique.length >= 4 && hasSemitone(unique)) return 'PLASMA_FLUX';
+      if(hasTritone(unique)) return 'PIEZO_TENSION';
+      if(unique.includes(7)) return 'GOLD_ANCHOR';
+      if(unique.length >= 3 && unique.some(p => Array.of(0,5,8,10).includes(p))) return 'ARMOR_SHIELD';
+      return 'SHADOW_PHASE';
     }
 
-    function addDossierSection(container, headingText, bodyText) {
-      const h3 = document.createElement("h3");
-      h3.textContent = headingText;
-      const div = document.createElement("div");
-      div.textContent = bodyText;
-      container.appendChild(h3);
-      container.appendChild(div);
+    function computeCHTE(nodes){
+      const pcs = nodes.flatMap(n => Array(Math.max(1, Math.round(n.count))).fill(n.pitch_class));
+      if(pcs.length < 2) return 1.0;
+      const W = { 0:1.0, 7:0.85, 5:0.75, 4:0.6, 3:0.55, 8:0.5, 9:0.5, 2:0.25, 10:0.25, 6:-0.5, 1:-0.6, 11:-0.6 };
+      let sum = 0, pairs = 0;
+      for(let i=0;i<pcs.length;i++) for(let j=i+1;j<pcs.length;j++){ sum += W[mod12(pcs.at(j)-pcs.at(i))] || 0; pairs++; }
+      return pairs > 0 ? Number((sum / pairs).toFixed(3)) : 1.0;
     }
 
-    function renderDossier(z, sym) {
-      if (v4Pinned) return;
-      const mode = document.getElementById("v4Proj").value;
-      const boundary = document.getElementById("v4Boundary").value;
-      const { p, o } = getV4Coord(z, mode);
-      const idStr = `MATLAS-E${String(z).padStart(3, "0")}-${sym.toUpperCase()}`;
-      document.getElementById("v4AtlasHeader").textContent = idStr;
+    function fifthLadder(rootZ){
+      if(!rootZ || rootZ < 1) return 'E0 Substrate';
+      const chain = Array.of();
+      for(let n=0; n<6; n++){ const zStep = rootZ + 7*n; if(Z_TO_SYM[zStep]) chain.push(Z_TO_SYM[zStep]); }
+      return chain.join(' → ');
+    }
+    function getElementDossier(sym){
+      const z = Z[sym] ?? 0, grp = GRP[sym] ?? 0, val = VAL[sym] ?? 0, chi = CHI[sym] ?? 0;
+      const mass = MASS[sym] ?? 0, phase = PHASE[sym] ?? 'solid', isos = ISOTOPES[sym] || Array.of();
+      const pRaw = mod12(z), pGrp = groupPi(grp), oct = z === 0 ? 0 : Math.floor((z - 1) / 12) + 1;
+      const ladder = fifthLadder(z);
+      const base = { sym, z, grp, val, chi, mass, phase, isos, pRaw, pGrp, oct, ladder };
+      if(CANONICAL_DOSSIERS[sym]) return { ...base, ...CANONICAL_DOSSIERS[sym] };
 
-      const role = z === 0
-        ? "Zero-point harmonic vacuum reference (Substrate Zero)."
-        : (z <= 2 ? "Primordial light-element singlet carrier." : "Multi-octave standing-wave lattice node.");
-
-      v4CurrentDossierMd = new Array(
-        `# ${idStr}`,
-        `- **Atomic Number (Z):** ${z} (${sym})`,
-        `- **HTE Coordinate (p, o):** (${p}, ${o}) — Pitch Class ${V4_NOTES.at(p)}`,
-        `- **Isotope Invariance:** All isotopes of ${sym} share Z=${z} and pitch class p=${p}.`,
-        `- **6-Step Fifth Ladder:** ${getFifthLadder(p)}`,
-        `- **Structural Role:** ${role}`
-      ).join("\n");
-
-      const box = document.getElementById("v4AtlasBody");
-      box.replaceChildren();
-      addDossierSection(box, "1. Core & HTE Signature", `Element: ${sym} (Z = ${z}) | Coord: HTE (${p}, ${o}) [${V4_NOTES.at(p)}]`);
-      addDossierSection(box, "2. Isotopic Invariance Rule", `All nuclear isotopes of ${sym} diverge in neutron mass while preserving identical Z=${z} and pitch class p=${p}.`);
-      addDossierSection(box, "3. CUC Relational & Fifth Ladder Map", getFifthLadder(p));
-      addDossierSection(box, "4. 7-State Activation & Interface Role", role);
-      addDossierSection(box, "5. Engineering Hypothesis & Search Directions", `Test ${sym} substitution along Fifth-Ladder partners in ${boundary} boundary regimes.`);
+      const isGas = phase === 'gas', isSyn = phase === 'synthetic', isMetal = grp >= 1 && grp <= 12 && !isGas;
+      return {
+        ...base,
+        entry_id:`MATLAS-E${String(z).padStart(3,'0')}-${sym.toUpperCase()}`, status:'auto_derived_v1', name:sym,
+        cls:`element / ${phase} at 20°C / group-${grp} carrier (χ=${chi.toFixed(2)}, valence=${val})`,
+        role:`Group-${grp} harmonic actor / Fifth-Ladder step-0 node`,
+        isoNote:`Primary isotopes: ${isos.join(', ')}. All share Z=${z} and raw pitch class p(${sym})=${pRaw} (${PITCH.at(pRaw)}); isotopes diverge in neutron mass and nuclear stability only.`,
+        chordNote:`Atomic chord {${pRaw}}; diatomic ${sym}2 chord {${pRaw}, ${pRaw}} with I(${sym},${sym})=0 and C_HTE=${1.00.toFixed(2)} (unison lock).`,
+        constraints: isGas ? 'Pressure, cryogenic/compressed containment, seal permeation & leak control.' : isSyn ? 'Nuclear half-life, radiation shielding & remote hot-cell containment.' : 'Temperature, surface oxidation, grain-boundary stress & lattice compatibility.',
+        thermal: isGas ? 'Cryogenic liquid below boiling point; low volumetric gas density.' : isMetal ? 'Conductive crystalline solid; thermal expansion & creep under high load.' : 'Directional covalent/dielectric thermal transport; watch thermal shock.',
+        energy: chi >= 2.5 ? 'High-electronegativity charge acceptor / redox & dielectric actor.' : grp === 1 ? 'High-mobility electron/ion donor (battery & plasma carrier).' : 'Structural, catalytic, or electronic network host.',
+        storage: isGas ? Array.of('1. Compressed gas cylinders','2. Cryogenic liquid','3. Adsorbent/clathrate matrix','4. Pipeline distribution') : isSyn ? Array.of('1. Shielded radiological containment','2. Target foil / isotopic trap') : Array.of('1. Bulk crystalline ingot / powder','2. Passivated surface / inert atmosphere','3. Alloyed or ceramic host matrix'),
+        cuc:Array.of(`Bulk ${sym} → baseline ${phase} phase`,`Ionized ${sym} → charge-transfer / plasma actor`,`Interface ${sym} → boundary-coupled catalyst or lattice modifier`,`Isotopic ${isos.at(0)||sym} → mass-shifted phonon & nuclear response`),
+        states:Array.of(
+          `Origin: ${z<=1?'very high':'low'} — Z=${z}, octave layer ${oct}.`,
+          `Gold: ${pGrp===7||pRaw===7?'high — fifth-anchored harmonic lock':'conditional — emerges in coherent transfer lattices'}.`,
+          `Shadow: ${grp>=3&&grp<=12?'high — d-block interstitial/hydride host candidate':'conditional — interface or defect trapped'}.`,
+          `Plasma: ${isGas||grp===1?'high — low-ionization or discharge plasma actor':'conditional — high-energy excitation'}.`,
+          `Armor: ${isMetal&&grp>=4?'high — structural metallic matrix':'conditional — depends on grain-boundary compatibility'}.`,
+          `Piezo: ${chi>=2.5||grp===4||grp===17?'high — polar electronegativity gradient':'indirect — stress coupling in asymmetric hosts'}.`,
+          `Fifth Ladder: ${ladder}`
+        ),
+        iface:Array.of(`Forms group-${grp} surface & lattice bonds (Pauling χ=${chi.toFixed(2)})`,`Modulates local electronic density & boundary charge transfer`),
+        fails:Array.of(`Interface reactivity, thermal mismatch, or defect trapping under extreme pressure/temperature`),
+        measure:Array.of('Basic: purity, isotope ratio, stoichiometry, pressure, temperature','Compatibility: grain-boundary stability, corrosion/oxidation rate','Interface: surface adsorption energy, diffusion coefficient'),
+        search:Array.of(`1. Fifth Ladder pathway (${ladder})`,`2. Binary/ternary oxides & hydrides with Δχ contrast`,`3. Boundary-stabilized coatings & alloy hosts`),
+        visible:`Z=${z}, Mass=${mass} u, Group ${grp}, Valence=${val}, Pauling χ=${chi.toFixed(2)}, STP=${phase}.`,
+        hidden:`Isotope mass divergence (${isos.join('/')}), interface charge transfer & boundary-dependent phase shifts.`,
+        fourcePhrase:`${sym} is note ${PITCH.at(pRaw)} in octave ${oct}, revealing its full engineering song only under boundary constraint.`,
+        lock:`${sym} (Z=${z}) = Group-${grp} HTE node at (${pRaw}, ${oct}) whose bulk chord shifts under relational boundary constraints.`
+      };
     }
 
-    function parseV4Formula(formula) {
-      const re = /(E0|[A-Z][a-z]?)(\d*\.?\d*)/g;
-      const items = new Array();
-      let m;
-      while ((m = re.exec(formula.trim())) !== null) {
-        const sym = m.at(1);
-        const z = V4_ELEMENTS.indexOf(sym);
-        if (z !== -1) {
-          items.push({ sym, z, w: m.at(2) ? parseFloat(m.at(2)) : 1.0 });
+    function togglePinDossier(){
+      pinnedElement = pinnedElement ? null : activeDossierSym;
+      $('pinBtn').textContent = pinnedElement ? `📌 Pinned: ${pinnedElement}` : '📌 Unpinned';
+      $('pinBtn').style.borderColor = pinnedElement ? '#ffd700' : '#23304d';
+    }
+
+    function copyDossierMarkdown(){
+      const d = getElementDossier(activeDossierSym);
+      const md = [
+        `# Materials Atlas Entry: ${d.name} (${d.sym})`,
+        `**ENTRY ID:** ${d.entry_id} | **STATUS:** ${d.status}`,
+        `**CLASS:** ${d.cls}`,
+        `**HTE ROLE:** ${d.role}`,
+        ``,
+        `## Core & Isotopic Identity`,
+        `- Z=${d.z}, Mass=${d.mass} u, Group=${d.grp}, Valence=${d.val}, Pauling χ=${d.chi}, STP=${d.phase}`,
+        `- ${d.isoNote}`,
+        `- HTE Coordinate: Raw (${d.pRaw}, ${d.oct}) ${PITCH.at(d.pRaw)} | Group (${d.pGrp}, ${d.oct}) ${PITCH.at(d.pGrp)}`,
+        `- ${d.chordNote}`,
+        `- Fifth Ladder: ${d.ladder}`,
+        ``,
+        `## 7-State Activation`,
+        ...d.states.map(s => `- ${s}`),
+        ``,
+        `## Interface Behavior & Failure Modes`,
+        ...d.iface.map(i => `- ${i}`),
+        ``,
+        `**Failure Modes:**`,
+        ...d.fails.map(f => `- ${f}`),
+        ``,
+        `## Storage & Containment`,
+        ...d.storage.map(s => `- ${s}`),
+        ``,
+        `## CUC Relational Map & Darkness Reading`,
+        ...d.cuc.map(c => `- ${c}`),
+        `- Visible: ${d.visible}`,
+        `- Hidden Remainder: ${d.hidden}`,
+        ``,
+        `## Measurement Stack & Search Directions`,
+        ...d.measure.map(m => `- ${m}`),
+        ...d.search.map(s => `- ${s}`),
+        ``,
+        `**One-Line Lock:** ${d.lock}`
+      ].join('\n');
+      navigator.clipboard.writeText(md).then(() => {
+        $('copyMdBtn').textContent = '✅ Copied!';
+        setTimeout(() => { $('copyMdBtn').textContent = '📋 Copy .md'; }, 1800);
+      });
+    }
+    function renderElementDossier(sym, force = false){
+      if(pinnedElement && !force) return;
+      activeDossierSym = sym;
+      const d = getElementDossier(sym);
+      $('dossierTitle').textContent = d.entry_id;
+      $('dossierMeta').innerHTML = `STATUS: <strong style="color:${d.status==='canonical draft'?'#ffd700':'#00bfff'}">${d.status}</strong> | HTE Raw: (${d.pRaw}, ${d.oct}) ${PITCH.at(d.pRaw)} | Group: (${d.pGrp}, ${d.oct}) ${PITCH.at(d.pGrp)}`;
+      $('dossierBody').innerHTML = `
+        <div class="d-lock">${d.lock}</div>
+        <div class="d-card"><h2>1. Core Identity &amp; HTE Signature</h2><div><strong>Class:</strong> ${d.cls}<br><strong>HTE Role:</strong> ${d.role}<br><strong>Atomic Weight / STP:</strong> ${d.mass} u | ${d.phase} at 20°C | Valence: ${d.val} | χ: ${d.chi}<br><strong>Chord &amp; Unison:</strong> ${d.chordNote}<br><strong>Fifth Ladder:</strong> ${d.ladder}</div></div>
+        <div class="d-card"><h2>2. Isotopic Identity (Pitch-Invariant)</h2><div>${d.isoNote}</div></div>
+        <div class="d-card"><h2>3. Constraint, Thermal &amp; Energy Fields</h2><div><strong>Constraints:</strong> ${d.constraints}<br><strong>Thermal:</strong> ${d.thermal}<br><strong>Energy Role:</strong> ${d.energy}</div></div>
+        <div class="d-card"><h2>4. Storage &amp; Containment Modes</h2><ul>${d.storage.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+        <div class="d-card"><h2>5. CUC Relational Constraint Map</h2><div class="mae-only"><em>"${d.fourcePhrase}"</em></div><ul>${d.cuc.map(c=>`<li>${c}</li>`).join('')}</ul></div>
+        <div class="d-card"><h2>6. 7-State Activation Profile</h2><ul>${d.states.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+        <div class="d-card"><h2>7. Interface Behavior &amp; Failure Modes</h2><ul>${d.iface.map(i=>`<li>${i}</li>`).join('')}</ul><div style="margin-top:5px;color:#ff9a9a"><strong>Failure Modes:</strong></div><ul>${d.fails.map(f=>`<li>${f}</li>`).join('')}</ul></div>
+        <div class="d-card"><h2>8. Darkness Remainder &amp; Measurement Stack</h2><div><strong>Visible:</strong> ${d.visible}<br><strong>Hidden Remainder:</strong> ${d.hidden}</div><ul style="margin-top:4px">${d.measure.map(m=>`<li>${m}</li>`).join('')}</ul></div>
+        <div class="d-card"><h2>9. HTE Search Directions</h2><ul>${d.search.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+      `;
+    }
+
+    function evaluateModalField(normH){
+      const normVal = Math.hypot(...normH);
+      let best = { score:-1, tonic:0, mode:MODES.at(0), match:0, cModal:0, fource:0 };
+      for(let t=0; t<12; t++){
+        for(const m of MODES){
+          const tplSet = new Set(m.intervals.map(d => mod12(t + d)));
+          const tVec = Array(12).fill(0);
+          m.intervals.forEach(d => tVec[mod12(t+d)] = 1.0);
+          tVec[t] = 2.0; tVec[mod12(t+m.fifth)] += 0.5; tVec[mod12(t+m.char)] += 0.6; tVec[mod12(t+m.third)] += 0.3;
+          const normT = Math.hypot(...tVec);
+          const dot = normH.reduce((acc, v, idx) => acc + v * tVec.at(idx), 0);
+          const cosSim = (normVal > 0 && normT > 0) ? dot / (normVal * normT) : 0;
+          const offMass = normH.reduce((acc, v, idx) => acc + (tplSet.has(idx) ? 0 : v), 0);
+          const match = Math.max(0, cosSim - 0.5 * offMass);
+          const hRoot = normH.at(t), hFifth = normH.at(mod12(t+m.fifth)), hThird = normH.at(mod12(t+m.third)), hChar = normH.at(mod12(t+m.char));
+          const cModal = Math.min(1.0,(0.5*hRoot+0.3*hFifth+0.2*hThird)*2.0) * (1.0-offMass) * Math.min(1.0,0.25+1.5*hChar);
+          let m2 = 0, tri = 0;
+          for(let i=0;i<12;i++) for(let j=i+1;j<12;j++){ const iv=mod12(j-i); if(iv===1||iv===11) m2+=normH.at(i)*normH.at(j); else if(iv===6) tri+=normH.at(i)*normH.at(j); }
+          const fource = (hRoot * (hChar + 0.15*hFifth)) / (0.05 + offMass + m2 + tri);
+          const score = match + 0.05 * Math.tanh(fource);
+          if(score > best.score) best = { score, tonic:t, mode:m, match, cModal, fource };
         }
       }
-      return items.length ? items : new Array({ sym: "Be", z: 4, w: 1.0 });
+      return best;
     }
 
-    function updateV4() {
-      const formula = document.getElementById("v4Formula").value.trim() || "Be";
-      const mode = document.getElementById("v4Proj").value;
-      const boundary = document.getElementById("v4Boundary").value;
-      const items = parseV4Formula(formula);
-      const totalW = items.reduce((a, b) => a + b.w, 0) || 1;
+    function buildSignature(formula, mappingMode='group', weightMode='stoich', boundary='free_bulk'){
+      const composition = parseFormula(formula);
+      const chis = Array.of();
+      let totalAtoms = 0, totalVal = 0, chiSum = 0;
 
-      let cx = 0, sy = 0;
-      items.forEach(it => {
-        const { p } = getV4Coord(it.z, mode);
-        const ang = (p / 12) * 2 * Math.PI - Math.PI / 2;
-        cx += (it.w / totalW) * Math.cos(ang);
-        sy += (it.w / totalW) * Math.sin(ang);
+      const nodes = Object.entries(composition).sort((a,b)=>Z[a.at(0)]-Z[b.at(0)]).map(([symbol,count]) => {
+        const atomicNumber = Z[symbol], grp = GRP[symbol], val = VAL[symbol], chi = CHI[symbol];
+        const pc = mappingMode === 'group' ? groupPi(grp) : mod12(atomicNumber);
+        if(chi > 0){ chis.push(chi); chiSum += count * chi; }
+        totalAtoms += count; totalVal += count * val;
+        return { element:symbol, atomic_number:atomicNumber, group:grp, valence:val, chi, count, pitch_class:pc, pitch_name:PITCH.at(pc), octave_band:atomicNumber===0?0:Math.floor((atomicNumber-1)/12)+1 };
       });
-      const coh = Math.hypot(cx, sy);
-      const tonicAng = Math.atan2(sy, cx);
-      const tonicP = ((Math.round(((tonicAng + Math.PI / 2) / (2 * Math.PI)) * 12) % 12) + 12) % 12;
 
-      const primary = items.at(0);
-      const { p, o } = getV4Coord(primary.z, mode);
-      document.getElementById("v4OutSig").textContent = `${formula} — HTE (${p}, ${o})`;
-      document.getElementById("v4OutLadder").textContent = getFifthLadder(p);
-      document.getElementById("v4OutCoh").textContent = `C_HTE +${coh.toFixed(3)} | Boundary: ${boundary}`;
-      document.getElementById("v4OutState").textContent = classify7State(formula, coh);
+      const rawHist = Array(12).fill(0);
+      nodes.forEach(n => {
+        const w = weightMode === 'electronegativity' ? n.count * (n.chi > 0 ? n.chi : 0.1)
+                : weightMode === 'valence' ? n.count * (n.valence > 0 ? n.valence : 0.1)
+                : n.count;
+        rawHist[n.pitch_class] += w;
+      });
+      const totalW = rawHist.reduce((a,b)=>a+b, 0), normH = totalW > 0 ? rawHist.map(x=>x/totalW) : rawHist;
+      const histogram = {}; nodes.forEach(n => histogram[n.pitch_class] = (histogram[n.pitch_class]||0) + n.count);
+      const unique = Object.keys(histogram).map(Number).sort((a,b)=>a-b);
+      const modal = evaluateModalField(normH);
+      const st = classifyState(unique, nodes, boundary);
+      const rootNode = nodes.at(0);
 
-      const canvas = document.getElementById("v4Wheel");
-      const ctx = canvas.getContext("2d");
-      const W = canvas.width, H = canvas.height, R = 128;
-      ctx.clearRect(0, 0, W, H);
+      const deltaChi = chis.length >= 2 ? Number((Math.max(...chis) - Math.min(...chis)).toFixed(2)) : 0;
+      const meanChi = totalAtoms > 0 ? Number((chiSum / totalAtoms).toFixed(2)) : 0;
+      const valPerAtom = totalAtoms > 0 ? Number((totalVal / totalAtoms).toFixed(2)) : 0;
 
-      ctx.strokeStyle = "#23304d";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(W / 2, H / 2, R, 0, 2 * Math.PI);
-      ctx.stroke();
+      return {
+        entry_id:`MATLAS-${formula.trim().toUpperCase()}`, status:'canonical_draft', formula:formula.trim(),
+        composition, mapping_mode:mappingMode, weight_mode:weightMode, boundary_context:boundary,
+        hte_coordinate: rootNode ? Array.of(rootNode.pitch_class, rootNode.octave_band) : Array.of(0,0),
+        c_hte_unison: computeCHTE(nodes),
+        fifth_ladder: fifthLadder(rootNode ? rootNode.atomic_number : 0),
+        nodes, pitch_class_histogram:histogram, overlay_state:st,
+        interface_profile: BOUNDARY_PROFILES[boundary] || BOUNDARY_PROFILES.free_bulk,
+        physical:{ delta_chi:deltaChi, mean_chi:meanChi, val_per_atom:valPerAtom },
+        modal_field:{ optimal_tonic:modal.tonic, optimal_tonic_name:PITCH.at(modal.tonic), optimal_mode:modal.mode.name, field_type:modal.mode.field, fource_lock:Number(modal.fource.toFixed(4)), c_modal:Number(modal.cModal.toFixed(4)) }
+      };
+    }
+    function updateDiscoveryUI(){
+      const box = $('discoveryBadges');
+      box.innerHTML = `<span class="badge unlocked">Discovered: ${discovered.size} / ${STATE_CATALOG.length}</span>` +
+        STATE_CATALOG.map(s => `<span class="badge ${discovered.has(s.id)?'unlocked':''}" style="border-color:${discovered.has(s.id)?s.color:'#2a2a2a'}">${s.label}</span>`).join('');
+    }
 
-      for (let k = 0; k < 12; k++) {
-        const a = (k / 12) * 2 * Math.PI - Math.PI / 2;
-        ctx.fillStyle = k === tonicP ? "#fbbf24" : "#8b9ec2";
-        ctx.font = "11px ui-monospace, monospace";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(V4_NOTES.at(k), W / 2 + (R + 22) * Math.cos(a), H / 2 + (R + 22) * Math.sin(a));
+    function renderSignature(sig, actionNote=''){
+      if(current) prevSnapshot = { state: current.overlay_state, fource: current.modal_field.fource_lock, dchi: current.physical.delta_chi };
+      current = sig;
+      const mf = sig.modal_field, ph = sig.physical, ip = sig.interface_profile;
+      const cat = STATE_CATALOG.find(s => s.id === sig.overlay_state);
+      if(cat) discovered.add(cat.id);
+      updateDiscoveryUI();
+
+      const bondType = ph.delta_chi >= 1.7 ? 'Ionic' : ph.delta_chi >= 0.4 ? 'Polar Covalent' : 'Covalent / Metallic';
+      $('selected').textContent = `${sig.formula} → HTE (${sig.hte_coordinate.join(', ')}) | ${sig.nodes.map(n=>`${n.element}×${n.count}`).join(' ')}`;
+      $('fifthLadder').textContent = sig.fifth_ladder;
+      $('polarityMetrics').textContent = `Δχ = ${ph.delta_chi.toFixed(2)} (${bondType}) | Mean χ = ${ph.mean_chi.toFixed(2)} | Val = ${ph.val_per_atom.toFixed(2)}`;
+      $('modalField').textContent = `${mf.optimal_tonic_name} ${mf.optimal_mode} (${mf.field_type})`;
+      $('fourceScore').textContent = `C_HTE = ${sig.c_hte_unison >= 0 ? '+' : ''}${sig.c_hte_unison.toFixed(2)} | F = ${mf.fource_lock.toFixed(3)} | C_mod = ${mf.c_modal.toFixed(3)}`;
+      $('interfaceRisk').textContent = ip.risk;
+      $('state').textContent = cat ? cat.label.toUpperCase() : sig.overlay_state;
+      $('state').style.color = cat ? cat.color : '#00bfff';
+      $('stateExplain').innerHTML = cat
+        ? `<span class="mae-only"><strong>Kid View:</strong> ${cat.kid}<br></span><strong>Engineering Hypothesis (L2):</strong> ${cat.eng}<br><strong>Darkness Remainder:</strong> ${ip.remainder}`
+        : 'Empty stack — click any element tile below to begin.';
+
+      if(actionNote && prevSnapshot){
+        const df = mf.fource_lock - prevSnapshot.fource;
+        const arrow = df > 0.001 ? '↑' : df < -0.001 ? '↓' : '→';
+        $('deltaBanner').innerHTML = `${actionNote} &nbsp;|&nbsp; State: <strong>${prevSnapshot.state}</strong> → <strong>${sig.overlay_state}</strong> &nbsp;|&nbsp; C_HTE: <strong>${sig.c_hte_unison.toFixed(2)}</strong> &nbsp;|&nbsp; Fource: <strong>${mf.fource_lock.toFixed(3)} (${arrow})</strong>`;
       }
+      Array.from(document.querySelectorAll('.grid button')).forEach((b,i)=>b.classList.toggle('active', sig.nodes.some(n=>n.atomic_number===i)));
+    }
 
-      const ga = (tonicP / 12) * 2 * Math.PI - Math.PI / 2;
-      ctx.strokeStyle = "#fbbf24";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(W / 2 + R * Math.cos(ga), H / 2 + R * Math.sin(ga), 13, 0, 2 * Math.PI);
-      ctx.stroke();
+    function mapFormula(actionNote=''){
+      try { renderSignature(buildSignature($('formula').value, $('modeSelect').value, $('weightSelect').value, $('boundarySelect').value), actionNote); $('log').classList.remove('error'); }
+      catch(err){ $('log').classList.add('error'); $('log').textContent = 'ERROR:\n- ' + err.message; }
+    }
 
-      items.forEach(it => {
-        const ep = getV4Coord(it.z, mode).p;
-        const ea = (ep / 12) * 2 * Math.PI - Math.PI / 2;
-        const nx = W / 2 + R * Math.cos(ea), ny = H / 2 + R * Math.sin(ea);
-        ctx.fillStyle = "#38bdf8";
-        ctx.beginPath();
-        ctx.arc(nx, ny, 7, 0, 2 * Math.PI);
-        ctx.fill();
+    function loadFormula(f){ atomHistory = Array.of(); $('formula').value = f; mapFormula(`Loaded preset <strong>${f}</strong>`); }
+
+    function resetAll(){
+      current=null; prevSnapshot=null; atomHistory=Array.of(); $('formula').value=''; $('selected').textContent='—';
+      $('fifthLadder').textContent='—'; $('polarityMetrics').textContent='—'; $('modalField').textContent='—';
+      $('fourceScore').textContent='—'; $('interfaceRisk').textContent='—'; $('state').textContent='VOID'; $('state').style.color='#8a8a8a';
+      $('stateExplain').textContent='Stack purged — click any element tile below to start a fresh experiment!';
+      $('deltaBanner').textContent='Stack purged. Ready for new atoms.';
+      Array.from(document.querySelectorAll('.grid button')).forEach(b=>b.classList.remove('active'));
+    }
+
+    function formulaFromHistory(hist){
+      const counts = new Map();
+      hist.forEach(sym => counts.set(sym, (counts.get(sym)||0) + 1));
+      return Array.from(counts.entries()).map(([s,c]) => c > 1 ? `${s}${c}` : s).join('');
+    }
+
+    function stackElement(sym){
+      if(atomHistory.length === 0 && ($('formula').value === 'H2' || $('formula').value === 'SiO2')) $('formula').value = '';
+      atomHistory.push(sym);
+      const stacked = formulaFromHistory(atomHistory);
+      $('formula').value = stacked;
+      if($('dopeBase')){ $('dopeBase').value = stacked; $('dopeSlider').value = 0; $('dopeVal').textContent = '0.00'; drawDopingCurve(0); }
+      renderElementDossier(sym, true);
+      mapFormula(`Added <strong>${sym}</strong>`);
+      if($('autoChime') && $('autoChime').checked && !document.body.classList.contains('rigor-mode')) sonify();
+    }
+
+    function undoLast(){
+      if(!atomHistory.length){ resetAll(); return; }
+      const removed = atomHistory.pop();
+      if(!atomHistory.length){ resetAll(); return; }
+      $('formula').value = formulaFromHistory(atomHistory);
+      mapFormula(`Removed <strong>${removed}</strong>`);
+    }
+
+    function captureAtlas(){
+      if(!current) return;
+      const mf=current.modal_field;
+      $('log').classList.remove('error');
+      $('log').textContent += `\n\n[${new Date().toISOString()}] ${current.entry_id} (${current.boundary_context}) → ${current.overlay_state} | C_HTE=${current.c_hte_unison} | Ladder: ${current.fifth_ladder} | ${mf.optimal_tonic_name} ${mf.optimal_mode} [F=${mf.fource_lock}]`;
+    }
+
+    function downloadLedger(){
+      if(!current) return;
+      const blob=new Blob(Array.of(JSON.stringify({ ...current, active_element_dossier: getElementDossier(activeDossierSym) },null,2)),{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${current.entry_id.toLowerCase()}.json`; a.click();
+    }
+
+    function sonify(){
+      if(!current) mapFormula();
+      if(!current) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if(!AudioCtx) return;
+      const ctx = new AudioCtx(), now = ctx.currentTime + 0.05;
+      current.nodes.forEach((node, i) => {
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.type = current.overlay_state.includes('PIEZO') ? 'triangle' : current.overlay_state.includes('ARMOR') ? 'square' : 'sine';
+        osc.frequency.value = 440 * Math.pow(2, ((60 + node.pitch_class + Math.max(0, node.octave_band-1)*3) - 69) / 12);
+        const start = now + i * 0.16, dur = Math.min(0.7, 0.22 + node.count * 0.07);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(Math.min(0.22, 0.07 + node.count * 0.025), start + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        osc.connect(gain).connect(ctx.destination); osc.start(start); osc.stop(start + dur + 0.05);
       });
     }
-    window.addEventListener("DOMContentLoaded", () => {
-      const grid = document.getElementById("v4Grid");
-      V4_ELEMENTS.forEach((sym, z) => {
-        const tile = document.createElement("div");
-        tile.className = "el-tile";
+    function setObservatoryMode(isRigor){
+      document.body.classList.toggle('rigor-mode', isRigor);
+      $('btnModeV4').classList.toggle('active-v4', !isRigor);
+      $('btnModeV5').classList.toggle('active-v5', isRigor);
+      $('activeModePill').textContent = isRigor
+        ? 'ACTIVE: v5.0 Rigor (Strict Physical & Provenance)'
+        : 'ACTIVE: v0.4 MAE (Exploratory + Harmonic)';
+    }
+    $('btnModeV4').addEventListener('click', () => setObservatoryMode(false));
+    $('btnModeV5').addEventListener('click', () => setObservatoryMode(true));
 
-        const numSpan = document.createElement("span");
-        numSpan.className = "num";
-        numSpan.textContent = String(z);
-
-        const symSpan = document.createElement("span");
-        symSpan.className = "sym";
-        symSpan.textContent = sym;
-
-        tile.appendChild(numSpan);
-        tile.appendChild(symSpan);
-
-        tile.addEventListener("mouseenter", () => renderDossier(z, sym));
-        tile.addEventListener("click", () => {
-          const cur = document.getElementById("v4Formula").value.trim();
-          const next = cur === "Be" && v4History.length === 1 ? sym : cur + sym;
-          v4History.push(next);
-          document.getElementById("v4Formula").value = next;
-          renderDossier(z, sym);
-          updateV4();
-        });
-        grid.appendChild(tile);
-      });
-
-      document.getElementById("v4EvalBtn").addEventListener("click", updateV4);
-      document.getElementById("v4Proj").addEventListener("change", updateV4);
-      document.getElementById("v4Boundary").addEventListener("change", updateV4);
-
-      document.getElementById("v4ClearBtn").addEventListener("click", () => {
-        v4History = new Array("E0");
-        document.getElementById("v4Formula").value = "E0";
-        updateV4();
-      });
-
-      document.getElementById("v4UndoBtn").addEventListener("click", () => {
-        if (v4History.length > 1) v4History.pop();
-        document.getElementById("v4Formula").value = v4History.at(v4History.length - 1);
-        updateV4();
-      });
-
-      document.querySelectorAll(".v4-preset").forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.getElementById("v4Formula").value = btn.dataset.f;
-          updateV4();
-        });
-      });
-
-      document.getElementById("v4SweepSlider").addEventListener("input", e => {
-        const x = parseFloat(e.target.value);
-        document.getElementById("v4SweepLabel").textContent = x.toFixed(2);
-        document.getElementById("v4Formula").value = `La${(1 - x).toFixed(2)}Sr${x.toFixed(2)}CuO4`;
-        updateV4();
-      });
-
-      document.getElementById("v4PinBtn").addEventListener("click", e => {
-        v4Pinned = !v4Pinned;
-        e.target.style.borderColor = v4Pinned ? "#fbbf24" : "#23304d";
-      });
-
-      document.getElementById("v4CopyBtn").addEventListener("click", () => {
-        navigator.clipboard.writeText(v4CurrentDossierMd);
-      });
-
-      document.getElementById("v4SonifyBtn").addEventListener("click", () => {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        const items = parseV4Formula(document.getElementById("v4Formula").value);
-        const mode = document.getElementById("v4Proj").value;
-        items.forEach((it, idx) => {
-          const { p, o } = getV4Coord(it.z, mode);
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.frequency.value = 130.81 * Math.pow(2, (p + o * 12) / 24);
-          gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.12);
-          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.12 + 0.9);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(ctx.currentTime + idx * 0.12);
-          osc.stop(ctx.currentTime + idx * 0.12 + 0.95);
-        });
-      });
-
-      renderDossier(4, "Be");
-      updateV4();
+    const gList = $('glossaryList');
+    STATE_CATALOG.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'g-card';
+      div.innerHTML = `<div><strong style="color:${s.color}">${s.label}</strong><span class="mae-only"> — ${s.kid}</span><br><span style="color:#8a8a8a">${s.eng}</span></div><button type="button" onclick="loadFormula('${s.example}')">Try ${s.example}</button>`;
+      gList.appendChild(div);
     });
+
+    const grid=$('grid');
+    ELEMENTS.forEach(e=>{
+      const s=e.at(0), z=e.at(1), grp=e.at(2), b=document.createElement('button');
+      b.type='button';
+      b.textContent=s+'\n'+z;
+      b.style.borderTopColor = PC_COLORS.at(groupPi(grp));
+      if(CANONICAL_DOSSIERS[s]) b.classList.add('has-canonical');
+      b.onmouseenter=()=>renderElementDossier(s, false);
+      b.onclick=()=>stackElement(s);
+      grid.appendChild(b);
+    });
+
+    function buildDopedFormula(base, el, xVal){
+      const x = Number(xVal);
+      if(x <= 0.001) return base;
+      const rx = new RegExp(`(${el})(?![a-z])(\\d*\\.?\\d*)`);
+      const m = base.match(rx);
+      if(m){ const prev = m.at(2) ? Number(m.at(2)) : 1; return base.replace(rx, `${el}${Number((prev + x).toFixed(2))}`); }
+      return `${base}${el}${Number(x.toFixed(2))}`;
+    }
+
+    function drawDopingCurve(activeX = Number($('dopeSlider')?.value || 0.9)){
+      const dc = $('dopingChart');
+      if(!dc) return;
+      dc.width = dc.clientWidth * devicePixelRatio; dc.height = dc.clientHeight * devicePixelRatio;
+      const dctx = dc.getContext('2d'), w = dc.width, h = dc.height;
+      dctx.clearRect(0, 0, w, h);
+      const base = ($('dopeBase')?.value || 'YBa2Cu3O6').trim(), el = ($('dopeEl')?.value || 'O').trim();
+      const mode = $('modeSelect').value, weight = $('weightSelect').value, boundary = $('boundarySelect').value, pts = Array.of();
+      for(let i = 0; i <= 40; i++){
+        const x = i * 0.05;
+        try { const sig = buildSignature(buildDopedFormula(base, el, x), mode, weight, boundary); pts.push({ x, f: sig.modal_field.fource_lock }); }
+        catch(e) { return; }
+      }
+      const maxF = Math.max(0.5, ...pts.map(p => p.f));
+      dctx.strokeStyle = '#00bfff'; dctx.lineWidth = 2 * devicePixelRatio; dctx.beginPath();
+      pts.forEach((p, idx) => {
+        const px = (p.x / 2.0) * (w - 20) + 10, py = h - 10 - (p.f / maxF) * (h - 22);
+        if(idx === 0) dctx.moveTo(px, py); else dctx.lineTo(px, py);
+      });
+      dctx.stroke();
+      const curPt = pts.reduce((a, b) => Math.abs(b.x - activeX) < Math.abs(a.x - activeX) ? b : a);
+      dctx.fillStyle = '#ffd700'; dctx.beginPath();
+      dctx.arc((curPt.x / 2.0) * (w - 20) + 10, h - 10 - (curPt.f / maxF) * (h - 22), 4.5 * devicePixelRatio, 0, Math.PI * 2);
+      dctx.fill();
+      dctx.fillStyle = '#8a8a8a'; dctx.font = `${10 * devicePixelRatio}px monospace`;
+      dctx.fillText(`Fource Lock Curve (${base} + x·${el}) | Peak F=${maxF.toFixed(2)}`, 10, 12 * devicePixelRatio);
+    }
+
+    function applyDoping(val){
+      const x = Number(val); $('dopeVal').textContent = x.toFixed(2);
+      const base = ($('dopeBase')?.value || 'YBa2Cu3O6').trim(), el = ($('dopeEl')?.value || 'O').trim();
+      atomHistory = Array.of(); $('formula').value = buildDopedFormula(base, el, x);
+      mapFormula(`Doped <strong>${base} + ${x.toFixed(2)} ${el}</strong>`); drawDopingCurve(x);
+    }
+    function loadDopingPreset(base, el, x){ $('dopeBase').value = base; $('dopeEl').value = el; $('dopeSlider').value = x; applyDoping(x); }
+
+    const c=$('scope'), ctx=c.getContext('2d');
+    function size(){ c.width=c.clientWidth*devicePixelRatio; c.height=c.clientHeight*devicePixelRatio; }
+    addEventListener('resize',size); size(); let t=0;
+    function draw(pcs, st){
+      ctx.fillStyle='rgba(7,11,20,.24)'; ctx.fillRect(0,0,c.width,c.height);
+      const cx=c.width/2, cy=c.height/2, R=Math.min(c.width,c.height)*.33, tonic=current?current.modal_field.optimal_tonic:-1;
+      const cat = STATE_CATALOG.find(s => s.id === st), color = cat ? cat.color : '#00bfff';
+      const isRigor = document.body.classList.contains('rigor-mode');
+      ctx.shadowBlur=0; ctx.strokeStyle='#1b253b'; ctx.lineWidth=1*devicePixelRatio;
+      for(let i=0;i<12;i++){ const a=(i/12)*Math.PI*2-Math.PI/2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a)); ctx.stroke(); }
+      ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+      t+=.02; ctx.strokeStyle=color; ctx.shadowColor=color; ctx.shadowBlur=18*devicePixelRatio; ctx.lineWidth=2*devicePixelRatio;
+      ctx.beginPath();
+      for(let a=0;a<Math.PI*2+.01;a+=.012){ let r=R*.58; pcs.forEach(p=>r+=(10+p)*Math.sin((p+2)*a+t+p*.4)); const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a); if(a===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+      ctx.closePath(); ctx.stroke(); ctx.shadowBlur=0;
+      for(let p=0;p<12;p++){
+        const a=(p/12)*Math.PI*2-Math.PI/2, x=cx+R*Math.cos(a), y=cy+R*Math.sin(a), active=pcs.includes(p), isTonic=p===tonic&&pcs.length>0;
+        if(isTonic){ ctx.strokeStyle='#ffd700'; ctx.lineWidth=2.5*devicePixelRatio; ctx.beginPath(); ctx.arc(x,y,12*devicePixelRatio,0,Math.PI*2); ctx.stroke(); }
+        ctx.fillStyle=active?color:'#334155'; ctx.beginPath(); ctx.arc(x,y,(active?7:4)*devicePixelRatio,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle=active?'#fff':(isTonic?'#ffd700':'#7c8db0'); ctx.font=`${11*devicePixelRatio}px monospace`;
+        const lbl = isRigor ? `p${p}` : PITCH.at(p);
+        ctx.fillText(lbl,x+14*devicePixelRatio,y+4*devicePixelRatio);
+      }
+    }
+    function loop(){ const pcs=current?Object.keys(current.pitch_class_histogram).map(Number).sort((a,b)=>a-b):Array.of(); draw(pcs,current?.overlay_state||'VOID'); requestAnimationFrame(loop); }
+
+    renderElementDossier('H', true);
+    updateDiscoveryUI();
+    mapFormula();
+    drawDopingCurve();
+    loop();
   </script>
 </body>
 </html>
