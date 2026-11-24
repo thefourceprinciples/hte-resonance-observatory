@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 import pytest
 
-ROOT = Path(__file__).resolve().parents
+ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -16,7 +16,6 @@ def test_web_index_html_structure_and_rigor_elements() -> None:
     assert index_path.exists(), "web/index.html must exist for GitHub Pages deployment."
     html = index_path.read_text(encoding="utf-8")
 
-    # Verify complete HTML framing and three-layer UI controls
     assert "<!DOCTYPE html>" in html
     assert "</html>" in html
     assert 'id="rigorToggleBtn"' in html
@@ -26,7 +25,6 @@ def test_web_index_html_structure_and_rigor_elements() -> None:
     assert 'id="wheelCanvas"' in html
     assert 'id="dopingSlider"' in html
 
-    # Verify zero legacy Z-mod-12 arbitrary arithmetic remains in frontend
     assert "Z % 12" not in html
     assert "z % 12" not in html
 
