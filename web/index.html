@@ -253,12 +253,188 @@
     </div>
     <div id="v4AtlasBody" class="dossier-box"></div>
   </section>
+
+  <!-- FLOATING VERSION SWITCHER PILL -->
+  <div id="version-switcher" style="position:fixed;bottom:12px;left:12px;z-index:9999;display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(9,13,22,0.92);border:1px solid #26324a;border-radius:8px;font-family:system-ui,-apple-system,sans-serif;font-size:11px;color:#e6edf7;box-shadow:0 4px 14px rgba(0,0,0,0.45);">
+    <span style="padding:2px 6px;border-radius:4px;background:rgba(251,191,36,0.18);color:#fbbf24;font-family:monospace;font-weight:700;">v0.4 MAE</span>
+    <a href="v5.html" style="text-decoration:none;padding:3px 9px;border-radius:5px;background:#182032;color:#38bdf8;border:1px solid #26324a;font-weight:600;">Switch to v5.0 Rigor &rarr;</a>
+  </div>
+  <script>
+    "use strict";
+
+    const V4_ELEMENTS = (
+      "E0 H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca " +
+      "Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr " +
+      "Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd " +
+      "Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg " +
+      "Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm " +
+      "Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og"
+    ).split(" ");
+
+    const V4_NOTES = new Array("C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B");
+    let v4Pinned = false;
+    let v4History = new Array("Be");
+    let v4CurrentDossierMd = "";
+
+    function getV4Coord(z, mode) {
+      if (z === 0) return { p: 0, o: 0 };
+      const p = mode === "v1" ? (z % 12) : ((z * 7) % 12);
+      const o = Math.floor((z - 1) / 12) + 1;
+      return { p, o };
+    }
+
+    function getFifthLadder(p0) {
+      const steps = new Array();
+      for (let n = 0; n < 6; n++) {
+        const pn = (p0 + 7 * n) % 12;
+        const rep = V4_ELEMENTS.find((s, idx) => idx > 0 && ((idx * 7) % 12) === pn) || "E0";
+        steps.push(rep);
+      }
+      return steps.join(" -> ");
+    }
+
+    function classify7State(formula, coh) {
+      if (formula === "E0") return "SUBSTRATE ZERO (E0)";
+      if (formula.includes("YBa2Cu3O7") || formula.includes("CuO")) return "PLASMA FLUX";
+      if (formula.includes("SiO2")) return "GOLD ANCHOR";
+      if (formula.includes("BaTiO3")) return "PIEZO TENSION";
+      if (formula.includes("Fe")) return "ARMOR SHIELD";
+      if (formula.includes("GaAs") || formula.includes("H")) return "SHADOW PHASE";
+      return coh > 0.85 ? "ORIGIN / SINGLET" : "HARMONIC COMPLEX";
+    }
+
+    function addDossierSection(container, headingText, bodyText) {
+      const h3 = document.createElement("h3");
+      h3.textContent = headingText;
+      const div = document.createElement("div");
+      div.textContent = bodyText;
+      container.appendChild(h3);
+      container.appendChild(div);
+    }
+
+    function renderDossier(z, sym) {
+      if (v4Pinned) return;
+      const mode = document.getElementById("v4Proj").value;
+      const boundary = document.getElementById("v4Boundary").value;
+      const { p, o } = getV4Coord(z, mode);
+      const idStr = `MATLAS-E${String(z).padStart(3, "0")}-${sym.toUpperCase()}`;
+      document.getElementById("v4AtlasHeader").textContent = idStr;
+
+      const role = z === 0
+        ? "Zero-point harmonic vacuum reference (Substrate Zero)."
+        : (z <= 2 ? "Primordial light-element singlet carrier." : "Multi-octave standing-wave lattice node.");
+
+      v4CurrentDossierMd = new Array(
+        `# ${idStr}`,
+        `- **Atomic Number (Z):** ${z} (${sym})`,
+        `- **HTE Coordinate (p, o):** (${p}, ${o}) — Pitch Class ${V4_NOTES.at(p)}`,
+        `- **Isotope Invariance:** All isotopes of ${sym} share Z=${z} and pitch class p=${p}.`,
+        `- **6-Step Fifth Ladder:** ${getFifthLadder(p)}`,
+        `- **Structural Role:** ${role}`
+      ).join("\n");
+
+      const box = document.getElementById("v4AtlasBody");
+      box.replaceChildren();
+      addDossierSection(box, "1. Core & HTE Signature", `Element: ${sym} (Z = ${z}) | Coord: HTE (${p}, ${o}) [${V4_NOTES.at(p)}]`);
+      addDossierSection(box, "2. Isotopic Invariance Rule", `All nuclear isotopes of ${sym} diverge in neutron mass while preserving identical Z=${z} and pitch class p=${p}.`);
+      addDossierSection(box, "3. CUC Relational & Fifth Ladder Map", getFifthLadder(p));
+      addDossierSection(box, "4. 7-State Activation & Interface Role", role);
+      addDossierSection(box, "5. Engineering Hypothesis & Search Directions", `Test ${sym} substitution along Fifth-Ladder partners in ${boundary} boundary regimes.`);
+    }
+
+    function parseV4Formula(formula) {
+      const re = /(E0|[A-Z][a-z]?)(\d*\.?\d*)/g;
+      const items = new Array();
+      let m;
+      while ((m = re.exec(formula.trim())) !== null) {
+        const sym = m.at(1);
+        const z = V4_ELEMENTS.indexOf(sym);
+        if (z !== -1) {
+          items.push({ sym, z, w: m.at(2) ? parseFloat(m.at(2)) : 1.0 });
+        }
+      }
+      return items.length ? items : new Array({ sym: "Be", z: 4, w: 1.0 });
+    }
+
+    function updateV4() {
+      const formula = document.getElementById("v4Formula").value.trim() || "Be";
+      const mode = document.getElementById("v4Proj").value;
+      const boundary = document.getElementById("v4Boundary").value;
+      const items = parseV4Formula(formula);
+      const totalW = items.reduce((a, b) => a + b.w, 0) || 1;
+
+      let cx = 0, sy = 0;
+      items.forEach(it => {
+        const { p } = getV4Coord(it.z, mode);
+        const ang = (p / 12) * 2 * Math.PI - Math.PI / 2;
+        cx += (it.w / totalW) * Math.cos(ang);
+        sy += (it.w / totalW) * Math.sin(ang);
+      });
+      const coh = Math.hypot(cx, sy);
+      const tonicAng = Math.atan2(sy, cx);
+      const tonicP = ((Math.round(((tonicAng + Math.PI / 2) / (2 * Math.PI)) * 12) % 12) + 12) % 12;
+
+      const primary = items.at(0);
+      const { p, o } = getV4Coord(primary.z, mode);
+      document.getElementById("v4OutSig").textContent = `${formula} — HTE (${p}, ${o})`;
+      document.getElementById("v4OutLadder").textContent = getFifthLadder(p);
+      document.getElementById("v4OutCoh").textContent = `C_HTE +${coh.toFixed(3)} | Boundary: ${boundary}`;
+      document.getElementById("v4OutState").textContent = classify7State(formula, coh);
+
+      const canvas = document.getElementById("v4Wheel");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, H = canvas.height, R = 128;
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.strokeStyle = "#23304d";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(W / 2, H / 2, R, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      for (let k = 0; k < 12; k++) {
+        const a = (k / 12) * 2 * Math.PI - Math.PI / 2;
+        ctx.fillStyle = k === tonicP ? "#fbbf24" : "#8b9ec2";
+        ctx.font = "11px ui-monospace, monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(V4_NOTES.at(k), W / 2 + (R + 22) * Math.cos(a), H / 2 + (R + 22) * Math.sin(a));
+      }
+
+      const ga = (tonicP / 12) * 2 * Math.PI - Math.PI / 2;
+      ctx.strokeStyle = "#fbbf24";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(W / 2 + R * Math.cos(ga), H / 2 + R * Math.sin(ga), 13, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      items.forEach(it => {
+        const ep = getV4Coord(it.z, mode).p;
+        const ea = (ep / 12) * 2 * Math.PI - Math.PI / 2;
+        const nx = W / 2 + R * Math.cos(ea), ny = H / 2 + R * Math.sin(ea);
+        ctx.fillStyle = "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(nx, ny, 7, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+    }
     window.addEventListener("DOMContentLoaded", () => {
       const grid = document.getElementById("v4Grid");
       V4_ELEMENTS.forEach((sym, z) => {
         const tile = document.createElement("div");
         tile.className = "el-tile";
-        tile.innerHTML = `<span class="num">${z}</span><span class="sym">${sym}</span>`;
+
+        const numSpan = document.createElement("span");
+        numSpan.className = "num";
+        numSpan.textContent = String(z);
+
+        const symSpan = document.createElement("span");
+        symSpan.className = "sym";
+        symSpan.textContent = sym;
+
+        tile.appendChild(numSpan);
+        tile.appendChild(symSpan);
+
         tile.addEventListener("mouseenter", () => renderDossier(z, sym));
         tile.addEventListener("click", () => {
           const cur = document.getElementById("v4Formula").value.trim();
@@ -334,10 +510,5 @@
       updateV4();
     });
   </script>
-
-  <div id="version-switcher" style="position:fixed;bottom:12px;left:12px;z-index:9999;display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(9,13,22,0.92);border:1px solid #26324a;border-radius:8px;font-family:system-ui,-apple-system,sans-serif;font-size:11px;color:#e6edf7;box-shadow:0 4px 14px rgba(0,0,0,0.45);">
-    <span style="padding:2px 6px;border-radius:4px;background:rgba(251,191,36,0.18);color:#fbbf24;font-family:monospace;font-weight:700;">v0.4 MAE</span>
-    <a href="v5.html" style="text-decoration:none;padding:3px 9px;border-radius:5px;background:#182032;color:#38bdf8;border:1px solid #26324a;font-weight:600;">Switch to v5.0 Rigor &rarr;</a>
-  </div>
 </body>
 </html>
