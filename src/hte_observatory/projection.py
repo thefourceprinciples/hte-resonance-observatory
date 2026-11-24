@@ -1,113 +1,133 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, Tuple
 import numpy as np
 from scipy.stats import pearsonr
-
 from .embeddings import ElementalEmbedding
 
 
 @dataclass(frozen=True)
 class CircularProjection:
+    """
+    2D Classical MDS projection of an ElementalEmbedding onto S^1 (theta in [0, 2*pi)),
+    paired with explicit pairwise similarity fidelity diagnostics.
+    """
     embedding_name: str
     embedding_sha256: str
     method: str
-    angles_rad: Dict[str, float]          # theta in [0, 2*pi)
-    pitch_coords_12: Dict[str, float]     # continuous 0-12 mapping: (6/pi)*theta
-    coordinates_2d: Dict[str, List[float]]
-    pearson_r: float                      # correlation(cos_sim_orig, cos(delta_theta))
+    angles_rad: Dict[str, float]
+    pitch_coords_12: Dict[str, float]
+    coordinates_2d: Dict[str, Tuple[float, float]]
+    pearson_r: float
     pearson_p_value: float
-    stress: float                         # normalized Kruskal stress-1 on angular chord distances
-    variance_explained_2d: float          # fraction of positive MDS eigenvalue energy captured
+    stress: float
+    variance_explained_2d: float
 
     def get_angle(self, symbol: str) -> float:
         if symbol not in self.angles_rad:
             raise KeyError(f"Element '{symbol}' not present in projection '{self.embedding_name}'.")
         return self.angles_rad[symbol]
 
+    def get_continuous_pitch(self, symbol: str) -> float:
+        """Continuous [0, 12) bridge coordinate p_i = (6/pi) * theta_i for downstream sonification."""
+        if symbol not in self.pitch_coords_12:
+            raise KeyError(f"Element '{symbol}' not present in projection '{self.embedding_name}'.")
+        return self.pitch_coords_12[symbol]
 
-def project_to_circle_mds(embedding: ElementalEmbedding) -> CircularProjection:
+
+def project_to_circle_mds(
+    embedding: ElementalEmbedding,
+    anchor_symbol: str | None = None,
+) -> CircularProjection:
     """
-    Project L2-normalized elemental embeddings onto S^1 via Classical MDS on cosine distances,
-    followed by atan2 angular extraction and Pearson similarity preservation audit.
+    Project L2-normalized elemental vectors onto S^1 via Classical Multidimensional Scaling (MDS)
+    on cosine dissimilarities d_ij = 1 - (v_i . v_j).
     """
-    symbols, X = embedding.get_matrix(include_e0=False)
+    symbols = embedding.symbols
     n = len(symbols)
     if n < 3:
-        raise ValueError("At least 3 elements are required for 2D circular MDS projection.")
+        raise ValueError(f"At least 3 non-null elements are required for 2D MDS projection; got {n}.")
 
-    # Pairwise cosine similarity S and cosine distance D = 1 - S
-    S = np.clip(X @ X.T, -1.0, 1.0)
-    np.fill_diagonal(S, 1.0)
-    D = np.maximum(0.0, 1.0 - S)
+    mat = embedding.matrix  # shape (n, d), L2-normalized rows
+    sim_matrix = np.clip(mat @ mat.T, -1.0, 1.0)
+    dist_matrix = np.maximum(0.0, 1.0 - sim_matrix)
 
-    # Classical MDS double-centering on squared distances
-    D2 = D ** 2
-    H = np.eye(n) - np.ones((n, n)) / n
-    B = -0.5 * (H @ D2 @ H)
+    # Classical MDS double-centering of squared distance matrix
+    d_sq = dist_matrix ** 2
+    row_means = d_sq.mean(axis=1, keepdims=True)
+    col_means = d_sq.mean(axis=0, keepdims=True)
+    grand_mean = d_sq.mean()
+    gram = -0.5 * (d_sq - row_means - col_means + grand_mean)
 
-    eigvals, eigvecs = np.linalg.eigh(B)
-    idx = np.argsort(eigvals)[::-1]
-    eigvals = eigvals[idx]
-    eigvecs = eigvecs[:, idx]
+    eigvals, eigvecs = np.linalg.eigh(gram)
+    order = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[order]
+    eigvecs = eigvecs[:, order]
 
     pos_eigvals = np.maximum(eigvals, 0.0)
-    total_energy = float(np.sum(pos_eigvals)) or 1.0
-    var_explained = float((pos_eigvals[0] + pos_eigvals[1]) / total_energy)
+    total_var = float(pos_eigvals.sum())
+    var_2d = float((pos_eigvals[0] + pos_eigvals[1]) / total_var) if total_var > 0.0 else 0.0
 
-    # Top 2 principal coordinates
-    top2_vals = np.maximum(eigvals[:2], 1e-12)
-    coords = eigvecs[:, :2] * np.sqrt(top2_vals)
+    coords = np.zeros((n, 2), dtype=np.float64)
+    for k in range(min(2, n)):
+        scale = np.sqrt(max(eigvals[k], 1e-12))
+        coords[:, k] = eigvecs[:, k] * scale
 
-    # Deterministic sign convention: align max-norm element to positive x-axis
-    anchor_idx = int(np.argmax(np.linalg.norm(coords, axis=1)))
-    anchor_angle = np.arctan2(coords[anchor_idx, 1], coords[anchor_idx, 0])
-    rot = np.array([
-        [np.cos(-anchor_angle), -np.sin(-anchor_angle)],
-        [np.sin(-anchor_angle),  np.cos(-anchor_angle)],
-    ])
-    coords = coords @ rot.T
-
-    angles = np.mod(np.arctan2(coords[:, 1], coords[:, 0]), 2.0 * np.pi)
-
-    # Audit projection fidelity on upper-triangular pairs (i < j)
-    iu = np.triu_indices(n, k=1)
-    orig_sim = S[iu]
-    delta_theta = angles[iu[0]] - angles[iu[1]]
-    circ_sim = np.cos(delta_theta)
-
-    if np.std(orig_sim) < 1e-12 or np.std(circ_sim) < 1e-12:
-        r_val, p_val = 0.0, 1.0
+    # Deterministic orientation anchoring (removes arbitrary orthogonal sign/rotation ambiguity)
+    if anchor_symbol is not None and anchor_symbol in symbols:
+        anchor_idx = symbols.index(anchor_symbol)
     else:
-        res = pearsonr(orig_sim, circ_sim)
-        r_val, p_val = float(res.statistic), float(res.pvalue)
+        radii = np.linalg.norm(coords, axis=1)
+        anchor_idx = int(np.argmax(radii))
 
-    # Normalized chord distance stress
-    d_orig = 1.0 - orig_sim
-    d_circ = 1.0 - circ_sim
-    denom = float(np.sum(d_orig ** 2)) or 1.0
-    stress = float(np.sqrt(np.sum((d_orig - d_circ) ** 2) / denom))
+    anchor_angle = float(np.arctan2(coords[anchor_idx, 1], coords[anchor_idx, 0]))
+    cos_a, sin_a = np.cos(-anchor_angle), np.sin(-anchor_angle)
+    rot = np.array([[cos_a, -sin_a], [sin_a, cos_a]], dtype=np.float64)
+    coords_rot = coords @ rot.T
 
+    # Wrap angles strictly into [0, 2*pi) with floating-point boundary guard
+    angles_rad = np.mod(np.arctan2(coords_rot[:, 1], coords_rot[:, 0]), 2.0 * np.pi)
+    angles_rad = np.where(np.isclose(angles_rad, 2.0 * np.pi, atol=1e-12), 0.0, angles_rad)
+
+    # Fidelity audit: compare high-D cosine similarity vs. circular similarity cos(theta_i - theta_j)
+    tri_idx = np.triu_indices(n, k=1)
+    orig_sim_pairs = sim_matrix[tri_idx]
+    circ_sim_matrix = np.cos(angles_rad[:, None] - angles_rad[None, :])
+    circ_sim_pairs = circ_sim_matrix[tri_idx]
+
+    if orig_sim_pairs.size >= 2 and np.std(orig_sim_pairs) > 1e-12 and np.std(circ_sim_pairs) > 1e-12:
+        r_val, p_val = pearsonr(orig_sim_pairs, circ_sim_pairs)
+        pearson_r = float(r_val)
+        pearson_p = float(p_val)
+    else:
+        pearson_r, pearson_p = 0.0, 1.0
+
+    orig_dist_pairs = 1.0 - orig_sim_pairs
+    circ_dist_pairs = 1.0 - circ_sim_pairs
+    denom = float(np.sum(orig_dist_pairs ** 2))
+    stress = float(np.sqrt(np.sum((orig_dist_pairs - circ_dist_pairs) ** 2) / denom)) if denom > 0.0 else 0.0
+
+    # Inject Element-0 null baseline at theta = 0.0
     angles_dict: Dict[str, float] = {"E0": 0.0}
     pitch_dict: Dict[str, float] = {"E0": 0.0}
-    coords_dict: Dict[str, List[float]] = {"E0": [0.0, 0.0]}
+    coords_dict: Dict[str, Tuple[float, float]] = {"E0": (0.0, 0.0)}
 
-    for sym, theta, xy in zip(symbols, angles, coords):
-        t = float(theta)
-        angles_dict[sym] = t
-        pitch_dict[sym] = float((6.0 / np.pi) * t)
-        coords_dict[sym] = [float(xy[0]), float(xy[1])]
+    for idx, sym in enumerate(symbols):
+        theta = float(angles_rad[idx])
+        angles_dict[sym] = theta
+        pitch_dict[sym] = float((6.0 / np.pi) * theta)
+        coords_dict[sym] = (float(coords_rot[idx, 0]), float(coords_rot[idx, 1]))
 
     return CircularProjection(
         embedding_name=embedding.metadata.name,
         embedding_sha256=embedding.metadata.sha256,
-        method="classical_mds_cosine_atan2",
+        method="classical_mds_cosine",
         angles_rad=angles_dict,
         pitch_coords_12=pitch_dict,
         coordinates_2d=coords_dict,
-        pearson_r=r_val,
-        pearson_p_value=p_val,
+        pearson_r=pearson_r,
+        pearson_p_value=pearson_p,
         stress=stress,
-        variance_explained_2d=var_explained,
+        variance_explained_2d=var_2d,
     )
