@@ -9,7 +9,7 @@ import numpy as np
 from .embeddings import ElementalEmbedding
 from .projection import CircularProjection
 
-FORMULA_TOKEN_RE = re.compile(r"([A-Z][a-z]?|E0)(\d*\.?\d*)")
+FORMULA_TOKEN_RE = re.compile(r"(E0|[A-Z][a-z]?)(\d*\.?\d*)")
 SOFTWARE_VERSION = "2.0.0-rigor"
 
 
