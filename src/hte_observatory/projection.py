@@ -67,14 +67,14 @@ def project_to_circle_mds(
 
     pos_eigvals = np.maximum(eigvals, 0.0)
     total_var = float(pos_eigvals.sum())
-    var_2d = float((pos_eigvals[0] + pos_eigvals[1]) / total_var) if total_var > 0.0 else 0.0
+    var_2d = float((pos_eigvals.item(0) + pos_eigvals.item(1)) / total_var) if total_var > 0.0 else 0.0
 
     coords = np.zeros((n, 2), dtype=np.float64)
     for k in range(min(2, n)):
-        scale = np.sqrt(max(eigvals[k], 1e-12))
+        scale = np.sqrt(max(float(eigvals.item(k)), 1e-12))
         coords[:, k] = eigvecs[:, k] * scale
 
-    # Deterministic orientation anchoring (removes arbitrary orthogonal sign/rotation ambiguity)
+    # Deterministic orientation anchoring
     if anchor_symbol is not None and anchor_symbol in symbols:
         anchor_idx = symbols.index(anchor_symbol)
     else:
@@ -114,7 +114,7 @@ def project_to_circle_mds(
     coords_dict: Dict[str, Tuple[float, float]] = {"E0": (0.0, 0.0)}
 
     for idx, sym in enumerate(symbols):
-        theta = float(angles_rad[idx])
+        theta = float(angles_rad.item(idx))
         angles_dict[sym] = theta
         pitch_dict[sym] = float((6.0 / np.pi) * theta)
         coords_dict[sym] = (float(coords_rot[idx, 0]), float(coords_rot[idx, 1]))
