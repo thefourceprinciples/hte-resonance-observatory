@@ -11,33 +11,42 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 
-def test_web_index_html_structure_and_rigor_elements() -> None:
-    index_path = ROOT / "web" / "index.html"
-    assert index_path.exists(), "web/index.html must exist for GitHub Pages deployment."
-    html = index_path.read_text(encoding="utf-8")
+def test_dual_workbench_html_files_exist_and_link_together() -> None:
+    v4_path = ROOT / "web" / "index.html"
+    v5_path = ROOT / "web" / "v5.html"
 
-    assert "<!DOCTYPE html>" in html
-    assert "</html>" in html
-    assert 'id="rigorToggleBtn"' in html
-    assert 'id="embeddingSelect"' in html
-    assert 'id="compareSelect"' in html
-    assert 'id="customMatrixInput"' in html
-    assert 'id="wheelCanvas"' in html
-    assert 'id="dopingSlider"' in html
+    assert v4_path.exists(), "web/index.html (v0.4 MAE) must exist."
+    assert v5_path.exists(), "web/v5.html (v5.0 Data-Driven Rigor) must exist."
 
-    assert "Z % 12" not in html
-    assert "z % 12" not in html
+    v4_html = v4_path.read_text(encoding="utf-8")
+    v5_html = v5_path.read_text(encoding="utf-8")
+
+    # Verify version switcher links connect v0.4 and v5.0
+    assert "v5.html" in v4_html
+    assert "index.html" in v5_html
+
+    # Verify v5.0 Rigor UI elements and zero Z-mod-12 arithmetic
+    assert "<!DOCTYPE html>" in v5_html
+    assert "</html>" in v5_html
+    assert 'id="rigorToggleBtn"' in v5_html
+    assert 'id="embeddingSelect"' in v5_html
+    assert 'id="compareSelect"' in v5_html
+    assert 'id="customMatrixInput"' in v5_html
+    assert 'id="wheelCanvas"' in v5_html
+    assert 'id="dopingSlider"' in v5_html
+    assert "Z % 12" not in v5_html
+    assert "z % 12" not in v5_html
 
 
-def test_web_index_html_inline_js_syntax_with_node() -> None:
+def test_v5_html_inline_js_syntax_with_node() -> None:
     node_bin = shutil.which("node")
     if node_bin is None:
         pytest.skip("Node.js not installed; skipping JS syntax check.")
 
-    html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+    html = (ROOT / "web" / "v5.html").read_text(encoding="utf-8")
     start = html.find("<script>")
     end = html.rfind("</script>")
-    assert start != -1 and end != -1 and end > start, "Missing inline <script> block in web/index.html."
+    assert start != -1 and end != -1 and end > start, "Missing inline <script> block in web/v5.html."
 
     js_code = html[start + len("<script>") : end]
     proc = subprocess.run(
@@ -46,7 +55,7 @@ def test_web_index_html_inline_js_syntax_with_node() -> None:
         text=True,
         capture_output=True,
     )
-    assert proc.returncode == 0, f"JavaScript syntax error in web/index.html:\n{proc.stderr}"
+    assert proc.returncode == 0, f"JavaScript syntax error in web/v5.html:\n{proc.stderr}"
 
 
 def test_end_to_end_python_pipeline_smoke() -> None:
