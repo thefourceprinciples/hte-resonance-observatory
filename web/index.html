@@ -33,7 +33,7 @@
 
     body {
       display: grid;
-      grid-template-columns: 380px 1fr 410px;
+      grid-template-columns: 360px 1fr 400px;
       gap: 10px;
       padding: 10px;
     }
@@ -68,7 +68,6 @@
       font-size: 13px;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: var(--text);
     }
 
     .badge-v4 {
@@ -106,185 +105,236 @@
       border-radius: 6px;
       padding: 5px 9px;
       font-size: 12px;
-      transition: border-color 0.15s;
     }
     button:hover { border-color: var(--accent); }
 
-    .wheel-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-    }
-
-    canvas#hteWheel {
+    canvas#v4Wheel {
       width: 100%;
-      max-width: 340px;
+      max-width: 320px;
       height: auto;
       aspect-ratio: 1 / 1;
       border-radius: 50%;
       background: radial-gradient(circle, #11192e 0%, #070b14 75%);
       border: 1px solid var(--border);
-    }
-    .status-box {
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px;
-      font-family: var(--mono);
-      font-size: 11px;
-      margin-top: 8px;
+      margin: 0 auto;
     }
 
-    .periodic-grid {
+    .ptable-grid {
       display: grid;
       grid-template-columns: repeat(18, minmax(0, 1fr));
-      gap: 3px;
-      margin-top: 8px;
+      gap: 2px;
+      margin-top: 6px;
     }
 
     .el-tile {
+      aspect-ratio: 1 / 1.12;
       background: var(--panel-alt);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 3px 1px;
-      text-align: center;
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      user-select: none;
-      transition: transform 0.1s, border-color 0.1s;
+      font-family: var(--mono);
+      padding: 1px;
     }
-    .el-tile:hover {
+    .el-tile:hover, .el-tile.active {
       border-color: var(--accent);
-      transform: scale(1.06);
-      z-index: 2;
+      background: rgba(56, 189, 248, 0.18);
     }
-    .el-tile.active {
-      border-color: var(--gold);
-      background: rgba(251, 191, 36, 0.16);
-    }
-    .el-tile .z { font-size: 8px; color: var(--muted); display: block; }
-    .el-tile .sym { font-family: var(--mono); font-size: 11px; font-weight: 700; display: block; }
+    .el-tile .sym { font-size: 10px; font-weight: 700; line-height: 1; }
+    .el-tile .num { font-size: 7px; color: var(--muted); line-height: 1; }
 
-    .atlas-section {
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      margin-bottom: 8px;
-    }
-    .atlas-section h3 {
-      margin: 0 0 4px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--accent);
-    }
-    .atlas-kv {
+    .kv-row {
       display: flex;
       justify-content: space-between;
+      border-bottom: 1px solid rgba(35, 48, 77, 0.6);
+      padding: 4px 0;
       font-family: var(--mono);
       font-size: 11px;
-      padding: 2px 0;
-      border-bottom: 1px dashed rgba(35, 48, 77, 0.7);
     }
-    .atlas-kv:last-child { border-bottom: none; }
+
+    .dossier-box {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .dossier-box h3 {
+      margin: 8px 0 3px;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+    }
   </style>
 </head>
 <body>
-  <!-- LEFT PANE: 12-FOLD STANDING-WAVE WHEEL & DOPING SWEEP -->
-  <section class="pane" id="leftPane">
+  <!-- LEFT PANE: 12-FOLD STANDING-WAVE WHEEL & DOPING PHASE SWEEP -->
+  <section class="pane">
     <div class="pane-header">
       <h2>12-Fold Standing-Wave Wheel</h2>
       <span class="badge-v4">v0.4 MAE</span>
     </div>
-
-    <div class="wheel-wrap">
-      <canvas id="hteWheel" width="360" height="360"></canvas>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px;">
-        <span style="color:var(--accent);">&#9679; Active Element</span> &nbsp;
-        <span style="color:var(--gold);">&#9711; Gold Modal Tonic</span>
-      </div>
+    <canvas id="v4Wheel" width="340" height="340"></canvas>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">
+      <span style="color:var(--accent);">&#9679;</span> Active Element &nbsp;
+      <span style="color:var(--gold);">&#9675;</span> Gold Modal Tonic Halo
     </div>
 
-    <div class="status-box" id="wheelReadout">
-      Select or hover any element tile to inspect its HTE coordinate (p, o) and standing-wave profile.
-    </div>
-
-    <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Fource Lock Doping Sweep (Base + x &middot; Dopant)</div>
-      <div class="control-row">
-        <input type="text" id="sweepBase" value="La2CuO4" style="width:95px;" />
-        <span style="align-self:center;">+ x</span>
-        <input type="text" id="sweepDopant" value="Sr" style="width:65px;" />
-        <input type="range" id="sweepSlider" min="0" max="1" step="0.01" value="0.15" style="flex:1;" />
-        <span id="sweepVal" style="font-family:var(--mono);align-self:center;">0.15</span>
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+        <span>Fource Lock Doping Sweep (x): <strong id="v4SweepLabel" style="font-family:var(--mono);">0.15</strong></span>
+        <span style="color:var(--muted);">La<sub>1-x</sub>Sr<sub>x</sub>CuO<sub>4</sub></span>
       </div>
-      <div class="control-row">
-        <button class="preset-sweep" data-base="YBa2Cu3O6" data-dop="O">YBCO</button>
-        <button class="preset-sweep" data-base="BaTiO3" data-dop="Sr">BaTiO3</button>
-        <button class="preset-sweep" data-base="SiO2" data-dop="Ge">SiO2</button>
-        <button class="preset-sweep" data-base="GaAs" data-dop="In">GaAs+In</button>
+      <input type="range" id="v4SweepSlider" min="0" max="1" step="0.01" value="0.15" style="width:100%;" />
+      <div class="control-row" style="margin-top:8px;">
+        <button class="v4-preset" data-f="YBa2Cu3O7">YBCO</button>
+        <button class="v4-preset" data-f="BaTiO3">BaTiO3</button>
+        <button class="v4-preset" data-f="SiO2">SiO2</button>
+        <button class="v4-preset" data-f="GaAs">GaAs</button>
+        <button class="v4-preset" data-f="E0">E0 Substrate</button>
       </div>
     </div>
   </section>
 
   <!-- CENTER PANE: MULTI-ELEMENT STACKING & 119-ELEMENT PERIODIC TABLE -->
-  <section class="pane" id="centerPane">
+  <section class="pane">
     <div class="pane-header">
       <h2>HTE Observatory &bull; 119-Element Grid</h2>
       <span style="font-size:11px;color:var(--muted);">Hover to preview Atlas &bull; Click to stack</span>
     </div>
 
     <div class="control-row">
-      <input type="text" id="compoundInput" value="Be" style="flex:1;" placeholder="Formula or click tiles below..." />
-      <select id="projectionMode">
+      <input type="text" id="v4Formula" value="Be" style="flex:1;min-width:120px;" />
+      <select id="v4Proj">
         <option value="v2">Group-Phase (v2)</option>
         <option value="v1">Raw Z mod 12 (v1)</option>
       </select>
-      <select id="weightMode">
-        <option value="stoich">Stoich</option>
-        <option value="en">Pauling &chi;</option>
-        <option value="val">Valence e&minus;</option>
+      <select id="v4Boundary">
+        <option value="Free Bulk">Free Bulk</option>
+        <option value="Metal Host / Hydride">Metal Host / Hydride</option>
+        <option value="Ceramic Matrix">Ceramic Matrix</option>
+        <option value="Cryo / Pressure">Cryo / Pressure</option>
+        <option value="Plasma Excited">Plasma Excited</option>
       </select>
     </div>
 
     <div class="control-row">
-      <select id="boundaryMode" style="flex:1;">
-        <option value="bulk">Free Bulk</option>
-        <option value="metal">Metal Host / Hydride</option>
-        <option value="ceramic">Ceramic Matrix</option>
-        <option value="cryo">Cryo / Pressure</option>
-        <option value="plasma">Plasma Excited</option>
-      </select>
-      <button id="undoBtn">Undo (-1)</button>
-      <button id="clearBtn">Clear</button>
-      <button id="sonifyBtn" style="border-color:var(--accent);color:var(--accent);">Sonify</button>
+      <button id="v4EvalBtn" style="border-color:var(--accent);color:var(--accent);">Evaluate</button>
+      <button id="v4ClearBtn">Clear</button>
+      <button id="v4UndoBtn">Undo (-1)</button>
+      <button id="v4SonifyBtn">Sonify</button>
     </div>
 
-    <div class="status-box" id="compoundSummary"></div>
+    <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px;">
+      <div class="kv-row"><span>Formula / HTE (p, o)</span><strong id="v4OutSig">Be &mdash; HTE (1, 1)</strong></div>
+      <div class="kv-row"><span>6-Step Fifth Ladder</span><span id="v4OutLadder">Be &rarr; Na &rarr; Ar &rarr; Mn &rarr; Ge &rarr; Y</span></div>
+      <div class="kv-row"><span>Modal Field / C_HTE</span><span id="v4OutCoh">C_HTE +1.00 | Boundary: Free Bulk</span></div>
+      <div class="kv-row" style="border-bottom:none;"><span>7-State Discovery</span><strong id="v4OutState" style="color:var(--gold);">ORIGIN / SINGLET</strong></div>
+    </div>
 
-    <div id="periodicGrid" class="periodic-grid"></div>
+    <div id="v4Grid" class="ptable-grid"></div>
   </section>
+
   <!-- RIGHT PANE: DOCKED SCROLLABLE MATERIALS ATLAS LEGEND (MATLAS-Exxx) -->
-  <section class="pane" id="rightPane">
+  <section class="pane">
     <div class="pane-header">
-      <h2 id="atlasTitle">MATLAS-E004-BERYLLIUM</h2>
+      <h2 id="v4AtlasHeader">MATLAS-E004-BERYLLIUM</h2>
       <div style="display:flex;gap:4px;">
-        <button id="pinAtlasBtn" title="Pin/lock scrolling">&#128204;</button>
-        <button id="copyMdBtn" title="Copy publication-ready Markdown">&#128203; Copy .md</button>
+        <button id="v4PinBtn" title="Pin/Lock Dossier">&#128204;</button>
+        <button id="v4CopyBtn" title="Copy Markdown Dossier">&#128203; Copy .md</button>
       </div>
     </div>
-    <div id="atlasDossier" class="dossier-box">
-      <p style="color:var(--muted);margin-top:0;">
-        Hover or click any element tile (<strong>E0</strong> through <strong>Og</strong>) in the periodic grid to inspect its full multi-section Materials Atlas Dossier, isotopic stability profile, CUC relational constraints, and HTE search directions.
-      </p>
-    </div>
+    <div id="v4AtlasBody" class="dossier-box"></div>
   </section>
+    window.addEventListener("DOMContentLoaded", () => {
+      const grid = document.getElementById("v4Grid");
+      V4_ELEMENTS.forEach((sym, z) => {
+        const tile = document.createElement("div");
+        tile.className = "el-tile";
+        tile.innerHTML = `<span class="num">${z}</span><span class="sym">${sym}</span>`;
+        tile.addEventListener("mouseenter", () => renderDossier(z, sym));
+        tile.addEventListener("click", () => {
+          const cur = document.getElementById("v4Formula").value.trim();
+          const next = cur === "Be" && v4History.length === 1 ? sym : cur + sym;
+          v4History.push(next);
+          document.getElementById("v4Formula").value = next;
+          renderDossier(z, sym);
+          updateV4();
+        });
+        grid.appendChild(tile);
+      });
 
-  <script src="app.js"></script>
+      document.getElementById("v4EvalBtn").addEventListener("click", updateV4);
+      document.getElementById("v4Proj").addEventListener("change", updateV4);
+      document.getElementById("v4Boundary").addEventListener("change", updateV4);
 
-  <!-- FLOATING VERSION SWITCHER PILL (ZERO GRID IMPACT) -->
+      document.getElementById("v4ClearBtn").addEventListener("click", () => {
+        v4History = new Array("E0");
+        document.getElementById("v4Formula").value = "E0";
+        updateV4();
+      });
+
+      document.getElementById("v4UndoBtn").addEventListener("click", () => {
+        if (v4History.length > 1) v4History.pop();
+        document.getElementById("v4Formula").value = v4History.at(v4History.length - 1);
+        updateV4();
+      });
+
+      document.querySelectorAll(".v4-preset").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.getElementById("v4Formula").value = btn.dataset.f;
+          updateV4();
+        });
+      });
+
+      document.getElementById("v4SweepSlider").addEventListener("input", e => {
+        const x = parseFloat(e.target.value);
+        document.getElementById("v4SweepLabel").textContent = x.toFixed(2);
+        document.getElementById("v4Formula").value = `La${(1 - x).toFixed(2)}Sr${x.toFixed(2)}CuO4`;
+        updateV4();
+      });
+
+      document.getElementById("v4PinBtn").addEventListener("click", e => {
+        v4Pinned = !v4Pinned;
+        e.target.style.borderColor = v4Pinned ? "#fbbf24" : "#23304d";
+      });
+
+      document.getElementById("v4CopyBtn").addEventListener("click", () => {
+        navigator.clipboard.writeText(v4CurrentDossierMd);
+      });
+
+      document.getElementById("v4SonifyBtn").addEventListener("click", () => {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const items = parseV4Formula(document.getElementById("v4Formula").value);
+        const mode = document.getElementById("v4Proj").value;
+        items.forEach((it, idx) => {
+          const { p, o } = getV4Coord(it.z, mode);
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.frequency.value = 130.81 * Math.pow(2, (p + o * 12) / 24);
+          gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.12 + 0.9);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.12);
+          osc.stop(ctx.currentTime + idx * 0.12 + 0.95);
+        });
+      });
+
+      renderDossier(4, "Be");
+      updateV4();
+    });
+  </script>
+
   <div id="version-switcher" style="position:fixed;bottom:12px;left:12px;z-index:9999;display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(9,13,22,0.92);border:1px solid #26324a;border-radius:8px;font-family:system-ui,-apple-system,sans-serif;font-size:11px;color:#e6edf7;box-shadow:0 4px 14px rgba(0,0,0,0.45);">
     <span style="padding:2px 6px;border-radius:4px;background:rgba(251,191,36,0.18);color:#fbbf24;font-family:monospace;font-weight:700;">v0.4 MAE</span>
     <a href="v5.html" style="text-decoration:none;padding:3px 9px;border-radius:5px;background:#182032;color:#38bdf8;border:1px solid #26324a;font-weight:600;">Switch to v5.0 Rigor &rarr;</a>
