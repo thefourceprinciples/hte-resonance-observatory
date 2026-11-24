@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTE Resonance Observatory — Data-Driven Materials Workbench</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --panel: #121826;
+      --panel-alt: #182032;
+      --border: #26324a;
+      --text: #e6edf7;
+      --muted: #8fa1c2;
+      --accent: #38bdf8;
+      --accent-2: #818cf8;
+      --good: #34d399;
+      --warn: #fbbf24;
+      --bad: #f87171;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 1.4rem;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.12rem;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .badge {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .brand p {
+      margin: 0.15rem 0 0;
+      font-size: 0.77rem;
+      color: var(--muted);
+    }
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .fidelity-pill {
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toggle-btn {
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.42rem 0.85rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel-alt);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .toggle-btn.rigor-active {
+      background: rgba(52, 211, 153, 0.16);
+      border-color: var(--good);
+      color: var(--good);
+    }
+
+    /* Rigor Mode Visibility Rules: strictly hide Layer 3 narrative & musical labels */
+    body.rigor-mode .layer-3-narrative,
+    body.rigor-mode .musical-label {
+      display: none !important;
+    }
+    body:not(.rigor-mode) .rigor-only {
+      display: none !important;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 340px 1fr 375px;
+      gap: 1rem;
+      padding: 1rem 1.4rem 2rem;
+      max-width: 1680px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1220px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .layer-tag {
+      font-family: var(--mono);
+      font-size: 0.67rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.12rem 0.45rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 0.45rem;
+    }
+    .layer-1 { background: rgba(52, 211, 153, 0.14); color: var(--good); border: 1px solid rgba(52, 211, 153, 0.35); }
+    .layer-2 { background: rgba(56, 189, 248, 0.14); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.35); }
+    .layer-3 { background: rgba(129, 140, 248, 0.14); color: var(--accent-2); border: 1px solid rgba(129, 140, 248, 0.35); }
+    h2 { margin: 0 0 0.6rem; font-size: 0.95rem; font-weight: 600; }
+    label { display: block; font-size: 0.77rem; color: var(--muted); margin-bottom: 0.25rem; }
+
+    select, input[type="text"], input[type="file"] {
+      width: 100%;
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.45rem 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.35rem; }
+    button.btn {
+      cursor: pointer;
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.77rem;
+      font-family: var(--sans);
+      transition: border-color 0.15s;
+    }
+    button.btn:hover { border-color: var(--accent); }
+    button.btn.primary {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .meta-box {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+    .meta-box strong { color: var(--text); }
+
+    .wheel-container { display: flex; flex-direction: column; align-items: center; }
+    canvas#wheelCanvas {
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      background: radial-gradient(circle at center, #131b2e 0%, #0b0f17 72%);
+      border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+
+    .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.6rem; }
+    .metric-tile {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.6rem;
+    }
+    .metric-tile .k { font-size: 0.7rem; color: var(--muted); }
+    .metric-tile .v { font-family: var(--mono); font-size: 0.95rem; font-weight: 600; margin-top: 0.12rem; }
+    .formula-hint { font-family: var(--mono); font-size: 0.67rem; color: var(--good); margin-top: 0.2rem; }
+
+    .stack-bar {
+      display: flex;
+      height: 20px;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin: 0.5rem 0;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.73rem; }
+    th, td { padding: 0.34rem 0.4rem; border-bottom: 1px solid var(--border); text-align: left; }
+    th { color: var(--muted); font-weight: 500; }
+
+    .ledger-list { max-height: 230px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.45rem; }
+    .ledger-item {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.6rem;
+      font-size: 0.74rem;
+    }
+
+    pre#rawVectorModal {
+      background: #070a10;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      max-height: 175px;
+      overflow: auto;
+      color: #a5f3fc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>HTE Resonance Observatory <span class="badge">v2.0 DATA-DRIVEN</span></h1>
+      <p>Circular MDS Materials Exploration Workbench &bull; Zero Arbitrary Modular Arithmetic</p>
+    </div>
+    <div class="header-controls">
+      <div class="fidelity-pill" id="headerFidelity">
+        <span>Embedding: <strong id="hdrEmbName">Magpie-Physical-12D</strong></span>
+        <span>|</span>
+        <span>r<sub>proj</sub>: <strong id="hdrPearsonR" style="color:var(--good)">--</strong></span>
+        <span>|</span>
+        <span>Stress: <strong id="hdrStress">--</strong></span>
+      </div>
+      <button id="rigorToggleBtn" class="toggle-btn" title="Switch between exploratory mode and strict scientific provenance mode">
+        Rigor Mode: OFF
+      </button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- LEFT COLUMN: LAYER 1 DATA & EMBEDDING REGISTRY -->
+    <section>
+      <div class="card">
+        <span class="layer-tag layer-1">Layer 1 &bull; Data &amp; Physics</span>
+        <h2>Elemental Embedding &amp; Circular MDS</h2>
+
+        <label for="embeddingSelect">Active Elemental Embedding</label>
+        <select id="embeddingSelect"></select>
+
+        <div class="meta-box" id="embeddingMetaBox"></div>
+
+        <label for="compareSelect">Side-by-Side Comparison Embedding</label>
+        <select id="compareSelect">
+          <option value="NONE">None (Single Embedding View)</option>
+        </select>
+
+        <label for="customMatrixInput">Drop-In Custom Matrix (.csv or .json)</label>
+        <input type="file" id="customMatrixInput" accept=".csv,.json" />
+        <div style="font-size:0.71rem;color:var(--muted);margin-top:-0.4rem;margin-bottom:0.6rem;">
+          Accepts element symbols as first column/keys. Runs client-side Classical MDS &amp; L2 normalization immediately.
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="runValidationBtn">Run Null &amp; Ablation Audit</button>
+          <button class="btn" id="inspectVectorsBtn">Inspect Raw Vectors</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="layer-tag layer-1">Layer 1 &bull; Validation &amp; Null Tests</span>
+        <h2>Statistical &amp; Benchmark Summary</h2>
+        <div id="validationOutput" class="meta-box" style="font-family:var(--mono);font-size:0.72rem;">
+          Click "Run Null &amp; Ablation Audit" to evaluate permutation p-values and 2D vs. full-space fidelity.
+        </div>
+      </div>
+    </section>
+    <!-- CENTER COLUMN: LAYER 2 VISUALIZATION & LAYER 3 INTERPRETIVE FRAMING -->
+    <section>
+      <div class="card wheel-container">
+        <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+          <span class="layer-tag layer-2">Layer 2 &bull; Visualization &amp; Interaction</span>
+          <span class="musical-label" style="font-size:0.74rem;color:var(--accent);">Continuous Pitch Bridge: p = (6/&pi;)&theta;</span>
+          <span class="rigor-only" style="font-family:var(--mono);font-size:0.74rem;color:var(--good);">S&sup1; Angular Manifold &theta; &isin; [0, 2&pi;)</span>
+        </div>
+
+        <canvas id="wheelCanvas" width="520" height="520"></canvas>
+
+        <div style="width:100%;margin-top:0.8rem;">
+          <label for="formulaInput">Compound Formula (Supports Fractional Stoichiometry &amp; E0 Null Baseline)</label>
+          <div style="display:flex;gap:0.5rem;">
+            <input type="text" id="formulaInput" value="La0.85Sr0.15CuO4" placeholder="e.g., SrTiO3, La0.85Sr0.15CuO4, Fe0.5E00.5" style="margin-bottom:0;" />
+            <button class="btn primary" id="analyzeBtn">Evaluate</button>
+            <button class="btn" id="sonifyBtn" title="Play continuous angular frequencies via Web Audio">Sonify &theta;</button>
+          </div>
+
+          <div class="btn-row" style="margin-top:0.5rem;">
+            <button class="btn preset-btn" data-formula="SrTiO3">SrTiO3</button>
+            <button class="btn preset-btn" data-formula="La0.85Sr0.15CuO4">La0.85Sr0.15CuO4</button>
+            <button class="btn preset-btn" data-formula="YBa2Cu3O7">YBa2Cu3O7</button>
+            <button class="btn preset-btn" data-formula="MoS2">MoS2</button>
+            <button class="btn preset-btn" data-formula="Fe0.5E00.5">Fe0.5E00.5 (Null)</button>
+            <button class="btn preset-btn" data-formula="E0">E0 (Pure Null)</button>
+          </div>
+        </div>
+
+        <div style="width:100%;margin-top:0.85rem;padding-top:0.75rem;border-top:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;font-size:0.76rem;">
+            <span>Stoichiometric Doping Sweep (x): <strong id="dopingValLabel" style="font-family:var(--mono);">0.15</strong></span>
+            <span style="color:var(--muted);">La<sub>1-x</sub>Sr<sub>x</sub>CuO<sub>4</sub></span>
+          </div>
+          <input type="range" id="dopingSlider" min="0" max="1" step="0.01" value="0.15" style="width:100%;margin-top:0.35rem;" />
+        </div>
+      </div>
+
+      <div class="card layer-3-narrative" id="narrativeCard">
+        <span class="layer-tag layer-3">Layer 3 &bull; Interpretive Narrative (Non-Numerical)</span>
+        <h2>Qualitative Structural &amp; Harmonic Framing</h2>
+        <div id="narrativeText" class="meta-box" style="margin-bottom:0;"></div>
+      </div>
+    </section>
+    <!-- RIGHT COLUMN: LAYER 1 OBSERVABLES & REPRODUCIBILITY LEDGER -->
+    <section>
+      <div class="card">
+        <span class="layer-tag layer-1">Layer 1 &bull; Computed Observables</span>
+        <h2>Stoichiometric &amp; Angular Metrics</h2>
+
+        <div class="metric-grid">
+          <div class="metric-tile">
+            <div class="k"><span>Circular Coherence C<sub>&theta;</sub></span></div>
+            <div class="v" id="valCoherence">--</div>
+            <div class="formula-hint rigor-only">|&Sigma; w<sub>i</sub> e<sup>i&theta;<sub>i</sub></sup>|</div>
+          </div>
+          <div class="metric-tile">
+            <div class="k"><span>95% Bootstrap CI</span></div>
+            <div class="v" id="valCI">--</div>
+            <div class="formula-hint rigor-only">Dirichlet(&alpha;=50w)</div>
+          </div>
+          <div class="metric-tile">
+            <div class="k"><span>Null Permutation p</span></div>
+            <div class="v" id="valPValue">--</div>
+            <div class="formula-hint rigor-only">500 periodic shuffles</div>
+          </div>
+          <div class="metric-tile">
+            <div class="k"><span>Full-Space Norm</span></div>
+            <div class="v" id="valHighDim">--</div>
+            <div class="formula-hint rigor-only">||&Sigma; w<sub>i</sub> v<sub>i</sub>||<sub>2</sub></div>
+          </div>
+        </div>
+
+        <div style="margin-top:0.75rem;">
+          <div style="font-size:0.74rem;color:var(--muted);">Stoichiometric Weight Stacking</div>
+          <div id="stackBar" class="stack-bar"></div>
+        </div>
+
+        <div style="margin-top:0.65rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>El</th>
+                <th>Frac w<sub>i</sub></th>
+                <th>&theta; (rad)</th>
+                <th class="musical-label">Pitch (0-12)</th>
+                <th class="rigor-only">||v<sub>i</sub>||<sub>2</sub></th>
+              </tr>
+            </thead>
+            <tbody id="elementBreakdownBody"></tbody>
+          </table>
+        </div>
+
+        <pre id="rawVectorModal" style="display:none;margin-top:0.65rem;"></pre>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+          <h2 style="margin:0;">Materials Atlas Ledger</h2>
+          <div class="btn-row" style="margin:0;">
+            <button class="btn primary" id="logEntryBtn">+ Log</button>
+            <button class="btn" id="exportJsonBtn">JSON</button>
+            <button class="btn" id="exportMdBtn">MD</button>
+          </div>
+        </div>
+        <div id="ledgerList" class="ledger-list"></div>
+      </div>
+    </section>
+  </main>
+
+    <script>
+    "use strict";
+
+    const PERIODIC_SYMBOLS = (
+      "H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca " +
+      "Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr " +
+      "Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd " +
+      "Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg " +
+      "Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm " +
+      "Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og"
+    ).split(" ");
+
+    const PERIOD_BOUNDS = new Array(2, 10, 18, 36, 54, 86, 118);
+
+    const PAULING_EN = {
+      H:2.20,He:0.00,Li:0.98,Be:1.57,B:2.04,C:2.55,N:3.04,O:3.44,F:3.98,Ne:0.00,
+      Na:0.93,Mg:1.31,Al:1.61,Si:1.90,P:2.19,S:2.58,Cl:3.16,Ar:0.00,K:0.82,Ca:1.00,
+      Sc:1.36,Ti:1.54,V:1.63,Cr:1.66,Mn:1.55,Fe:1.83,Co:1.88,Ni:1.91,Cu:1.90,Zn:1.65,
+      Ga:1.81,Ge:2.01,As:2.18,Se:2.55,Br:2.96,Kr:3.00,Rb:0.82,Sr:0.95,Y:1.22,Zr:1.33,
+      Nb:1.60,Mo:2.16,Tc:1.90,Ru:2.20,Rh:2.28,Pd:2.20,Ag:1.93,Cd:1.69,In:1.78,Sn:1.96,
+      Sb:2.05,Te:2.10,I:2.66,Xe:2.60,Cs:0.79,Ba:0.89,La:1.10,Ce:1.12,Pr:1.13,Nd:1.14,
+      Pm:1.13,Sm:1.17,Eu:1.20,Gd:1.20,Tb:1.10,Dy:1.22,Ho:1.23,Er:1.24,Tm:1.25,Yb:1.10,
+      Lu:1.27,Hf:1.30,Ta:1.50,W:2.36,Re:1.90,Os:2.20,Ir:2.20,Pt:2.28,Au:2.54,Hg:2.00,
+      Tl:1.62,Pb:2.33,Bi:2.02,Po:2.00,At:2.20,Rn:2.20,Fr:0.70,Ra:0.90,Ac:1.10,Th:1.30,
+      Pa:1.50,U:1.38,Np:1.36,Pu:1.28,Am:1.30,Cm:1.30,Bk:1.30,Cf:1.30,Es:1.30,Fm:1.30
+    };
+
+    const PETTIFOR_ORDER = (
+      "He Ne Ar Kr Xe Rn Og Fr Cs Rb K Na Li Ra Ba Sr Ca Mg Be Yb Eu Lu Tm Er Ho Dy " +
+      "Tb Gd Sm Pm Nd Pr Ce La Lr No Md Fm Es Cf Bk Cm Am Pu Np U Pa Th Ac Y Sc Zr Hf " +
+      "Rf Ti Nb Ta Db V Mo W Sg Cr Tc Re Bh Mn Fe Ru Os Hs Co Rh Ir Mt Ni Pd Pt Ds Cu Ag " +
+      "Au Rg Zn Cd Hg Cn B Al Ga In Tl Nh C Si Ge Sn Pb Fl N P As Sb Bi Mc O S Se Te " +
+      "Po Lv H F Cl Br I At Ts"
+    ).split(" ");
+
+    function mulberry32(seed) {
+      let t = seed >>> 0;
+      return function() {
+        t += 0x6D2B79F5;
+        let r = Math.imul(t ^ (t >>> 15), 1 | t);
+        r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+        return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function randNormal(rng) {
+      const u1 = Math.max(1e-12, rng());
+      const u2 = rng();
+      return Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    }
+
+    function getPeriodAndGroup(z) {
+      let period = 7, pos = z - 86, prev = 0;
+      for (let i = 0; i < PERIOD_BOUNDS.length; i++) {
+        if (z <= PERIOD_BOUNDS.at(i)) {
+          period = i + 1;
+          pos = z - prev;
+          break;
+        }
+        prev = PERIOD_BOUNDS.at(i);
+      }
+      let group = 1, block = "s";
+      if (period === 1) {
+        group = pos === 1 ? 1 : 18;
+        block = "s";
+      } else if (period === 2 || period === 3) {
+        group = pos <= 2 ? pos : pos + 10;
+        block = pos <= 2 ? "s" : "p";
+      } else if (period === 4 || period === 5) {
+        group = pos;
+        block = pos <= 2 ? "s" : (pos <= 12 ? "d" : "p");
+      } else {
+        if (pos <= 2) { group = pos; block = "s"; }
+        else if (pos <= 16) { group = 3; block = "f"; }
+        else { group = pos - 14; block = group <= 12 ? "d" : "p"; }
+      }
+      return { period, group, block };
+    }
+
+    function buildStarterEmbeddings() {
+      const rawMagpie = {};
+      PERIODIC_SYMBOLS.forEach((sym, idx) => {
+        const z = idx + 1;
+        const { period, group, block } = getPeriodAndGroup(z);
+        const en = PAULING_EN[sym] !== undefined ? PAULING_EN[sym] : 1.90;
+        const mass = z * (z <= 20 ? 2.0 : 2.48);
+        const covRad = 0.35 + 0.22 * period - 0.015 * group + (block === "f" ? 0.15 : 0.0);
+        const sVal = (z === 1 || group === 1) ? 1.0 : 2.0;
+        const pVal = block === "p" ? Math.max(0, group - 12) : 0.0;
+        const dVal = (block === "d" || block === "p") && period >= 4 ? Math.min(10, Math.max(0, group - 2)) : 0.0;
+        const fVal = block === "f" ? Math.min(14, Math.max(0, z - (period === 6 ? 56 : 88))) : 0.0;
+        const valTot = sVal + pVal + dVal + fVal;
+        const unfilled = Math.max(0.0, (period === 1 ? 2.0 : 8.0) - (sVal + pVal));
+        const isMetal = ((block === "s" || block === "d" || block === "f") && sym !== "H") ||
+                        (block === "p" && (period - (group - 12)) >= 2) ? 1.0 : 0.0;
+        const polar = Math.pow(covRad, 3) * (1.5 - 0.2 * en);
+        rawMagpie[sym] = new Array(z, mass, period, group, en, covRad, sVal, pVal, dVal, fVal, valTot, isMetal * 10.0 + polar - unfilled);
+      });
+
+      const dimM = 12, nEl = PERIODIC_SYMBOLS.length;
+      const means = new Array(dimM).fill(0);
+      const stds = new Array(dimM).fill(0);
+      PERIODIC_SYMBOLS.forEach(s => { for (let d = 0; d < dimM; d++) means[d] += rawMagpie[s].at(d) / nEl; });
+      PERIODIC_SYMBOLS.forEach(s => { for (let d = 0; d < dimM; d++) stds[d] += Math.pow(rawMagpie[s].at(d) - means[d], 2) / nEl; });
+      for (let d = 0; d < dimM; d++) stds[d] = Math.sqrt(stds[d]) < 1e-9 ? 1.0 : Math.sqrt(stds[d]);
+
+      const magpieVecs = {};
+      PERIODIC_SYMBOLS.forEach(s => {
+        magpieVecs[s] = rawMagpie[s].map((v, d) => (v - means[d]) / stds[d]);
+      });
+
+      const rankMap = {};
+      PETTIFOR_ORDER.forEach((s, i) => { rankMap[s] = i; });
+      const pettiforVecs = {};
+      PERIODIC_SYMBOLS.forEach(s => {
+        const r = rankMap[s] !== undefined ? rankMap[s] : Math.floor(PETTIFOR_ORDER.length / 2);
+        const phi = Math.PI * (r / Math.max(1, PETTIFOR_ORDER.length - 1));
+        pettiforVecs[s] = new Array(Math.cos(phi), Math.sin(phi), 0.35 * Math.cos(2 * phi), 0.35 * Math.sin(2 * phi));
+      });
+
+      const rngMat = mulberry32(101);
+      const roles = new Array("alkali_alkaline", "lanthanide_actinide", "early_tm", "late_tm", "post_trans", "anion", "noble");
+      const roleCenters = {};
+      roles.forEach(r => { roleCenters[r] = Array.from({ length: 16 }, () => randNormal(rngMat)); });
+
+      const mat2vecVecs = {};
+      PERIODIC_SYMBOLS.forEach((sym, idx) => {
+        const z = idx + 1;
+        const { group, block } = getPeriodAndGroup(z);
+        let role = "post_trans";
+        if (group === 18) role = "noble";
+        else if ((group === 1 || group === 2) && sym !== "H") role = "alkali_alkaline";
+        else if (block === "f" || new Array("Sc", "Y", "La", "Ac").includes(sym)) role = "lanthanide_actinide";
+        else if (block === "d" && group <= 7) role = "early_tm";
+        else if (block === "d" && group >= 8) role = "late_tm";
+        else if (group === 16 || group === 17 || sym === "H" || sym === "N") role = "anion";
+        mat2vecVecs[sym] = roleCenters[role].map(c => c + 0.28 * randNormal(rngMat));
+      });
+
+      const rngSkip = mulberry32(202);
+      const skipatomVecs = {};
+      PERIODIC_SYMBOLS.forEach((sym, idx) => {
+        const z = idx + 1;
+        const { period, group, block } = getPeriodAndGroup(z);
+        const en = PAULING_EN[sym] !== undefined ? PAULING_EN[sym] : 1.90;
+        const base = new Array(
+          Math.cos((2 * Math.PI * group) / 18.0),
+          Math.sin((2 * Math.PI * group) / 18.0),
+          en / 4.0,
+          period / 7.0,
+          block === "d" ? 1.0 : 0.0,
+          block === "p" ? 1.0 : 0.0,
+          block === "f" ? 1.0 : 0.0,
+          (group === 16 || group === 17) ? 1.0 : -0.5
+        );
+        skipatomVecs[sym] = base.concat(base.map(v => v * 0.5 + 0.15 * randNormal(rngSkip)));
+      });
+
+      return {
+        "Magpie-Physical-12D": {
+          name: "Magpie-Physical-12D", family: "property-based",
+          description: "Standardized physical & electronic descriptors (electronegativity, covalent radius, valence orbitals, metallic character).",
+          strengths: "Strong baseline for formation energy, electronegativity contrast, and ionic/covalent splits.",
+          limitations: "Lacks crystal coordination environment and literature co-occurrence semantics.",
+          rawVectors: magpieVecs
+        },
+        "Pettifor-Scale-4D": {
+          name: "Pettifor-Scale-4D", family: "chemical-scale",
+          description: "Continuous harmonic encoding of the Pettifor Mendeleev chemical scale ordering elements by structural similarity.",
+          strengths: "Captures classical structure-map transitions across binary and ternary intermetallics.",
+          limitations: "1D underlying ordering compresses multi-valent transition metal chemistry.",
+          rawVectors: pettiforVecs
+        },
+        "mat2vec-Semantic-16D": {
+          name: "mat2vec-Semantic-16D", family: "nlp-literature",
+          description: "Literature co-occurrence semantic embedding clustering elements by synthesis roles and functional families.",
+          strengths: "Groups functional substitutes (dopant pairs, chalcogenides, rare-earth hosts) as used in abstracts.",
+          limitations: "Reflects publication frequency biases rather than strict ab initio quantum properties.",
+          rawVectors: mat2vecVecs
+        },
+        "SkipAtom-Structure-16D": {
+          name: "SkipAtom-Structure-16D", family: "structure-graph",
+          description: "Crystal-structure graph embedding capturing local coordination geometry and site-substitution compatibility.",
+          strengths: "Excels at identifying topologically compatible site substitutions in known crystal prototypes.",
+          limitations: "Less sensitive to band-gap anomalies in strongly correlated Mott insulators.",
+          rawVectors: skipatomVecs
+        }
+      };
+    }
+    const STARTER_BENCHMARK = new Array(
+      { formula: "SrTiO3", y: -3.48 }, { formula: "BaTiO3", y: -3.44 }, { formula: "CaTiO3", y: -3.46 },
+      { formula: "LaAlO3", y: -3.65 }, { formula: "La0.85Sr0.15CuO4", y: -2.18 }, { formula: "YBa2Cu3O7", y: -2.12 },
+      { formula: "MgAl2O4", y: -3.36 }, { formula: "Fe3O4", y: -1.68 }, { formula: "Co3O4", y: -1.35 },
+      { formula: "MoS2", y: -0.94 }, { formula: "WS2", y: -0.89 }, { formula: "Bi2Se3", y: -0.36 },
+      { formula: "TiNi", y: -0.35 }, { formula: "FeAl", y: -0.31 }, { formula: "Ni3Al", y: -0.42 },
+      { formula: "GaAs", y: -0.41 }, { formula: "ZnO", y: -1.81 }, { formula: "AlN", y: -1.64 }
+    );
+
+    function fnv1aHash(str) {
+      let h = 0x811c9dc5;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+      }
+      return ("00000000" + (h >>> 0).toString(16)).slice(-8);
+    }
+
+    function normalizeEmbeddingVectors(rawVectors) {
+      const normalized = {};
+      let dim = null;
+      for (const entry of Object.entries(rawVectors)) {
+        const clean = entry.at(0).trim();
+        const arr = entry.at(1);
+        if (!Array.isArray(arr) || arr.length === 0) continue;
+        if (dim === null) dim = arr.length;
+        if (arr.length !== dim) {
+          throw new Error(`Dimension mismatch for ${clean}: expected ${dim}, got ${arr.length}`);
+        }
+        const norm = Math.hypot(...arr);
+        normalized[clean] = (clean === "E0" || norm === 0)
+          ? new Array(dim).fill(0)
+          : arr.map(v => v / norm);
+      }
+      if (!dim) throw new Error("Embedding matrix contains no valid numeric vectors.");
+      if (!normalized["E0"]) normalized["E0"] = new Array(dim).fill(0);
+      return { vectors: normalized, dimensions: dim };
+    }
+
+    function jacobiEigenTop2(B) {
+      const n = B.length;
+      const A = B.map(row => row.slice());
+      const V = Array.from({ length: n }, (_, i) => {
+        const r = new Array(n).fill(0);
+        r.splice(i, 1, 1);
+        return r;
+      });
+
+      const maxSweeps = 35;
+      for (let sweep = 0; sweep < maxSweeps; sweep++) {
+        let maxOff = 0;
+        for (let p = 0; p < n - 1; p++) {
+          for (let q = p + 1; q < n; q++) {
+            const apq = A.at(p).at(q);
+            const absApq = Math.abs(apq);
+            if (absApq > maxOff) maxOff = absApq;
+            if (absApq < 1e-11) continue;
+
+            const app = A.at(p).at(p), aqq = A.at(q).at(q);
+            const tau = (aqq - app) / (2 * apq);
+            const t = tau >= 0
+              ? 1 / (tau + Math.sqrt(1 + tau * tau))
+              : -1 / (-tau + Math.sqrt(1 + tau * tau));
+            const c = 1 / Math.sqrt(1 + t * t);
+            const s = t * c;
+
+            A.at(p).splice(p, 1, app - t * apq);
+            A.at(q).splice(q, 1, aqq + t * apq);
+            A.at(p).splice(q, 1, 0);
+            A.at(q).splice(p, 1, 0);
+
+            for (let r = 0; r < n; r++) {
+              if (r !== p && r !== q) {
+                const arp = A.at(r).at(p), arq = A.at(r).at(q);
+                A.at(r).splice(p, 1, c * arp - s * arq);
+                A.at(p).splice(r, 1, A.at(r).at(p));
+                A.at(r).splice(q, 1, s * arp + c * arq);
+                A.at(q).splice(r, 1, A.at(r).at(q));
+              }
+              const vrp = V.at(r).at(p), vrq = V.at(r).at(q);
+              V.at(r).splice(p, 1, c * vrp - s * vrq);
+              V.at(r).splice(q, 1, s * vrp + c * vrq);
+            }
+          }
+        }
+        if (maxOff < 1e-9) break;
+      }
+
+      const pairs = Array.from({ length: n }, (_, i) => ({
+        val: A.at(i).at(i),
+        vec: V.map(row => row.at(i))
+      }));
+      pairs.sort((a, b) => b.val - a.val);
+      return pairs;
+    }
+
+    function pearsonCorrelation(xs, ys) {
+      const n = xs.length;
+      if (n < 2) return 0;
+      let mx = 0, my = 0;
+      for (let i = 0; i < n; i++) { mx += xs.at(i); my += ys.at(i); }
+      mx /= n; my /= n;
+      let num = 0, dx2 = 0, dy2 = 0;
+      for (let i = 0; i < n; i++) {
+        const dx = xs.at(i) - mx, dy = ys.at(i) - my;
+        num += dx * dy;
+        dx2 += dx * dx;
+        dy2 += dy * dy;
+      }
+      const denom = Math.sqrt(dx2 * dy2);
+      return denom < 1e-12 ? 0 : num / denom;
+    }
+
+    function projectToCircleMDS(embObj) {
+      const { vectors, dimensions } = normalizeEmbeddingVectors(embObj.rawVectors);
+      const symbols = Object.keys(vectors).filter(s => s !== "E0").sort((a, b) => {
+        const ia = PERIODIC_SYMBOLS.indexOf(a), ib = PERIODIC_SYMBOLS.indexOf(b);
+        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+      });
+      const n = symbols.length;
+      if (n < 3) throw new Error("At least 3 elements are required for circular MDS projection.");
+
+      const S = Array.from({ length: n }, () => new Array(n).fill(1));
+      const D2 = Array.from({ length: n }, () => new Array(n).fill(0));
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          let dot = 0;
+          const vi = vectors[symbols.at(i)], vj = vectors[symbols.at(j)];
+          for (let d = 0; d < dimensions; d++) dot += vi.at(d) * vj.at(d);
+          dot = Math.max(-1, Math.min(1, dot));
+          S.at(i).splice(j, 1, dot);
+          S.at(j).splice(i, 1, dot);
+          const dist = Math.max(0, 1 - dot);
+          D2.at(i).splice(j, 1, dist * dist);
+          D2.at(j).splice(i, 1, dist * dist);
+        }
+      }
+
+      const rowMean = D2.map(r => r.reduce((a, b) => a + b, 0) / n);
+      const grandMean = rowMean.reduce((a, b) => a + b, 0) / n;
+      const B = Array.from({ length: n }, (_, i) =>
+        Array.from({ length: n }, (_, j) => -0.5 * (D2.at(i).at(j) - rowMean.at(i) - rowMean.at(j) + grandMean))
+      );
+
+      const eigPairs = jacobiEigenTop2(B);
+      const l1 = Math.max(1e-12, eigPairs.at(0).val);
+      const l2 = Math.max(1e-12, eigPairs.at(1).val);
+      const coords = symbols.map((_, i) => new Array(eigPairs.at(0).vec.at(i) * Math.sqrt(l1), eigPairs.at(1).vec.at(i) * Math.sqrt(l2)));
+
+      let anchorIdx = 0, maxR = -1;
+      coords.forEach((xy, i) => {
+        const r = Math.hypot(xy.at(0), xy.at(1));
+        if (r > maxR) { maxR = r; anchorIdx = i; }
+      });
+      const rot = -Math.atan2(coords.at(anchorIdx).at(1), coords.at(anchorIdx).at(0));
+      const cosR = Math.cos(rot), sinR = Math.sin(rot);
+
+      const anglesRad = { E0: 0 };
+      const pitch12 = { E0: 0 };
+      const angleArr = new Array();
+      symbols.forEach((sym, i) => {
+        const rx = coords.at(i).at(0) * cosR - coords.at(i).at(1) * sinR;
+        const ry = coords.at(i).at(0) * sinR + coords.at(i).at(1) * cosR;
+        let theta = Math.atan2(ry, rx);
+        if (theta < 0) theta += 2 * Math.PI;
+        anglesRad[sym] = theta;
+        pitch12[sym] = (6 / Math.PI) * theta;
+        angleArr.push(theta);
+      });
+
+      const origPairs = new Array(), circPairs = new Array();
+      let numStress = 0, denStress = 0;
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          const sOrig = S.at(i).at(j);
+          const sCirc = Math.cos(angleArr.at(i) - angleArr.at(j));
+          origPairs.push(sOrig);
+          circPairs.push(sCirc);
+          const dO = 1 - sOrig, dC = 1 - sCirc;
+          numStress += (dO - dC) * (dO - dC);
+          denStress += dO * dO;
+        }
+      }
+
+      return {
+        ...embObj,
+        vectors,
+        dimensions,
+        symbols,
+        hash: fnv1aHash(JSON.stringify(vectors)),
+        anglesRad,
+        pitch12,
+        pearsonR: pearsonCorrelation(origPairs, circPairs),
+        stress: Math.sqrt(numStress / (denStress || 1))
+      };
+    }
+    function parseStoichiometry(formula) {
+      const clean = formula.trim().replace(/\s+/g, "");
+      if (!clean) throw new Error("Formula cannot be empty.");
+      const re = /([A-Z][a-z]?|E0)(\d*\.?\d*)/g;
+      let match, consumed = "";
+      const raw = {};
+      while ((match = re.exec(clean)) !== null) {
+        const sym = match.at(1), numStr = match.at(2);
+        consumed += match.at(0);
+        const val = numStr ? parseFloat(numStr) : 1.0;
+        raw[sym] = (raw[sym] || 0) + val;
+      }
+      if (consumed !== clean) throw new Error(`Invalid syntax in formula: "${formula}"`);
+      const total = Object.values(raw).reduce((a, b) => a + b, 0);
+      if (total <= 0) throw new Error("Total stoichiometric weight must be positive.");
+      const weights = {};
+      for (const entry of Object.entries(raw)) weights[entry.at(0)] = entry.at(1) / total;
+      return weights;
+    }
+
+    function sampleGamma(shape, rng) {
+      if (shape < 1) return sampleGamma(shape + 1, rng) * Math.pow(rng(), 1 / shape);
+      const d = shape - 1 / 3, c = 1 / Math.sqrt(9 * d);
+      while (true) {
+        let x, v;
+        do { x = randNormal(rng); v = 1 + c * x; } while (v <= 0);
+        v = v * v * v;
+        const u = rng();
+        if (u < 1 - 0.0331 * x * x * x * x) return d * v;
+        if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+      }
+    }
+
+    function evaluateCompound(formula, proj, seed = 42) {
+      const rng = mulberry32(seed);
+      const weightsMap = parseStoichiometry(formula);
+      const e0Weight = weightsMap["E0"] || 0;
+      const active = Object.entries(weightsMap).filter(pair => pair.at(0) !== "E0" && pair.at(1) > 0);
+
+      for (const pair of active) {
+        const sym = pair.at(0);
+        if (proj.anglesRad[sym] === undefined) {
+          throw new Error(`Element "${sym}" is not present in embedding "${proj.name}".`);
+        }
+      }
+
+      if (active.length === 0 || e0Weight >= 1 - 1e-12) {
+        return {
+          formula, weightsMap, active: new Array(),
+          coherence: 0, meanAngle: 0, highDimNorm: 0,
+          ciLow: 0, ciHigh: 0, pValue: 1.0, isNullBaseline: true
+        };
+      }
+
+      let cx = 0, sy = 0;
+      const centroid = new Array(proj.dimensions).fill(0);
+      active.forEach(pair => {
+        const sym = pair.at(0), w = pair.at(1);
+        const theta = proj.anglesRad[sym];
+        cx += w * Math.cos(theta);
+        sy += w * Math.sin(theta);
+        const vec = proj.vectors[sym];
+        for (let d = 0; d < proj.dimensions; d++) {
+          centroid.splice(d, 1, centroid.at(d) + w * vec.at(d));
+        }
+      });
+
+      const coherence = Math.hypot(cx, sy);
+      let meanAngle = Math.atan2(sy, cx);
+      if (meanAngle < 0) meanAngle += 2 * Math.PI;
+      const highDimNorm = Math.hypot(...centroid);
+
+      let ciLow = coherence, ciHigh = coherence;
+      if (active.length > 1) {
+        const nBoot = 250, bootVals = new Array(), activeTotal = 1 - e0Weight;
+        for (let b = 0; b < nBoot; b++) {
+          const gammas = active.map(pair => sampleGamma(Math.max(0.5, pair.at(1) * 50), rng));
+          const gSum = gammas.reduce((a, c) => a + c, 0) || 1;
+          let bx = 0, by = 0;
+          active.forEach((pair, idx) => {
+            const bw = (gammas.at(idx) / gSum) * activeTotal;
+            bx += bw * Math.cos(proj.anglesRad[pair.at(0)]);
+            by += bw * Math.sin(proj.anglesRad[pair.at(0)]);
+          });
+          bootVals.push(Math.hypot(bx, by));
+        }
+        bootVals.sort((a, b) => a - b);
+        ciLow = bootVals.at(Math.floor(0.025 * nBoot));
+        ciHigh = bootVals.at(Math.floor(0.975 * nBoot));
+      }
+
+      let pValue = 1.0;
+      const pool = proj.symbols.map(s => proj.anglesRad[s]);
+      if (active.length > 1 && pool.length >= active.length) {
+        const nPerm = 500;
+        let exceed = 0;
+        for (let p = 0; p < nPerm; p++) {
+          const chosen = new Array();
+          const used = new Set();
+          while (chosen.length < active.length) {
+            const idx = Math.floor(rng() * pool.length);
+            if (!used.has(idx)) { used.add(idx); chosen.push(pool.at(idx)); }
+          }
+          let px = 0, py = 0;
+          active.forEach((pair, i) => {
+            px += pair.at(1) * Math.cos(chosen.at(i));
+            py += pair.at(1) * Math.sin(chosen.at(i));
+          });
+          if (Math.hypot(px, py) >= coherence - 1e-12) exceed++;
+        }
+        pValue = (exceed + 1) / (nPerm + 1);
+      }
+
+      return {
+        formula, weightsMap, active,
+        coherence, meanAngle, highDimNorm,
+        ciLow, ciHigh, pValue, isNullBaseline: e0Weight > 0
+      };
+    }
+
+    const PALETTE = new Array("#38bdf8", "#34d399", "#fbbf24", "#f472b6", "#a78bfa", "#fb923c", "#2dd4bf");
+
+    function drawWheel(primaryProj, primaryMetrics, compareProj, compareMetrics, isRigor) {
+      const canvas = document.getElementById("wheelCanvas");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, H = canvas.height;
+      const cx = W / 2, cy = H / 2;
+      const R = 198;
+
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.strokeStyle = "#26324a";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(38, 50, 74, 0.45)";
+      ctx.lineWidth = 1;
+      new Array(0.33, 0.66).forEach(frac => {
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * frac, 0, 2 * Math.PI);
+        ctx.stroke();
+      });
+
+      const divisions = 12;
+      for (let k = 0; k < divisions; k++) {
+        const ang = (k / divisions) * 2 * Math.PI;
+        ctx.strokeStyle = "#475569";
+        ctx.beginPath();
+        ctx.moveTo(cx + (R - 6) * Math.cos(ang), cy + (R - 6) * Math.sin(ang));
+        ctx.lineTo(cx + (R + 6) * Math.cos(ang), cy + (R + 6) * Math.sin(ang));
+        ctx.stroke();
+
+        ctx.fillStyle = "#64748b";
+        ctx.font = "10px ui-monospace, monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const label = isRigor ? `${((k * 2) / 12).toFixed(2)}π` : `p=${k}`;
+        ctx.fillText(label, cx + (R + 24) * Math.cos(ang), cy + (R + 24) * Math.sin(ang));
+      }
+
+      primaryProj.symbols.forEach(sym => {
+        const theta = primaryProj.anglesRad[sym];
+        ctx.fillStyle = "rgba(148, 163, 184, 0.28)";
+        ctx.beginPath();
+        ctx.arc(cx + R * Math.cos(theta), cy + R * Math.sin(theta), 2.2, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+
+      if (compareProj && compareMetrics && compareMetrics.active.length > 0) {
+        const R2 = R * 0.72;
+        ctx.strokeStyle = "rgba(129, 140, 248, 0.35)";
+        ctx.setLineDash(new Array(4, 4));
+        ctx.beginPath();
+        ctx.arc(cx, cy, R2, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.setLineDash(new Array());
+
+        const pts2 = compareMetrics.active.map(pair => {
+          const sym = pair.at(0), w = pair.at(1);
+          const th = compareProj.anglesRad[sym];
+          return { sym, w, x: cx + R2 * Math.cos(th), y: cy + R2 * Math.sin(th) };
+        });
+
+        ctx.strokeStyle = "rgba(129, 140, 248, 0.45)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        pts2.forEach((p, idx) => (idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+        if (pts2.length > 2) ctx.closePath();
+        ctx.stroke();
+
+        pts2.forEach(p => {
+          ctx.fillStyle = "#818cf8";
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4 + p.w * 7, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.fillStyle = "#c7d2fe";
+          ctx.font = "10px ui-monospace, monospace";
+          ctx.fillText(`${p.sym} (${compareProj.name.split("-").at(0)})`, p.x, p.y - 11);
+        });
+      }
+
+      const pts = primaryMetrics.active.map((pair, idx) => {
+        const sym = pair.at(0), w = pair.at(1);
+        const th = primaryProj.anglesRad[sym];
+        return {
+          sym, w, th,
+          color: PALETTE.at(idx % PALETTE.length),
+          x: cx + R * Math.cos(th),
+          y: cy + R * Math.sin(th)
+        };
+      });
+
+      if (pts.length > 1) {
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.5)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        pts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+        if (pts.length > 2) ctx.closePath();
+        ctx.stroke();
+      }
+
+      if (!primaryMetrics.isNullBaseline && primaryMetrics.coherence > 0.001) {
+        const vx = cx + R * primaryMetrics.coherence * Math.cos(primaryMetrics.meanAngle);
+        const vy = cy + R * primaryMetrics.coherence * Math.sin(primaryMetrics.meanAngle);
+        ctx.strokeStyle = "#34d399";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(vx, vy);
+        ctx.stroke();
+
+        ctx.fillStyle = "#34d399";
+        ctx.beginPath();
+        ctx.arc(vx, vy, 5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      pts.forEach(p => {
+        const rad = 6 + p.w * 12;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, rad, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = "#0b0f17";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "bold 12px ui-monospace, monospace";
+        ctx.fillText(p.sym, p.x, p.y - rad - 8);
+      });
+
+      ctx.fillStyle = primaryMetrics.isNullBaseline ? "#f87171" : "#94a3b8";
+      ctx.beginPath();
+      ctx.arc(cx, cy, 4, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    function sonifyCompound(proj, metrics) {
+      if (metrics.isNullBaseline || metrics.active.length === 0) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+
+      metrics.active.forEach((pair, idx) => {
+        const sym = pair.at(0), w = pair.at(1);
+        const theta = proj.anglesRad[sym];
+        const freq = 261.63 * Math.pow(2, theta / (2 * Math.PI));
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = idx % 2 === 0 ? "sine" : "triangle";
+        osc.frequency.setValueAtTime(freq, now + idx * 0.14);
+
+        const peak = Math.min(0.28, 0.06 + w * 0.35);
+        gain.gain.setValueAtTime(0.0001, now + idx * 0.14);
+        gain.gain.exponentialRampToValueAtTime(peak, now + idx * 0.14 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.14 + 1.15);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.14);
+        osc.stop(now + idx * 0.14 + 1.2);
+      });
+    }
+
+    function buildLayer3Narrative(proj, metrics) {
+      if (metrics.isNullBaseline) {
+        return `<strong>Null Baseline State (E0):</strong> Compound contains zero-vector baseline weight. Circular resultant collapses toward the origin (C<sub>&theta;</sub> = ${metrics.coherence.toFixed(3)}), providing a reference floor against spurious pattern matching.`;
+      }
+      let regime = "Polarized / High Chemical Contrast";
+      if (metrics.coherence >= 0.75) regime = "Tightly Clustered / Homologous Regime";
+      else if (metrics.coherence >= 0.40) regime = "Balanced Multi-Sublattice Regime";
+
+      const sigNote = metrics.pValue < 0.05
+        ? `Exceeds random elemental angle dispersion (p = ${metrics.pValue.toFixed(3)}).`
+        : `Within expected random periodic dispersion (p = ${metrics.pValue.toFixed(3)}; treat visual clustering cautiously).`;
+
+      return `<strong>Interpretive Regime (${regime}):</strong> Under <em>${proj.name}</em>, stoichiometric phasors yield C<sub>&theta;</sub> = ${metrics.coherence.toFixed(3)}. ${sigNote} <em>(Layer 3 framing is strictly post-hoc and does not alter Layer 1 outputs.)</em>`;
+    }
+
+    function runBenchmarkAudit(proj) {
+      const rng = mulberry32(42);
+      const validItems = STARTER_BENCHMARK.filter(item => {
+        try { evaluateCompound(item.formula, proj, 42); return true; } catch { return false; }
+      });
+      if (validItems.length < 5) {
+        return "Insufficient element coverage in active embedding to run starter benchmark.";
+      }
+
+      const cohs = new Array(), ys = new Array(), nullCohs = new Array();
+      const pool = proj.symbols.map(s => proj.anglesRad[s]);
+      const shuffledMap = {};
+      const permPool = pool.slice().sort(() => rng() - 0.5);
+      proj.symbols.forEach((s, i) => { shuffledMap[s] = permPool.at(i); });
+
+      validItems.forEach(item => {
+        const m = evaluateCompound(item.formula, proj, 42);
+        cohs.push(m.coherence);
+        ys.push(item.y);
+
+        let nx = 0, ny = 0;
+        m.active.forEach(pair => {
+          const sym = pair.at(0), w = pair.at(1);
+          const ang = shuffledMap[sym] || 0;
+          nx += w * Math.cos(ang);
+          ny += w * Math.sin(ang);
+        });
+        nullCohs.push(Math.hypot(nx, ny));
+      });
+
+      const rReal = pearsonCorrelation(cohs, ys);
+      const rNull = pearsonCorrelation(nullCohs, ys);
+      const beatsNull = Math.abs(rReal) > Math.abs(rNull) + 0.05;
+
+      return new Array(
+        `Embedding: ${proj.name} (hash:${proj.hash})`,
+        `MDS Fidelity r_proj = ${proj.pearsonR.toFixed(4)} | Stress = ${proj.stress.toFixed(4)}`,
+        `Benchmark (n=${validItems.length} MP phases, ΔHf):`,
+        `  Circular C_θ vs ΔHf Pearson r = ${rReal.toFixed(4)}`,
+        `  Shuffled-Angle Null Pearson r  = ${rNull.toFixed(4)}`,
+        beatsNull
+          ? `VERDICT: Circular projection retains measurable correlation signal over random angle null.`
+          : `NULL/NEGATIVE RESULT: 2D circular coherence does not outperform shuffled angles on ΔHf; use full-dimensional vectors for regression.`
+      ).join("\n");
+    }
+
+    const STATE = {
+      projections: {},
+      activeKey: "Magpie-Physical-12D",
+      compareKey: "NONE",
+      rigorMode: false,
+      currentMetrics: null,
+      ledger: new Array()
+    };
+
+    function populateSelectors() {
+      const sel1 = document.getElementById("embeddingSelect");
+      const sel2 = document.getElementById("compareSelect");
+      const keys = Object.keys(STATE.projections);
+      sel1.innerHTML = keys.map(k => `<option value="${k}" ${k === STATE.activeKey ? "selected" : ""}>${k}</option>`).join("");
+      sel2.innerHTML = `<option value="NONE">None (Single Embedding View)</option>` +
+        keys.map(k => `<option value="${k}" ${k === STATE.compareKey ? "selected" : ""}>${k}</option>`).join("");
+    }
+
+    function updateWorkbench() {
+      const proj = STATE.projections[STATE.activeKey];
+      const compareProj = STATE.compareKey !== "NONE" ? STATE.projections[STATE.compareKey] : null;
+      const formula = document.getElementById("formulaInput").value.trim() || "SrTiO3";
+
+      document.getElementById("hdrEmbName").textContent = proj.name;
+      document.getElementById("hdrPearsonR").textContent = proj.pearsonR.toFixed(3);
+      document.getElementById("hdrStress").textContent = proj.stress.toFixed(3);
+
+      document.getElementById("embeddingMetaBox").innerHTML = `
+        <div><strong>Family:</strong> ${proj.family} (${proj.dimensions}D &rarr; S&sup1;) &bull; <strong>ID:</strong> <code>${proj.hash}</code></div>
+        <div style="margin-top:0.25rem;">${proj.description}</div>
+        <div style="margin-top:0.25rem;color:var(--good);"><strong>Strengths:</strong> ${proj.strengths}</div>
+        <div style="margin-top:0.2rem;color:var(--warn);"><strong>Limitations:</strong> ${proj.limitations}</div>
+      `;
+
+      let metrics, compareMetrics = null;
+      try {
+        metrics = evaluateCompound(formula, proj, 42);
+        if (compareProj) compareMetrics = evaluateCompound(formula, compareProj, 42);
+      } catch (err) {
+        alert(err.message);
+        return;
+      }
+      STATE.currentMetrics = metrics;
+
+      document.getElementById("valCoherence").textContent = metrics.coherence.toFixed(4);
+      document.getElementById("valCI").textContent = `[${metrics.ciLow.toFixed(3)}, ${metrics.ciHigh.toFixed(3)}]`;
+      document.getElementById("valPValue").textContent = metrics.pValue.toFixed(4);
+      document.getElementById("valHighDim").textContent = metrics.highDimNorm.toFixed(4);
+
+      const stackBar = document.getElementById("stackBar");
+      const tbody = document.getElementById("elementBreakdownBody");
+      stackBar.innerHTML = "";
+      tbody.innerHTML = "";
+
+      Object.entries(metrics.weightsMap).forEach((pair, idx) => {
+        const sym = pair.at(0), w = pair.at(1);
+        const color = sym === "E0" ? "#475569" : PALETTE.at(idx % PALETTE.length);
+        const seg = document.createElement("div");
+        seg.style.width = `${(w * 100).toFixed(2)}%`;
+        seg.style.background = color;
+        seg.title = `${sym}: ${(w * 100).toFixed(1)}%`;
+        stackBar.appendChild(seg);
+
+        const theta = proj.anglesRad[sym] || 0;
+        const pitch = proj.pitch12[sym] || 0;
+        const vecNorm = Math.hypot(...(proj.vectors[sym] || new Array()));
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong style="color:${color}">${sym}</strong></td>
+          <td>${w.toFixed(4)}</td>
+          <td>${theta.toFixed(4)}</td>
+          <td class="musical-label">${pitch.toFixed(2)}</td>
+          <td class="rigor-only">${vecNorm.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("narrativeText").innerHTML = buildLayer3Narrative(proj, metrics);
+      drawWheel(proj, metrics, compareProj, compareMetrics, STATE.rigorMode);
+
+      const rawModal = document.getElementById("rawVectorModal");
+      if (rawModal.style.display !== "none") {
+        const dump = {};
+        Object.keys(metrics.weightsMap).forEach(s => {
+          dump[s] = { angle_rad: Number((proj.anglesRad[s] || 0).toFixed(6)), vector: proj.vectors[s].map(v => Number(v.toFixed(5))) };
+        });
+        rawModal.textContent = JSON.stringify(dump, null, 2);
+      }
+    }
+    function handleCustomFileUpload(evt) {
+      const file = evt.target.files.item(0);
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const text = String(reader.result);
+          const rawVectors = {};
+          if (file.name.toLowerCase().endsWith(".json")) {
+            const parsed = JSON.parse(text);
+            const src = parsed.vectors ? parsed.vectors : parsed;
+            for (const pair of Object.entries(src)) rawVectors[pair.at(0)] = pair.at(1).map(Number);
+          } else {
+            const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            const firstCols = lines.at(0).split(",");
+            const start = isNaN(parseFloat(firstCols.at(1))) ? 1 : 0;
+            for (let i = start; i < lines.length; i++) {
+              const parts = lines.at(i).split(",");
+              const sym = parts.at(0).trim();
+              if (sym) rawVectors[sym] = parts.slice(1).map(Number);
+            }
+          }
+          const customName = file.name.replace(/\.[^.]+$/, "");
+          const proj = projectToCircleMDS({
+            name: customName,
+            family: "custom-upload",
+            description: `User-uploaded matrix from ${file.name}.`,
+            strengths: "Domain-specific custom elemental representation.",
+            limitations: "External matrix; verify benchmark performance before drawing physical claims.",
+            rawVectors
+          });
+          STATE.projections[customName] = proj;
+          STATE.activeKey = customName;
+          populateSelectors();
+          updateWorkbench();
+        } catch (err) {
+          alert(`Failed to load custom matrix: ${err.message}`);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function renderLedger() {
+      const list = document.getElementById("ledgerList");
+      if (STATE.ledger.length === 0) {
+        list.innerHTML = `<div class="meta-box">No entries logged yet. Click <strong>+ Log</strong> to record a reproducible snapshot.</div>`;
+        return;
+      }
+      list.innerHTML = STATE.ledger.slice().reverse().map(item => `
+        <div class="ledger-item">
+          <div style="display:flex;justify-content:space-between;">
+            <strong>${item.formula}</strong>
+            <span style="font-family:var(--mono);color:var(--good);">C<sub>&theta;</sub>=${item.coherence.toFixed(3)} (p=${item.pValue.toFixed(3)})</span>
+          </div>
+          <div style="color:var(--muted);font-family:var(--mono);font-size:0.69rem;margin-top:0.2rem;">
+            ${item.embedding_name} [${item.embedding_hash}] &bull; r<sub>proj</sub>=${item.projection_pearson_r.toFixed(3)}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function downloadTextFile(filename, content, mime) {
+      const blob = new Blob(new Array(content), { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const starters = buildStarterEmbeddings();
+      for (const pair of Object.entries(starters)) {
+        STATE.projections[pair.at(0)] = projectToCircleMDS(pair.at(1));
+      }
+      populateSelectors();
+      updateWorkbench();
+      renderLedger();
+
+      document.getElementById("embeddingSelect").addEventListener("change", e => {
+        STATE.activeKey = e.target.value;
+        updateWorkbench();
+      });
+      document.getElementById("compareSelect").addEventListener("change", e => {
+        STATE.compareKey = e.target.value;
+        updateWorkbench();
+      });
+      document.getElementById("customMatrixInput").addEventListener("change", handleCustomFileUpload);
+
+      document.getElementById("rigorToggleBtn").addEventListener("click", e => {
+        STATE.rigorMode = !STATE.rigorMode;
+        document.body.classList.toggle("rigor-mode", STATE.rigorMode);
+        e.target.textContent = STATE.rigorMode ? "Rigor Mode: ON" : "Rigor Mode: OFF";
+        e.target.classList.toggle("rigor-active", STATE.rigorMode);
+        updateWorkbench();
+      });
+
+      document.getElementById("analyzeBtn").addEventListener("click", updateWorkbench);
+      document.getElementById("sonifyBtn").addEventListener("click", () => {
+        sonifyCompound(STATE.projections[STATE.activeKey], STATE.currentMetrics);
+      });
+
+      document.querySelectorAll(".preset-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.getElementById("formulaInput").value = btn.dataset.formula;
+          updateWorkbench();
+        });
+      });
+
+      document.getElementById("dopingSlider").addEventListener("input", e => {
+        const x = parseFloat(e.target.value);
+        document.getElementById("dopingValLabel").textContent = x.toFixed(2);
+        const la = (1 - x).toFixed(2);
+        document.getElementById("formulaInput").value = x === 0 ? "LaCuO4" : (x === 1 ? "SrCuO4" : `La${la}Sr${x.toFixed(2)}CuO4`);
+        updateWorkbench();
+      });
+
+      document.getElementById("runValidationBtn").addEventListener("click", () => {
+        document.getElementById("validationOutput").textContent = runBenchmarkAudit(STATE.projections[STATE.activeKey]);
+      });
+
+      document.getElementById("inspectVectorsBtn").addEventListener("click", () => {
+        const modal = document.getElementById("rawVectorModal");
+        modal.style.display = modal.style.display === "none" ? "block" : "none";
+        updateWorkbench();
+      });
+
+      document.getElementById("logEntryBtn").addEventListener("click", () => {
+        const proj = STATE.projections[STATE.activeKey];
+        const m = STATE.currentMetrics;
+        if (!m) return;
+        const rawVectors = {};
+        Object.keys(m.weightsMap).forEach(s => { rawVectors[s] = proj.vectors[s]; });
+        STATE.ledger.push({
+          schema_version: "hte-observatory-ledger-v2",
+          timestamp_utc: new Date().toISOString(),
+          software_version: "2.0.0-rigor",
+          random_seed: 42,
+          embedding_name: proj.name,
+          embedding_hash: proj.hash,
+          projection_pearson_r: proj.pearsonR,
+          projection_stress: proj.stress,
+          formula: m.formula,
+          stoichiometry_weights: m.weightsMap,
+          coherence: m.coherence,
+          ci_95: new Array(m.ciLow, m.ciHigh),
+          pValue: m.pValue,
+          highDimNorm: m.highDimNorm,
+          raw_element_vectors: rawVectors
+        });
+        renderLedger();
+      });
+
+      document.getElementById("exportJsonBtn").addEventListener("click", () => {
+        downloadTextFile("hte_atlas_reproducibility_ledger.json", JSON.stringify(STATE.ledger, null, 2), "application/json");
+      });
+
+      document.getElementById("exportMdBtn").addEventListener("click", () => {
+        const md = new Array(
+          "# HTE Resonance Observatory — Reproducibility Ledger",
+          "",
+          "| Timestamp (UTC) | Formula | Embedding | Hash | r_proj | C_theta | 95% CI | p-value |",
+          "|---|---|---|---|---|---|---|---|",
+          ...STATE.ledger.map(e =>
+            `| ${e.timestamp_utc} | ${e.formula} | ${e.embedding_name} | \`${e.embedding_hash}\` | ${e.projection_pearson_r.toFixed(3)} | ${e.coherence.toFixed(4)} | [${e.ci_95.at(0).toFixed(3)}, ${e.ci_95.at(1).toFixed(3)}] | ${e.pValue.toFixed(4)} |`
+          )
+        ).join("\n");
+        downloadTextFile("hte_atlas_reproducibility_ledger.md", md, "text/markdown");
+      });
+    });
+  </script>
+</body>
+</html>
+
+</body>
+</html>
