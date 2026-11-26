@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HTE Resonance Observatory — Data-Driven Materials Workbench</title>
+  <title>HTE Resonance Observatory — v5.0 Data-Driven Rigor Workbench</title>
   <style>
     :root {
       --bg: #0b0f17;
@@ -30,13 +30,25 @@
       line-height: 1.45;
     }
 
+    .version-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 16px;
+      background: #090d16;
+      border-bottom: 1px solid var(--border);
+      font-size: 12.5px;
+    }
+
     header {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      padding: 0.85rem 1.4rem;
+      padding: 0.8rem 1.4rem;
       background: var(--panel);
       border-bottom: 1px solid var(--border);
       position: sticky;
@@ -46,7 +58,7 @@
 
     .brand h1 {
       margin: 0;
-      font-size: 1.12rem;
+      font-size: 1.1rem;
       letter-spacing: 0.02em;
       display: flex;
       align-items: center;
@@ -61,21 +73,12 @@
       color: var(--accent);
       border: 1px solid rgba(56, 189, 248, 0.35);
     }
-    .brand p {
-      margin: 0.15rem 0 0;
-      font-size: 0.77rem;
-      color: var(--muted);
-    }
-    .header-controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.7rem;
-    }
+    .brand p { margin: 0.15rem 0 0; font-size: 0.77rem; color: var(--muted); }
+    .header-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem; }
 
     .fidelity-pill {
       font-family: var(--mono);
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       padding: 0.35rem 0.65rem;
       border-radius: 6px;
       background: var(--panel-alt);
@@ -88,9 +91,9 @@
     .toggle-btn {
       cursor: pointer;
       font-family: var(--mono);
-      font-size: 0.78rem;
+      font-size: 0.77rem;
       font-weight: 600;
-      padding: 0.42rem 0.85rem;
+      padding: 0.4rem 0.85rem;
       border-radius: 6px;
       border: 1px solid var(--border);
       background: var(--panel-alt);
@@ -103,26 +106,19 @@
       color: var(--good);
     }
 
-    /* Rigor Mode Visibility Rules: strictly hide Layer 3 narrative & musical labels */
     body.rigor-mode .layer-3-narrative,
-    body.rigor-mode .musical-label {
-      display: none !important;
-    }
-    body:not(.rigor-mode) .rigor-only {
-      display: none !important;
-    }
+    body.rigor-mode .musical-label { display: none !important; }
+    body:not(.rigor-mode) .rigor-only { display: none !important; }
 
     .workspace {
       display: grid;
-      grid-template-columns: 340px 1fr 375px;
+      grid-template-columns: 355px 1fr 395px;
       gap: 1rem;
       padding: 1rem 1.4rem 2rem;
-      max-width: 1680px;
+      max-width: 1740px;
       margin: 0 auto;
     }
-    @media (max-width: 1220px) {
-      .workspace { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 1240px) { .workspace { grid-template-columns: 1fr; } }
 
     .card {
       background: var(--panel);
@@ -145,8 +141,8 @@
     .layer-1 { background: rgba(52, 211, 153, 0.14); color: var(--good); border: 1px solid rgba(52, 211, 153, 0.35); }
     .layer-2 { background: rgba(56, 189, 248, 0.14); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.35); }
     .layer-3 { background: rgba(129, 140, 248, 0.14); color: var(--accent-2); border: 1px solid rgba(129, 140, 248, 0.35); }
-    h2 { margin: 0 0 0.6rem; font-size: 0.95rem; font-weight: 600; }
-    label { display: block; font-size: 0.77rem; color: var(--muted); margin-bottom: 0.25rem; }
+    h2 { margin: 0 0 0.55rem; font-size: 0.94rem; font-weight: 600; }
+    label { display: block; font-size: 0.76rem; color: var(--muted); margin-bottom: 0.25rem; }
 
     select, input[type="text"], input[type="file"] {
       width: 100%;
@@ -154,21 +150,21 @@
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 0.45rem 0.6rem;
+      padding: 0.42rem 0.6rem;
       font-family: var(--mono);
-      font-size: 0.8rem;
-      margin-bottom: 0.6rem;
+      font-size: 0.79rem;
+      margin-bottom: 0.55rem;
     }
 
-    .btn-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.35rem; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.42rem; margin-top: 0.35rem; }
     button.btn {
       cursor: pointer;
       background: var(--panel-alt);
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 0.4rem 0.7rem;
-      font-size: 0.77rem;
+      padding: 0.38rem 0.68rem;
+      font-size: 0.76rem;
       font-family: var(--sans);
       transition: border-color 0.15s;
     }
@@ -194,45 +190,66 @@
     .wheel-container { display: flex; flex-direction: column; align-items: center; }
     canvas#wheelCanvas {
       width: 100%;
-      max-width: 500px;
+      max-width: 470px;
       height: auto;
       aspect-ratio: 1 / 1;
       background: radial-gradient(circle at center, #131b2e 0%, #0b0f17 72%);
       border-radius: 50%;
       border: 1px solid var(--border);
     }
+    canvas#sweepCurveCanvas {
+      width: 100%;
+      height: 112px;
+      background: #080d18;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-top: 0.45rem;
+      display: block;
+    }
 
-    .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.6rem; }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.55rem; }
     .metric-tile {
       background: var(--panel-alt);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 0.5rem 0.6rem;
+      padding: 0.48rem 0.6rem;
     }
     .metric-tile .k { font-size: 0.7rem; color: var(--muted); }
-    .metric-tile .v { font-family: var(--mono); font-size: 0.95rem; font-weight: 600; margin-top: 0.12rem; }
-    .formula-hint { font-family: var(--mono); font-size: 0.67rem; color: var(--good); margin-top: 0.2rem; }
+    .metric-tile .v { font-family: var(--mono); font-size: 0.92rem; font-weight: 600; margin-top: 0.12rem; }
+    .formula-hint { font-family: var(--mono); font-size: 0.67rem; color: var(--good); margin-top: 0.18rem; }
 
     .stack-bar {
       display: flex;
-      height: 20px;
+      height: 18px;
       border-radius: 5px;
       overflow: hidden;
       border: 1px solid var(--border);
-      margin: 0.5rem 0;
+      margin: 0.45rem 0;
     }
 
     table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.73rem; }
     th, td { padding: 0.34rem 0.4rem; border-bottom: 1px solid var(--border); text-align: left; }
     th { color: var(--muted); font-weight: 500; }
 
-    .ledger-list { max-height: 230px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.45rem; }
+    .blindspot-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      padding: 0.38rem 0.45rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+    }
+    .blindspot-row:last-child { border-bottom: none; }
+
+    .ledger-list { max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.42rem; }
     .ledger-item {
       background: var(--panel-alt);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 0.5rem 0.6rem;
-      font-size: 0.74rem;
+      padding: 0.48rem 0.58rem;
+      font-size: 0.73rem;
     }
 
     pre#rawVectorModal {
@@ -242,7 +259,7 @@
       padding: 0.6rem;
       font-family: var(--mono);
       font-size: 0.7rem;
-      max-height: 175px;
+      max-height: 165px;
       overflow: auto;
       color: #a5f3fc;
       white-space: pre-wrap;
@@ -250,26 +267,22 @@
   </style>
 </head>
 <body>
-  <!-- FLOATING VERSION SWITCHER PILL -->
-<div id="version-switcher" style="position:fixed;bottom:12px;left:12px;z-index:9999;display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(9,13,22,0.92);border:1px solid #26324a;border-radius:8px;font-family:system-ui,-apple-system,sans-serif;font-size:11px;color:#e6edf7;box-shadow:0 4px 14px rgba(0,0,0,0.45);backdrop-filter:blur(6px);">
-  <a href="index.html" style="text-decoration:none;padding:3px 9px;border-radius:5px;background:#182032;color:#fbbf24;border:1px solid #26324a;font-weight:600;">&larr; v0.4 MAE</a>
-  <span style="padding:2px 6px;border-radius:4px;background:rgba(52,211,153,0.18);color:#34d399;font-family:monospace;font-weight:700;">v5.0 Rigor</span>
-</div>
-  <!-- VERSION SWITCHER BAR -->
-<div id="version-switcher" style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#090d16;border-bottom:1px solid #26324a;font-family:system-ui,-apple-system,sans-serif;font-size:13px;color:#e6edf7;">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <strong style="letter-spacing:0.03em;">HTE RESONANCE OBSERVATORY</strong>
-    <span style="padding:2px 8px;border-radius:4px;background:rgba(52,211,153,0.16);color:#34d399;border:1px solid rgba(52,211,153,0.4);font-family:monospace;font-size:11px;">ACTIVE: v5.0 Data-Driven Rigor</span>
+  <!-- SINGLE CLEAN VERSION SWITCHER BAR -->
+  <div id="version-switcher" class="version-bar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <strong style="letter-spacing:0.03em;">HTE RESONANCE OBSERVATORY</strong>
+      <span style="padding:2px 8px;border-radius:4px;background:rgba(52,211,153,0.16);color:#34d399;border:1px solid rgba(52,211,153,0.4);font-family:var(--mono);font-size:11px;">ACTIVE: v5.0 Data-Driven Rigor</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <a href="index.html" style="text-decoration:none;padding:4px 11px;border-radius:6px;background:#182032;color:#fbbf24;border:1px solid #26324a;font-weight:600;font-size:12px;">&larr; Switch to v0.4 MAE</a>
+      <span style="padding:4px 11px;border-radius:6px;background:rgba(52,211,153,0.2);color:#34d399;border:1px solid #34d399;font-weight:600;font-size:12px;">v5.0 Rigor</span>
+    </div>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <a href="index.html" style="text-decoration:none;padding:5px 12px;border-radius:6px;background:#182032;color:#fbbf24;border:1px solid #26324a;font-weight:600;font-size:12px;">&larr; Switch to v0.4 MAE</a>
-    <a href="v5.html" style="text-decoration:none;padding:5px 12px;border-radius:6px;background:rgba(52,211,153,0.2);color:#34d399;border:1px solid #34d399;font-weight:600;font-size:12px;">v5.0 Rigor</a>
-  </div>
-</div>
+
   <header>
     <div class="brand">
-      <h1>HTE Resonance Observatory <span class="badge">v2.0 DATA-DRIVEN</span></h1>
-      <p>Circular MDS Materials Exploration Workbench &bull; Zero Arbitrary Modular Arithmetic</p>
+      <h1>HTE Resonance Observatory <span class="badge">v5.0 PRE-DFT RIGOR</span></h1>
+      <p>Circular MDS Materials Screening Workbench &bull; Multi-Embedding Divergence &amp; Null Falsification</p>
     </div>
     <div class="header-controls">
       <div class="fidelity-pill" id="headerFidelity">
@@ -279,17 +292,17 @@
         <span>|</span>
         <span>Stress: <strong id="hdrStress">--</strong></span>
       </div>
-      <button id="rigorToggleBtn" class="toggle-btn" title="Switch between exploratory mode and strict scientific provenance mode">
+      <button id="rigorToggleBtn" class="toggle-btn" title="Hide Layer 3 narrative and musical labels">
         Rigor Mode: OFF
       </button>
     </div>
   </header>
 
   <main class="workspace">
-    <!-- LEFT COLUMN: LAYER 1 DATA & EMBEDDING REGISTRY -->
+    <!-- LEFT COLUMN: LAYER 1 EMBEDDINGS, DOMAIN BENCHMARKS & BLIND-SPOT SCANNER -->
     <section>
       <div class="card">
-        <span class="layer-tag layer-1">Layer 1 &bull; Data &amp; Physics</span>
+        <span class="layer-tag layer-1">Layer 1 &bull; Data &amp; Embeddings</span>
         <h2>Elemental Embedding &amp; Circular MDS</h2>
 
         <label for="embeddingSelect">Active Elemental Embedding</label>
@@ -304,68 +317,108 @@
 
         <label for="customMatrixInput">Drop-In Custom Matrix (.csv or .json)</label>
         <input type="file" id="customMatrixInput" accept=".csv,.json" />
-        <div style="font-size:0.71rem;color:var(--muted);margin-top:-0.4rem;margin-bottom:0.6rem;">
-          Accepts element symbols as first column/keys. Runs client-side Classical MDS &amp; L2 normalization immediately.
+        <div style="font-size:0.71rem;color:var(--muted);margin-top:-0.35rem;margin-bottom:0.55rem;">
+          Accepts element symbols as first column/keys. Runs Classical MDS &amp; L2 normalization immediately.
         </div>
 
         <div class="btn-row">
-          <button class="btn" id="runValidationBtn">Run Null &amp; Ablation Audit</button>
           <button class="btn" id="inspectVectorsBtn">Inspect Raw Vectors</button>
         </div>
       </div>
 
+      <!-- PILLAR 3: CURATED EXPERIMENTAL DOMAIN BENCHMARKS -->
       <div class="card">
-        <span class="layer-tag layer-1">Layer 1 &bull; Validation &amp; Null Tests</span>
-        <h2>Statistical &amp; Benchmark Summary</h2>
-        <div id="validationOutput" class="meta-box" style="font-family:var(--mono);font-size:0.72rem;">
-          Click "Run Null &amp; Ablation Audit" to evaluate permutation p-values and 2D vs. full-space fidelity.
+        <span class="layer-tag layer-1">Layer 1 &bull; Domain Benchmarks &amp; Null Audit</span>
+        <h2>Experimental Benchmark Suite</h2>
+
+        <label for="benchmarkSelect">Target Physical Property Dataset</label>
+        <select id="benchmarkSelect">
+          <option value="mp_formation">Materials Project &Delta;H_f (18 Phases, eV/atom)</option>
+          <option value="superconductors">Cuprate &amp; Pnictide Superconductors (T_c, K)</option>
+          <option value="hydrides">Solid-State Metal Hydrides (Capacity wt% H2)</option>
+          <option value="electrolytes">Solid-State Li/Na Electrolytes (&sigma;_ion, mS/cm)</option>
+        </select>
+
+        <div class="btn-row" style="margin-bottom:0.55rem;">
+          <button class="btn primary" id="runValidationBtn">Run Null &amp; Ablation Audit</button>
+        </div>
+
+        <div id="validationOutput" class="meta-box" style="font-family:var(--mono);font-size:0.71rem;margin-bottom:0;white-space:pre-wrap;">
+          Select an experimental domain and click "Run Null &amp; Ablation Audit" to evaluate permutation p-values vs. shuffled angles.
+        </div>
+      </div>
+
+      <!-- PILLAR 1: AUTOMATED HIDDEN SUBSTITUTE / BLIND-SPOT FINDER -->
+      <div class="card">
+        <span class="layer-tag layer-1">Layer 1 &bull; Pre-DFT Discovery Scanner</span>
+        <h2>Hidden Substitute Finder (Blind Spots)</h2>
+        <div style="font-size:0.73rem;color:var(--muted);margin-bottom:0.5rem;">
+          Ranks element pairs with high physical/structural compatibility (<code>Magpie</code> + <code>SkipAtom</code>) but low literature co-occurrence (<code>mat2vec</code>).
+        </div>
+        <div class="btn-row" style="margin-bottom:0.5rem;">
+          <button class="btn primary" id="scanBlindSpotsBtn">Scan 118 Elements</button>
+        </div>
+        <div id="blindSpotList" class="meta-box" style="padding:0.2rem 0.4rem;max-height:195px;overflow-y:auto;margin-bottom:0;">
+          <div style="padding:0.4rem;">Click <strong>Scan 118 Elements</strong> to surface overlooked substitution candidates.</div>
         </div>
       </div>
     </section>
-    <!-- CENTER COLUMN: LAYER 2 VISUALIZATION & LAYER 3 INTERPRETIVE FRAMING -->
+    <!-- CENTER COLUMN: LAYER 2 CIRCULAR MANIFOLD & UNIVERSAL 2-CHANNEL DOPING SWEEP -->
     <section>
       <div class="card wheel-container">
         <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-          <span class="layer-tag layer-2">Layer 2 &bull; Visualization &amp; Interaction</span>
+          <span class="layer-tag layer-2">Layer 2 &bull; S&sup1; Angular Manifold</span>
           <span class="musical-label" style="font-size:0.74rem;color:var(--accent);">Continuous Pitch Bridge: p = (6/&pi;)&theta;</span>
-          <span class="rigor-only" style="font-family:var(--mono);font-size:0.74rem;color:var(--good);">S&sup1; Angular Manifold &theta; &isin; [0, 2&pi;)</span>
+          <span class="rigor-only" style="font-family:var(--mono);font-size:0.74rem;color:var(--good);">S&sup1; Phase Coordinates &theta; &isin; [0, 2&pi;)</span>
         </div>
 
-        <canvas id="wheelCanvas" width="520" height="520"></canvas>
+        <canvas id="wheelCanvas" width="500" height="500"></canvas>
 
-        <div style="width:100%;margin-top:0.8rem;">
+        <div style="width:100%;margin-top:0.75rem;">
           <label for="formulaInput">Compound Formula (Supports Fractional Stoichiometry &amp; E0 Null Baseline)</label>
           <div style="display:flex;gap:0.5rem;">
             <input type="text" id="formulaInput" value="La0.85Sr0.15CuO4" placeholder="e.g., SrTiO3, La0.85Sr0.15CuO4, Fe0.5E00.5" style="margin-bottom:0;" />
             <button class="btn primary" id="analyzeBtn">Evaluate</button>
-            <button class="btn" id="sonifyBtn" title="Play continuous angular frequencies via Web Audio">Sonify &theta;</button>
+            <button class="btn musical-label" id="sonifyBtn" title="Play continuous angular frequencies via Web Audio">Sonify &theta;</button>
           </div>
 
           <div class="btn-row" style="margin-top:0.5rem;">
             <button class="btn preset-btn" data-formula="SrTiO3">SrTiO3</button>
             <button class="btn preset-btn" data-formula="La0.85Sr0.15CuO4">La0.85Sr0.15CuO4</button>
             <button class="btn preset-btn" data-formula="YBa2Cu3O7">YBa2Cu3O7</button>
-            <button class="btn preset-btn" data-formula="MoS2">MoS2</button>
+            <button class="btn preset-btn" data-formula="Li7La3Zr2O12">LLZO</button>
+            <button class="btn preset-btn" data-formula="LaNi5H6">LaNi5H6</button>
             <button class="btn preset-btn" data-formula="Fe0.5E00.5">Fe0.5E00.5 (Null)</button>
             <button class="btn preset-btn" data-formula="E0">E0 (Pure Null)</button>
           </div>
         </div>
 
+        <!-- PILLAR 2: UNIVERSAL 2-CHANNEL DOPING SWEEP & INFLECTION DETECTOR -->
         <div style="width:100%;margin-top:0.85rem;padding-top:0.75rem;border-top:1px solid var(--border);">
-          <div style="display:flex;justify-content:space-between;font-size:0.76rem;">
-            <span>Stoichiometric Doping Sweep (x): <strong id="dopingValLabel" style="font-family:var(--mono);">0.15</strong></span>
-            <span style="color:var(--muted);">La<sub>1-x</sub>Sr<sub>x</sub>CuO<sub>4</sub></span>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.76rem;margin-bottom:0.4rem;">
+            <strong>Universal 2-Channel Doping Sweep (x)</strong>
+            <span>x = <strong id="dopingValLabel" style="font-family:var(--mono);color:var(--warn);">0.15</strong></span>
           </div>
-          <input type="range" id="dopingSlider" min="0" max="1" step="0.01" value="0.15" style="width:100%;margin-top:0.35rem;" />
+
+          <div style="display:grid;grid-template-columns:1fr 70px 70px;gap:0.4rem;margin-bottom:0.35rem;">
+            <input type="text" id="sweepHostInput" value="CuO4" placeholder="Fixed Host (e.g. CuO4)" style="margin-bottom:0;" title="Fixed host matrix" />
+            <input type="text" id="sweepSubAInput" value="La" placeholder="Host Site" style="margin-bottom:0;text-align:center;" title="Element A (weight 1 - x)" />
+            <input type="text" id="sweepSubBInput" value="Sr" placeholder="Dopant" style="margin-bottom:0;text-align:center;" title="Element B (weight x)" />
+          </div>
+
+          <input type="range" id="dopingSlider" min="0" max="1" step="0.01" value="0.15" style="width:100%;" />
+          <canvas id="sweepCurveCanvas" width="460" height="112"></canvas>
+          <div id="inflectionReadout" style="font-family:var(--mono);font-size:0.71rem;color:var(--good);margin-top:0.3rem;"></div>
         </div>
       </div>
 
       <div class="card layer-3-narrative" id="narrativeCard">
-        <span class="layer-tag layer-3">Layer 3 &bull; Interpretive Narrative (Non-Numerical)</span>
-        <h2>Qualitative Structural &amp; Harmonic Framing</h2>
+        <span class="layer-tag layer-3">Layer 3 &bull; Interpretive Framing (Non-Numerical)</span>
+        <h2>Qualitative Structural &amp; Pre-DFT Screening Notes</h2>
         <div id="narrativeText" class="meta-box" style="margin-bottom:0;"></div>
       </div>
     </section>
+
     <!-- RIGHT COLUMN: LAYER 1 OBSERVABLES & REPRODUCIBILITY LEDGER -->
     <section>
       <div class="card">
@@ -395,7 +448,7 @@
           </div>
         </div>
 
-        <div style="margin-top:0.75rem;">
+        <div style="margin-top:0.7rem;">
           <div style="font-size:0.74rem;color:var(--muted);">Stoichiometric Weight Stacking</div>
           <div id="stackBar" class="stack-bar"></div>
         </div>
@@ -431,8 +484,7 @@
       </div>
     </section>
   </main>
-
-    <script>
+  <script>
     "use strict";
 
     const PERIODIC_SYMBOLS = (
@@ -510,7 +562,6 @@
       }
       return { period, group, block };
     }
-
     function buildStarterEmbeddings() {
       const rawMagpie = {};
       PERIODIC_SYMBOLS.forEach((sym, idx) => {
@@ -621,15 +672,45 @@
         }
       };
     }
-    const STARTER_BENCHMARK = new Array(
-      { formula: "SrTiO3", y: -3.48 }, { formula: "BaTiO3", y: -3.44 }, { formula: "CaTiO3", y: -3.46 },
-      { formula: "LaAlO3", y: -3.65 }, { formula: "La0.85Sr0.15CuO4", y: -2.18 }, { formula: "YBa2Cu3O7", y: -2.12 },
-      { formula: "MgAl2O4", y: -3.36 }, { formula: "Fe3O4", y: -1.68 }, { formula: "Co3O4", y: -1.35 },
-      { formula: "MoS2", y: -0.94 }, { formula: "WS2", y: -0.89 }, { formula: "Bi2Se3", y: -0.36 },
-      { formula: "TiNi", y: -0.35 }, { formula: "FeAl", y: -0.31 }, { formula: "Ni3Al", y: -0.42 },
-      { formula: "GaAs", y: -0.41 }, { formula: "ZnO", y: -1.81 }, { formula: "AlN", y: -1.64 }
-    );
 
+    const DOMAIN_BENCHMARKS = {
+      mp_formation: {
+        label: "Materials Project ΔHf (eV/atom)",
+        items: new Array(
+          { formula: "SrTiO3", y: -3.48 }, { formula: "BaTiO3", y: -3.44 }, { formula: "CaTiO3", y: -3.46 },
+          { formula: "LaAlO3", y: -3.65 }, { formula: "La0.85Sr0.15CuO4", y: -2.18 }, { formula: "YBa2Cu3O7", y: -2.12 },
+          { formula: "MgAl2O4", y: -3.36 }, { formula: "Fe3O4", y: -1.68 }, { formula: "Co3O4", y: -1.35 },
+          { formula: "MoS2", y: -0.94 }, { formula: "WS2", y: -0.89 }, { formula: "Bi2Se3", y: -0.36 },
+          { formula: "TiNi", y: -0.35 }, { formula: "FeAl", y: -0.31 }, { formula: "Ni3Al", y: -0.42 },
+          { formula: "GaAs", y: -0.41 }, { formula: "ZnO", y: -1.81 }, { formula: "AlN", y: -1.64 }
+        )
+      },
+      superconductors: {
+        label: "Superconductors Tc (K)",
+        items: new Array(
+          { formula: "HgBa2Ca2Cu3O8", y: 133 }, { formula: "Tl2Ba2Ca2Cu3O10", y: 125 }, { formula: "Bi2Sr2Ca2Cu3O10", y: 110 },
+          { formula: "YBa2Cu3O7", y: 92 }, { formula: "SmFeAsO0.85F0.15", y: 55 }, { formula: "MgB2", y: 39 },
+          { formula: "La0.85Sr0.15CuO4", y: 38 }, { formula: "Ba0.6K0.4BiO3", y: 30 }, { formula: "LaFeAsO0.89F0.11", y: 26 },
+          { formula: "Nb3Sn", y: 18 }, { formula: "NbTi", y: 9.8 }, { formula: "FeSe", y: 8.0 }
+        )
+      },
+      hydrides: {
+        label: "Metal Hydrides Capacity (wt% H2)",
+        items: new Array(
+          { formula: "LiBH4", y: 18.5 }, { formula: "NaBH4", y: 10.8 }, { formula: "MgH2", y: 7.6 },
+          { formula: "NaAlH4", y: 7.5 }, { formula: "Li3N", y: 10.4 }, { formula: "Mg2NiH4", y: 3.6 },
+          { formula: "TiFeH2", y: 1.9 }, { formula: "ZrMn2H3", y: 1.8 }, { formula: "LaNi5H6", y: 1.4 }
+        )
+      },
+      electrolytes: {
+        label: "Solid Electrolytes σ_ion (mS/cm)",
+        items: new Array(
+          { formula: "Li10GeP2S12", y: 12.0 }, { formula: "Li7P3S11", y: 17.0 }, { formula: "Li6PS5Cl", y: 3.2 },
+          { formula: "Na3Zr2Si2PO12", y: 1.0 }, { formula: "Li7La3Zr2O12", y: 0.5 }, { formula: "Li0.33La0.56TiO3", y: 1.0 },
+          { formula: "Li1.3Al0.3Ti1.7P3O12", y: 0.7 }, { formula: "Li3N", y: 0.4 }, { formula: "LiPON", y: 0.002 }
+        )
+      }
+    };
     function fnv1aHash(str) {
       let h = 0x811c9dc5;
       for (let i = 0; i < str.length; i++) {
@@ -936,7 +1017,6 @@
         ciLow, ciHigh, pValue, isNullBaseline: e0Weight > 0
       };
     }
-
     const PALETTE = new Array("#38bdf8", "#34d399", "#fbbf24", "#f472b6", "#a78bfa", "#fb923c", "#2dd4bf");
 
     function drawWheel(primaryProj, primaryMetrics, compareProj, compareMetrics, isRigor) {
@@ -944,10 +1024,9 @@
       const ctx = canvas.getContext("2d");
       const W = canvas.width, H = canvas.height;
       const cx = W / 2, cy = H / 2;
-      const R = 198;
+      const R = 192;
 
       ctx.clearRect(0, 0, W, H);
-
       ctx.strokeStyle = "#26324a";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -976,7 +1055,7 @@
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         const label = isRigor ? `${((k * 2) / 12).toFixed(2)}π` : `p=${k}`;
-        ctx.fillText(label, cx + (R + 24) * Math.cos(ang), cy + (R + 24) * Math.sin(ang));
+        ctx.fillText(label, cx + (R + 23) * Math.cos(ang), cy + (R + 23) * Math.sin(ang));
       }
 
       primaryProj.symbols.forEach(sym => {
@@ -1076,6 +1155,7 @@
       ctx.arc(cx, cy, 4, 0, 2 * Math.PI);
       ctx.fill();
     }
+
     function sonifyCompound(proj, metrics) {
       if (metrics.isNullBaseline || metrics.active.length === 0) return;
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1103,7 +1183,6 @@
         osc.stop(now + idx * 0.14 + 1.2);
       });
     }
-
     function buildLayer3Narrative(proj, metrics) {
       if (metrics.isNullBaseline) {
         return `<strong>Null Baseline State (E0):</strong> Compound contains zero-vector baseline weight. Circular resultant collapses toward the origin (C<sub>&theta;</sub> = ${metrics.coherence.toFixed(3)}), providing a reference floor against spurious pattern matching.`;
@@ -1119,16 +1198,125 @@
       return `<strong>Interpretive Regime (${regime}):</strong> Under <em>${proj.name}</em>, stoichiometric phasors yield C<sub>&theta;</sub> = ${metrics.coherence.toFixed(3)}. ${sigNote} <em>(Layer 3 framing is strictly post-hoc and does not alter Layer 1 outputs.)</em>`;
     }
 
-    function runBenchmarkAudit(proj) {
-      const rng = mulberry32(42);
-      const validItems = STARTER_BENCHMARK.filter(item => {
-        try { evaluateCompound(item.formula, proj, 42); return true; } catch { return false; }
-      });
-      if (validItems.length < 5) {
-        return "Insufficient element coverage in active embedding to run starter benchmark.";
+    // PILLAR 1: HIDDEN SUBSTITUTE / LITERATURE BLIND-SPOT SCANNER
+    function cosineVec(a, b) {
+      let dot = 0;
+      for (let i = 0; i < a.length; i++) dot += a.at(i) * b.at(i);
+      return Math.max(-1, Math.min(1, dot));
+    }
+
+    function scanBlindSpots(projections) {
+      const mag = projections["Magpie-Physical-12D"];
+      const skip = projections["SkipAtom-Structure-16D"];
+      const mat = projections["mat2vec-Semantic-16D"];
+      if (!mag || !skip || !mat) return new Array();
+
+      const syms = mag.symbols.slice(0, 86);
+      const candidates = new Array();
+      for (let i = 0; i < syms.length; i++) {
+        for (let j = i + 1; j < syms.length; j++) {
+          const s1 = syms.at(i), s2 = syms.at(j);
+          const simPhys = 0.5 * (cosineVec(mag.vectors[s1], mag.vectors[s2]) + cosineVec(skip.vectors[s1], skip.vectors[s2]));
+          const simLit = cosineVec(mat.vectors[s1], mat.vectors[s2]);
+          const gap = simPhys - simLit;
+          if (simPhys > 0.78 && simLit < 0.30) {
+            candidates.push({ s1, s2, simPhys, simLit, gap });
+          }
+        }
+      }
+      candidates.sort((a, b) => b.gap - a.gap);
+      return candidates.slice(0, 18);
+    }
+
+    // PILLAR 2: UNIVERSAL 2-CHANNEL DOPING SWEEP & INFLECTION DETECTOR
+    function buildTwoChannelFormula(host, subA, subB, x) {
+      const h = host.trim(), a = subA.trim(), b = subB.trim();
+      const wA = Number((1 - x).toFixed(2));
+      const wB = Number(x.toFixed(2));
+      let partA = wA <= 0 ? "" : (wA === 1 ? a : `${a}${wA}`);
+      let partB = wB <= 0 ? "" : (wB === 1 ? b : `${b}${wB}`);
+      return `${partA}${partB}${h}`;
+    }
+
+    function drawUniversalSweep(proj, activeX) {
+      const canvas = document.getElementById("sweepCurveCanvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const host = document.getElementById("sweepHostInput").value || "CuO4";
+      const subA = document.getElementById("sweepSubAInput").value || "La";
+      const subB = document.getElementById("sweepSubBInput").value || "Sr";
+
+      const pts = new Array();
+      for (let i = 0; i <= 40; i++) {
+        const x = i * 0.025;
+        try {
+          const f = buildTwoChannelFormula(host, subA, subB, x);
+          const m = evaluateCompound(f, proj, 42);
+          pts.push({ x, c: m.coherence, norm: m.highDimNorm });
+        } catch {
+          document.getElementById("inflectionReadout").textContent = "Invalid host/dopant symbol for active embedding.";
+          return;
+        }
       }
 
-      const cohs = new Array(), ys = new Array(), nullCohs = new Array();
+      let maxCurv = -1, inflectPt = pts.at(0);
+      for (let i = 1; i < pts.length - 1; i++) {
+        const d2 = Math.abs(pts.at(i + 1).c - 2 * pts.at(i).c + pts.at(i - 1).c);
+        if (d2 > maxCurv) { maxCurv = d2; inflectPt = pts.at(i); }
+      }
+
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      pts.forEach((p, i) => {
+        const px = p.x * (W - 24) + 12;
+        const py = H - 14 - p.c * (H - 28);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(129, 140, 248, 0.75)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      pts.forEach((p, i) => {
+        const px = p.x * (W - 24) + 12;
+        const py = H - 14 - Math.min(1, p.norm) * (H - 28);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+
+      const ix = inflectPt.x * (W - 24) + 12;
+      const iy = H - 14 - inflectPt.c * (H - 28);
+      ctx.fillStyle = "#34d399";
+      ctx.beginPath();
+      ctx.arc(ix, iy, 4, 0, 2 * Math.PI);
+      ctx.fill();
+
+      const curPt = pts.reduce((a, b) => Math.abs(b.x - activeX) < Math.abs(a.x - activeX) ? b : a);
+      ctx.fillStyle = "#fbbf24";
+      ctx.beginPath();
+      ctx.arc(curPt.x * (W - 24) + 12, H - 14 - curPt.c * (H - 28), 4.5, 0, 2 * Math.PI);
+      ctx.fill();
+
+      document.getElementById("inflectionReadout").textContent =
+        `Inflection Critical Point: x* = ${inflectPt.x.toFixed(2)} (C_θ=${inflectPt.c.toFixed(3)}) | Cyan: C_θ(x) | Purple: ||v(x)||₂`;
+    }
+
+    // PILLAR 3: CURATED EXPERIMENTAL DOMAIN BENCHMARKS
+    function runDomainBenchmarkAudit(proj, domainKey) {
+      const bench = DOMAIN_BENCHMARKS[domainKey] || DOMAIN_BENCHMARKS.mp_formation;
+      const rng = mulberry32(42);
+      const validItems = bench.items.filter(item => {
+        try { evaluateCompound(item.formula, proj, 42); return true; } catch { return false; }
+      });
+      if (validItems.length < 4) {
+        return `Insufficient element coverage in "${proj.name}" for ${bench.label}.`;
+      }
+
+      const cohs = new Array(), norms = new Array(), ys = new Array(), nullCohs = new Array();
       const pool = proj.symbols.map(s => proj.anglesRad[s]);
       const shuffledMap = {};
       const permPool = pool.slice().sort(() => rng() - 0.5);
@@ -1137,6 +1325,7 @@
       validItems.forEach(item => {
         const m = evaluateCompound(item.formula, proj, 42);
         cohs.push(m.coherence);
+        norms.push(m.highDimNorm);
         ys.push(item.y);
 
         let nx = 0, ny = 0;
@@ -1149,22 +1338,23 @@
         nullCohs.push(Math.hypot(nx, ny));
       });
 
-      const rReal = pearsonCorrelation(cohs, ys);
+      const rCirc = pearsonCorrelation(cohs, ys);
+      const rFull = pearsonCorrelation(norms, ys);
       const rNull = pearsonCorrelation(nullCohs, ys);
-      const beatsNull = Math.abs(rReal) > Math.abs(rNull) + 0.05;
+      const beatsNull = Math.abs(rCirc) > Math.abs(rNull) + 0.05 || Math.abs(rFull) > Math.abs(rNull) + 0.05;
 
       return new Array(
-        `Embedding: ${proj.name} (hash:${proj.hash})`,
+        `Domain: ${bench.label} (n=${validItems.length})`,
+        `Embedding: ${proj.name} [${proj.hash}]`,
         `MDS Fidelity r_proj = ${proj.pearsonR.toFixed(4)} | Stress = ${proj.stress.toFixed(4)}`,
-        `Benchmark (n=${validItems.length} MP phases, ΔHf):`,
-        `  Circular C_θ vs ΔHf Pearson r = ${rReal.toFixed(4)}`,
-        `  Shuffled-Angle Null Pearson r  = ${rNull.toFixed(4)}`,
+        `  Circular C_θ Pearson r   = ${rCirc.toFixed(4)}`,
+        `  Full-Space ||v||₂ r    = ${rFull.toFixed(4)}`,
+        `  Shuffled-Angle Null r  = ${rNull.toFixed(4)}`,
         beatsNull
-          ? `VERDICT: Circular projection retains measurable correlation signal over random angle null.`
-          : `NULL/NEGATIVE RESULT: 2D circular coherence does not outperform shuffled angles on ΔHf; use full-dimensional vectors for regression.`
+          ? `VERDICT: Retains measurable signal over shuffled-angle null.`
+          : `NULL RESULT: Does not exceed shuffled-angle null on this target; rely on full-space regression.`
       ).join("\n");
     }
-
     const STATE = {
       projections: {},
       activeKey: "Magpie-Physical-12D",
@@ -1244,6 +1434,7 @@
 
       document.getElementById("narrativeText").innerHTML = buildLayer3Narrative(proj, metrics);
       drawWheel(proj, metrics, compareProj, compareMetrics, STATE.rigorMode);
+      drawUniversalSweep(proj, parseFloat(document.getElementById("dopingSlider").value));
 
       const rawModal = document.getElementById("rawVectorModal");
       if (rawModal.style.display !== "none") {
@@ -1254,6 +1445,7 @@
         rawModal.textContent = JSON.stringify(dump, null, 2);
       }
     }
+
     function handleCustomFileUpload(evt) {
       const file = evt.target.files.item(0);
       if (!file) return;
@@ -1295,7 +1487,6 @@
       };
       reader.readAsText(file);
     }
-
     function renderLedger() {
       const list = document.getElementById("ledgerList");
       if (STATE.ledger.length === 0) {
@@ -1367,13 +1558,48 @@
       document.getElementById("dopingSlider").addEventListener("input", e => {
         const x = parseFloat(e.target.value);
         document.getElementById("dopingValLabel").textContent = x.toFixed(2);
-        const la = (1 - x).toFixed(2);
-        document.getElementById("formulaInput").value = x === 0 ? "LaCuO4" : (x === 1 ? "SrCuO4" : `La${la}Sr${x.toFixed(2)}CuO4`);
+        const host = document.getElementById("sweepHostInput").value || "CuO4";
+        const subA = document.getElementById("sweepSubAInput").value || "La";
+        const subB = document.getElementById("sweepSubBInput").value || "Sr";
+        document.getElementById("formulaInput").value = buildTwoChannelFormula(host, subA, subB, x);
         updateWorkbench();
       });
 
+      ["sweepHostInput", "sweepSubAInput", "sweepSubBInput"].forEach(id => {
+        document.getElementById(id).addEventListener("change", () => {
+          drawUniversalSweep(STATE.projections[STATE.activeKey], parseFloat(document.getElementById("dopingSlider").value));
+        });
+      });
+
       document.getElementById("runValidationBtn").addEventListener("click", () => {
-        document.getElementById("validationOutput").textContent = runBenchmarkAudit(STATE.projections[STATE.activeKey]);
+        const domainKey = document.getElementById("benchmarkSelect").value;
+        document.getElementById("validationOutput").textContent = runDomainBenchmarkAudit(STATE.projections[STATE.activeKey], domainKey);
+      });
+
+      document.getElementById("scanBlindSpotsBtn").addEventListener("click", () => {
+        const list = document.getElementById("blindSpotList");
+        const hits = scanBlindSpots(STATE.projections);
+        if (hits.length === 0) {
+          list.innerHTML = `<div style="padding:0.4rem;">No pairs met threshold (sim_phys &gt; 0.78, sim_lit &lt; 0.30).</div>`;
+          return;
+        }
+        list.innerHTML = hits.map(h => `
+          <div class="blindspot-row">
+            <div>
+              <strong>${h.s1} &harr; ${h.s2}</strong>
+              <span style="color:var(--muted);"> | phys:${h.simPhys.toFixed(2)} lit:${h.simLit.toFixed(2)}</span>
+            </div>
+            <button class="btn" style="padding:2px 6px;font-size:0.69rem;" data-pair="${h.s1}0.5${h.s2}0.5">Load</button>
+          </div>
+        `).join("");
+        list.querySelectorAll("button[data-pair]").forEach(b => {
+          b.addEventListener("click", () => {
+            document.getElementById("formulaInput").value = b.dataset.pair;
+            STATE.compareKey = "mat2vec-Semantic-16D";
+            populateSelectors();
+            updateWorkbench();
+          });
+        });
       });
 
       document.getElementById("inspectVectorsBtn").addEventListener("click", () => {
@@ -1391,7 +1617,7 @@
         STATE.ledger.push({
           schema_version: "hte-observatory-ledger-v2",
           timestamp_utc: new Date().toISOString(),
-          software_version: "2.0.0-rigor",
+          software_version: "5.0.0-rigor",
           random_seed: 42,
           embedding_name: proj.name,
           embedding_hash: proj.hash,
@@ -1426,8 +1652,5 @@
       });
     });
   </script>
-</body>
-</html>
-
 </body>
 </html>
